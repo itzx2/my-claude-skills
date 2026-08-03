@@ -4,14 +4,19 @@ Personal Claude Code skills, synced across devices.
 
 ## Install on a new machine
 
+Skills live under the `skills/` folder in this repo, so clone the repo
+elsewhere and symlink that folder into `~/.claude/skills`:
+
 ```sh
-git clone https://github.com/itzx2/my-claude-skills.git ~/.claude/skills
+git clone https://github.com/itzx2/my-claude-skills.git ~/my-claude-skills
+ln -s ~/my-claude-skills/skills ~/.claude/skills
 ```
 
-On Windows (PowerShell):
+On Windows (PowerShell, run as Administrator):
 
 ```powershell
-git clone https://github.com/itzx2/my-claude-skills.git $env:USERPROFILE\.claude\skills
+git clone https://github.com/itzx2/my-claude-skills.git $env:USERPROFILE\my-claude-skills
+New-Item -ItemType SymbolicLink -Path $env:USERPROFILE\.claude\skills -Target $env:USERPROFILE\my-claude-skills\skills
 ```
 
 Restart Claude Code after cloning.
