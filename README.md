@@ -33,9 +33,12 @@ Restart Claude Code after cloning.
 - **grilling** — relentless interview to stress-test a plan or design.
 - **handoff** — compact the current conversation into a handoff doc for another agent.
 - **implement** — implement a spec/tickets using TDD, typechecking, and code review.
+- **improve-codebase-architecture** — scan for deepening opportunities, present as an HTML report, then grill through the pick.
 - **karpathy-guidelines** — behavioral guidelines to reduce common LLM coding mistakes.
 - **prototype** — build throwaway prototypes to answer a design or UI question.
 - **research** — delegate primary-source research to a background agent, captured as a Markdown file.
 - **scrutinize** — outsider-perspective end-to-end review of a plan/PR/code change.
+- **setup-matt-pocock-skills** — one-time per-repo config: issue tracker, triage labels, domain-doc layout.
+- **tdd** — red-green-refactor reference: what a good test is, seams, anti-patterns, loop rules.
 - **teach** — multi-session teaching workflow with HTML lessons and learning records.
 - **writing-great-skills** — reference for writing and editing skills well.
