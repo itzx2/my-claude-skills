@@ -23,6 +23,7 @@ Restart Claude Code after cloning.
 
 ## Skills
 
+- **ask-matt** — router over the skills in this repo; ask which skill or flow fits your situation.
 - **batch-grill-me** — relentless interview that asks every frontier question at once, round by round.
 - **code-review** — two-axis review (standards + spec) of a diff since a fixed point, via parallel sub-agents.
 - **codebase-design** — shared vocabulary and principles for designing deep modules.
@@ -37,8 +38,13 @@ Restart Claude Code after cloning.
 - **karpathy-guidelines** — behavioral guidelines to reduce common LLM coding mistakes.
 - **prototype** — build throwaway prototypes to answer a design or UI question.
 - **research** — delegate primary-source research to a background agent, captured as a Markdown file.
+- **resolving-merge-conflicts** — resolve an in-progress git merge/rebase conflict, preserving intent on both sides.
 - **scrutinize** — outsider-perspective end-to-end review of a plan/PR/code change.
 - **setup-matt-pocock-skills** — one-time per-repo config: issue tracker, triage labels, domain-doc layout.
 - **tdd** — red-green-refactor reference: what a good test is, seams, anti-patterns, loop rules.
 - **teach** — multi-session teaching workflow with HTML lessons and learning records.
+- **to-spec** — turn the current conversation into a spec/PRD and publish it to the issue tracker.
+- **to-tickets** — break a plan/spec into tracer-bullet tickets with declared blocking edges.
+- **triage** — move issues and external PRs through a state machine of triage roles.
+- **wayfinder** — plan a huge effort as a shared map of decision tickets, resolved one at a time.
 - **writing-great-skills** — reference for writing and editing skills well.
