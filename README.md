@@ -21,6 +21,46 @@ New-Item -ItemType SymbolicLink -Path $env:USERPROFILE\.claude\skills -Target $e
 
 Restart Claude Code after cloning.
 
+## Install on a Claude Code cloud/remote environment
+
+`scripts/install-skills.sh` sparse-clones this repo over plain public HTTPS
+and mirrors `skills/` into `~/.claude/skills`. It needs nothing but outbound
+HTTPS — no GitHub App / repo-source access — so it works even in
+environments that don't have this repo attached as a source.
+
+Run it directly:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/install-skills.sh | bash
+```
+
+To have it run automatically, wire that command into one of:
+
+- **Environment setup script** (Claude Code on the web → environment
+  settings) — runs once when the environment container is provisioned,
+  before any session starts, regardless of which repo is opened.
+- **Global `SessionStart` hook**, in `~/.claude/settings.json`, so it runs
+  at the start of every session in that environment. Gate it on
+  `$CLAUDE_CODE_REMOTE` so it's a no-op on a local machine (where you'd use
+  the symlink method above instead):
+
+  ```json
+  {
+    "hooks": {
+      "SessionStart": [
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command": "if [ \"${CLAUDE_CODE_REMOTE:-}\" = \"true\" ]; then curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/install-skills.sh | bash; fi"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  ```
+
 ## Skills
 
 - **ask-matt** — router over the skills in this repo; ask which skill or flow fits your situation.
