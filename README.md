@@ -23,7 +23,9 @@ Restart Claude Code after cloning.
 
 ## Skills
 
+- **batch-grill-me** — relentless interview that asks every frontier question at once, round by round.
 - **domain-modeling** — build and sharpen a project's domain model (glossary, ADRs).
+- **grill-me** — thin `/grilling` alias, user-invoked only.
 - **grill-with-docs** — `/grilling` session that also produces ADRs and glossary via `domain-modeling`.
 - **grilling** — relentless interview to stress-test a plan or design.
 - **handoff** — compact the current conversation into a handoff doc for another agent.
