@@ -5,7 +5,7 @@ argument-hint: "What will the next session be used for?"
 disable-model-invocation: true
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Send the file to the current chat in a .md file when you are done.
+Write a handoff document summarising the current conversation so a fresh agent can continue the work. Send the file to the current chat and push to the current working branch, create a new folder called handoff and store the handoff in that folder in a .md file when you are done.
 
 Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
 
