@@ -6,15 +6,30 @@ For a fresh session picking this up. Supersedes any earlier copy of this file.
 
 ## Run this first
 
+Ask the agent to **"run the skills doctor"**. It is a shell script, so the agent
+runs it — the human never types this. Three ways to reach it, in order of
+convenience:
+
 ```sh
-bash scripts/doctor.sh
+bash ~/.claude/doctor.sh                        # cached by every install; works in any session
+bash scripts/doctor.sh                          # in a checkout of this repo
+curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/doctor.sh | bash
 ```
 
-Read-only. It reports what is installed, whether the installer is the fixed one,
-whether the account-synced skills survived, and which skills exist in two places.
-**Run it before believing any claim that a skill is missing** — it distinguishes
+All three print the same report and change nothing. With a checkout it compares
+against `skills/`; without one it falls back to
+`~/.claude/.my-claude-skills.manifest`, so the cached copy is just as useful in a
+session on some other repo.
+
+**Run it before believing any claim that a skill is missing.** It distinguishes
 "absent from disk" from "present but unreported", which decides whether the fault
-is the installer or whatever is reading the roster.
+is the installer or whatever is reading the roster. That distinction was the
+whole difficulty the first time this went wrong.
+
+It is deliberately **not** wired into the session-start hook. The briefing
+already names the full roster every session, so a short or wrong briefing is the
+signal; the doctor is the follow-up, and running it unconditionally would spend
+output on an all-clear in the common case.
 
 ---
 
@@ -49,7 +64,7 @@ behaviour, not drift.
 | `scripts/session-start.sh` | The hook. Installs (remote only), then briefs. |
 | `scripts/install-skills.sh` | Mirrors `skills/` → `~/.claude/skills`, caches the scripts into `~/.claude/`. |
 | `scripts/skills-briefing.py` | Reads front matter, emits the `additionalContext` payload. |
-| `scripts/doctor.sh` | Read-only diagnosis. Start here. |
+| `scripts/doctor.sh` | Read-only diagnosis. Start here. Cached to `~/.claude/doctor.sh` on every install, so it is reachable from any session. |
 
 ```
 setup script (pasted once per environment)
