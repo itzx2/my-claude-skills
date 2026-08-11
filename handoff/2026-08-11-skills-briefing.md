@@ -1,8 +1,18 @@
 # Handoff — skills briefing, upstream sync, installer
 
-**Date:** 2026-08-11 · **Repo:** `itzx2/my-claude-skills` · everything below is on `main` and pushed.
+**Date:** 2026-08-11 · **Repo:** `itzx2/my-claude-skills`
 
 For a fresh session picking this up. Supersedes any earlier copy of this file.
+
+Every code and script change described here is on `main` and pushed. This
+revision of the document is on `claude/handoff-review-nm87dx` until merged — it
+changes no behaviour, only what is recorded.
+
+**Do not trust a container's `main` ref without fetching.** The clone can be
+older than the remote, and `git rev-list --left-right main...origin/main` will
+happily report `0 0` because *both* refs are stale. That reads as "this work
+never landed" and sends you chasing a merge that already happened. Run
+`git fetch origin main` first.
 
 ## Run this first
 
@@ -25,6 +35,13 @@ session on some other repo.
 "absent from disk" from "present but unreported", which decides whether the fault
 is the installer or whatever is reading the roster. That distinction was the
 whole difficulty the first time this went wrong.
+
+**A clean doctor report is not yet a clean bill of health.** It does not check
+the manifest entry count, and a corrupt manifest is the symptom of the live hook
+race in Known issues. Until that check exists, run
+`wc -l < ~/.claude/.my-claude-skills.manifest` alongside it and expect it to
+equal the number of directories in `skills/` (30 today). Anything else means the
+install raced.
 
 It is deliberately **not** wired into the session-start hook. The briefing
 already names the full roster every session, so a short or wrong briefing is the
@@ -92,7 +109,12 @@ listed in `synced/manifest.json` with a `skillId` and source per entry:
 | --- | --- |
 | `anthropic` | `xlsx`, `docx`, `pptx`, `pdf` |
 | `anthropic-example` | `skill-creator`, `morning` |
-| `custom` (the user's own) | `grill-with-docs`, `handoff`, `teach`, `grilling`, `scrutinize`, `karpathy-guidelines`, `domain-modeling`, `writing-great-skills` |
+
+As of 2026-08-11 those six are the whole of `synced/`. It previously also carried
+eight `custom` entries — the user's own copies of `grill-with-docs`, `handoff`,
+`teach`, `grilling`, `scrutinize`, `karpathy-guidelines`, `domain-modeling` and
+`writing-great-skills` — which duplicated this repo and are now gone from the
+account. See Known issues for what that resolved.
 
 Because they are just files in `~/.claude/skills`, any script that clears that
 directory deletes them. That is exactly what happened.
@@ -118,6 +140,14 @@ Run `scripts/doctor.sh`. It prints one of:
 - `synced/ is ABSENT` → the skills really are gone. Either a pre-fix installer
   ran, or the account sync has not landed yet. It re-syncs on its own; a session
   started before that runs without them.
+
+  **Read the other checks before blaming the installer.** If the manifest is
+  present, `synced` is absent from it, and the cached installer is the
+  manifest-scoped one, then nothing on this container could have deleted
+  `synced/` — it is a fresh container waiting on the account sync, not a
+  regression. Observed on 2026-08-11: a session started with `synced/` absent and
+  it appeared partway through, without a restart. So an `ABSENT` at session start
+  is not even final within that session.
 - `cached installer is PRE-FIX` → this container carries an old cached copy.
   Re-run the bootstrap line to refresh it immediately.
 - Everything `ok` → the skills are present, so a report of "missing" is about
@@ -167,21 +197,26 @@ Each fixes a bug that actually occurred. Please do not "simplify" them away.
 | 5 | **Live container after the fix** | `synced/` 14 skills, `xlsx`/`docx`/`pptx`/`pdf` all reachable |
 | 6 | Environment's own `session-start-hook` at top level | **survived** — collateral damage under the old installer |
 | 7 | `synced` absent from the manifest | confirmed — installer cannot delete it |
-| 8 | Upstream removal still propagates | stale `writing-great-skills` removed via manifest |
+| 8 | Upstream removal still propagates | stale `writing-great-skills` removed via manifest — **only holds on a single-hook container**; see the hook race in Known issues |
 | 9 | Total outage (no HTTP origin, dead git remote) | full briefing from cache, 30 skills intact |
 | 10 | Bootstrap idempotency / foreign settings / corrupt settings | no duplicate entry; `env`, `Stop`, git-identity hook preserved; refuses to write over unparseable JSON |
 | 11 | New skill added upstream | appears in the **same** session |
 | 12 | Skill reclassified / removed upstream | moves bucket / disappears |
 | 13 | Briefing edge cases (empty, missing, no front matter, quoted, block scalars) | handled; silent when nothing to say |
 | 14 | `doctor.sh` against a broken container | correctly reports pre-fix installer and absent `synced/` |
+| 15 | **`/ask-matt` answering a synced-skill question** | passed — "need to make a spreadsheet" named `xlsx` |
+| 16 | README skill list vs disk | in sync, 30/30 exact |
+
+Test 15 was the last open question and it closed on 2026-08-11. It is the
+end-to-end proof, because it exercises every fix at once: the installer left
+`synced/` alone, the sync delivered `xlsx`, the briefing carried the roster, and
+the rewritten `ask-matt` routed over the whole roster rather than just this
+repo's skills. The original failing run hit two bugs stacked — stale `ask-matt`,
+and `synced/` already deleted — so a pass here rules out both.
 
 ### Not yet verified
 
-1. **`/ask-matt` answering a synced-skill question.** The one real run hit both
-   bugs at once — stale `ask-matt`, and `synced/` already deleted. With both
-   fixed, `/ask-matt` "I need to make a spreadsheet" should now name `xlsx`.
-   **Only the human can run this** — `ask-matt` is user-invoked.
-2. **Whether agents recommend user-invoked skills at fitting moments.** Prompt
+1. **Whether agents recommend user-invoked skills at fitting moments.** Prompt
    behaviour, argued about rather than measured. `skill-creator` can run evals on
    triggering accuracy.
 
@@ -189,15 +224,51 @@ Each fixes a bug that actually occurred. Please do not "simplify" them away.
 
 ## Known issues
 
-- **7 skills exist in both `synced/` and this repo**, and two differ:
-  `grilling` and `handoff` (synced copies dated 2026-07-01 and 2026-07-15,
-  predating the upstream refresh). Which copy the harness prefers is **not
-  verified** — do not guess. The clean fix is deleting the 8 `custom` skills from
-  the claude.ai account, since this repo is their source of truth and syncs them
-  everywhere already. That leaves `synced/` holding only the Anthropic skills.
-  `doctor.sh` flags these.
-- **`writing-great-skills` still syncs from the account** although the repo
-  dropped it for `writing-for-agents`.
+- **Two SessionStart hooks race on this repo, and the install is not
+  concurrency-safe.** Found 2026-08-11, unfixed. This is the live defect; start
+  here.
+
+  Sessions **on this repo** register the hook twice: once user-level in
+  `~/.claude/settings.json` (`bash /root/.claude/session-start.sh`, written by
+  `bootstrap-env.sh`) and once repo-level in `.claude/settings.json`
+  (`$CLAUDE_PROJECT_DIR/scripts/session-start.sh`). Claude Code runs both, in
+  parallel, so two `install-skills.sh` processes overlap. Both registrations are
+  individually correct — bootstrap covers every *other* repo, and the repo-level
+  one covers a session here that never bootstrapped — so the fix belongs in the
+  installer, not in deleting a hook.
+
+  Two shared paths have no mutual exclusion: the fixed manifest temp file
+  `$MANIFEST.tmp`, and the per-skill `rm -rf` immediately followed by `cp -r`
+  into the same destination. Ten trials of the install loop run two-up produced a
+  correct manifest **zero** times:
+
+  | Observed | Cause |
+  | --- | --- |
+  | manifest holds **1 entry** (the last skill alphabetically) | one process `mv`s the temp away; the other's remaining `>>` recreates it with only what it had left |
+  | manifest holds 13–20 entries for 10 skills | interleaved appends, duplicated names |
+  | `cp: cannot create directory '…/iota': File exists` → **install exits 1** | one process `rm -rf`s a skill dir while the other is mid-`cp` into it |
+  | `mv: cannot stat '….tmp'` → **install exits 1** | the other process already claimed the temp |
+
+  This container is in the 1-entry state right now. The damage is that the
+  "drop skills removed upstream" loop reads the manifest, so it now considers a
+  single skill: **upstream removals silently stop propagating**, which is the one
+  job the manifest exists to do. Test 8 below passed on a clean container and
+  would fail here.
+
+  It also hides itself. `session-start.sh` runs the install as
+  `… || log "install failed; continuing"`, so a raced, exit-1 install degrades to
+  a stderr line nobody reads, and the doctor still reports every skill present —
+  because they *are* present, just installed by whichever process won. Only the
+  manifest count betrays it. **`doctor.sh` does not check the manifest count
+  against the repo's skill count; it should.**
+
+  Fix direction, not yet implemented: serialise the whole install under an
+  `flock` on a lockfile, so the second hook waits and then no-ops, rather than
+  patching the temp filename alone — a unique temp file fixes the manifest but
+  leaves the `rm -rf`/`cp` collision, which is the one that fails the install
+  outright. The duplicated briefing in every session on this repo is the same
+  root cause and would go with it.
+
 - **A foreign skill can have `name` ≠ directory** — the environment's
   `session-start-hook` directory declares `name: startup-hook-skill`, and the
   briefing uses the `name` field. Harmless, but explains a mismatch.
@@ -213,11 +284,25 @@ Each fixes a bug that actually occurred. Please do not "simplify" them away.
 - **`writing-great-skills`'s 181-line `GLOSSARY.md`** was not carried forward —
   upstream deleted it. Recover with
   `git show 28bd2e8:skills/writing-great-skills/GLOSSARY.md`.
-- **The README skill list is hand-maintained**; the briefing is generated.
+- **The README skill list is hand-maintained**; the briefing is generated. It was
+  30/30 in sync on 2026-08-11, so this is a drift risk rather than a live defect.
 
----
+### Resolved on 2026-08-11
 
-## Setup for the human
+Kept here so nobody re-opens them from an older copy of this file.
+
+- **The 7 skills duplicated across `synced/` and this repo.** Two of them
+  (`grilling`, `handoff`) differed, and which copy the harness preferred was
+  never established. The 8 `custom` skills have since been deleted from the
+  claude.ai account — the fix this file recommended — so `synced/` now holds only
+  the Anthropic six and the ambiguity is gone. `doctor.sh` reports no duplicates.
+  It still checks, so the guard remains if any are ever re-added.
+- **`writing-great-skills` syncing from the account** after the repo replaced it
+  with `writing-for-agents`. Went with the other seven `custom` entries.
+
+Both were account-side state, not repo state, so no commit here caused the fix
+and no commit can regress it. Re-adding a custom skill to the claude.ai account
+brings the duplicate back.
 
 Sessions on this repo are covered by the committed `.claude/settings.json`. For
 **every other repo**, paste into **Claude Code on the web → environment settings
