@@ -36,42 +36,55 @@ Both steps need nothing but outbound HTTPS — no GitHub App / repo-source
 access — so this works even in environments that don't have this repo
 attached as a source.
 
-Wire it into one of:
+### Scope: which sessions get this
 
-- **Global `SessionStart` hook**, in `~/.claude/settings.json` — runs at the
-  start of every session in that environment, whichever repo is open. This is
-  the one you want: the briefing has to be re-emitted per session, so a
-  once-per-container setup script can't deliver it.
+| Where it's registered | Covers |
+| --- | --- |
+| `.claude/settings.json` (in this repo, committed) | sessions opened on **this repo** only |
+| `~/.claude/settings.json` (user scope) | **every** session in that environment, whichever repo is open |
 
-  ```json
-  {
-    "hooks": {
-      "SessionStart": [
-        {
-          "hooks": [
-            {
-              "type": "command",
-              "command": "curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/session-start.sh | bash"
-            }
-          ]
-        }
-      ]
-    }
+The repo-local file is already committed, so this repo needs nothing. For
+everything else you need the user-scope registration — and in a cloud
+container that is the catch: `~/.claude` is rebuilt from the image on every
+provision, so anything written there by hand is gone next time.
+
+`scripts/bootstrap-env.sh` solves that. Paste this into **Claude Code on the
+web → environment settings → setup script**:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/bootstrap-env.sh | bash
+```
+
+It merges the `SessionStart` hook into `~/.claude/settings.json` at provision
+time and installs the skills straight away, so the first session doesn't pay
+the clone cost. Re-running never duplicates the hook entry, unrelated settings
+are preserved, and a settings file it can't parse is left untouched rather
+than overwritten. Hooks merge across settings scopes, so this coexists with
+whatever the base image already registers.
+
+On a local machine, register the hook in `~/.claude/settings.json` yourself —
+it persists there:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/session-start.sh | bash"
+          }
+        ]
+      }
+    ]
   }
-  ```
+}
+```
 
-  No `$CLAUDE_CODE_REMOTE` guard needed — the script checks that itself, and
-  skips only the install step when run locally, so a local machine still gets
-  the briefing for its symlinked skills.
-
-- **Environment setup script** (Claude Code on the web → environment
-  settings) — runs once when the container is provisioned. Use
-  `scripts/install-skills.sh` here if you want the skills present before the
-  first session starts; it does not replace the hook, since only the hook can
-  brief each session.
-
-This repo also ships `.claude/settings.json`, so sessions opened on *this*
-repo run the hook from the checkout without touching the network.
+No `$CLAUDE_CODE_REMOTE` guard needed — the script checks that itself and
+skips only the install step when run locally, so a local machine still gets
+the briefing for its symlinked skills.
 
 ## Telling the agent what it has
 
