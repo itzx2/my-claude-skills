@@ -23,26 +23,25 @@ Restart Claude Code after cloning.
 
 ## Install on a Claude Code cloud/remote environment
 
-`scripts/install-skills.sh` sparse-clones this repo over plain public HTTPS
-and mirrors `skills/` into `~/.claude/skills`. It needs nothing but outbound
-HTTPS — no GitHub App / repo-source access — so it works even in
-environments that don't have this repo attached as a source.
+`scripts/session-start.sh` is the entry point. It does two things:
 
-Run it directly:
+1. Mirrors `skills/` into `~/.claude/skills` (remote environments only — on a
+   local machine that path is the symlink created above, and reinstalling
+   would delete it).
+2. Prints a briefing describing every installed skill, so the agent in that
+   session knows what it has. See [Telling the agent what it
+   has](#telling-the-agent-what-it-has) below.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/install-skills.sh | bash
-```
+Both steps need nothing but outbound HTTPS — no GitHub App / repo-source
+access — so this works even in environments that don't have this repo
+attached as a source.
 
-To have it run automatically, wire that command into one of:
+Wire it into one of:
 
-- **Environment setup script** (Claude Code on the web → environment
-  settings) — runs once when the environment container is provisioned,
-  before any session starts, regardless of which repo is opened.
-- **Global `SessionStart` hook**, in `~/.claude/settings.json`, so it runs
-  at the start of every session in that environment. Gate it on
-  `$CLAUDE_CODE_REMOTE` so it's a no-op on a local machine (where you'd use
-  the symlink method above instead):
+- **Global `SessionStart` hook**, in `~/.claude/settings.json` — runs at the
+  start of every session in that environment, whichever repo is open. This is
+  the one you want: the briefing has to be re-emitted per session, so a
+  once-per-container setup script can't deliver it.
 
   ```json
   {
@@ -52,7 +51,7 @@ To have it run automatically, wire that command into one of:
           "hooks": [
             {
               "type": "command",
-              "command": "if [ \"${CLAUDE_CODE_REMOTE:-}\" = \"true\" ]; then curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/install-skills.sh | bash; fi"
+              "command": "curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/session-start.sh | bash"
             }
           ]
         }
@@ -60,6 +59,50 @@ To have it run automatically, wire that command into one of:
     }
   }
   ```
+
+  No `$CLAUDE_CODE_REMOTE` guard needed — the script checks that itself, and
+  skips only the install step when run locally, so a local machine still gets
+  the briefing for its symlinked skills.
+
+- **Environment setup script** (Claude Code on the web → environment
+  settings) — runs once when the container is provisioned. Use
+  `scripts/install-skills.sh` here if you want the skills present before the
+  first session starts; it does not replace the hook, since only the hook can
+  brief each session.
+
+This repo also ships `.claude/settings.json`, so sessions opened on *this*
+repo run the hook from the checkout without touching the network.
+
+## Telling the agent what it has
+
+Claude Code shows an agent only the skills it is allowed to invoke itself.
+Any skill with `disable-model-invocation: true` in its front matter is hidden
+from the agent completely — it can't see it, can't call it, and can't suggest
+it, because it has no idea the skill exists. Roughly half the skills here are
+in that group.
+
+`scripts/skills-briefing.py` closes that gap. It reads the front matter of
+every skill in `~/.claude/skills` and emits a `SessionStart`
+`additionalContext` payload splitting them into:
+
+- **Model-invokable** — a compact roster, as a recall aid, with a nudge to
+  reach for a matching skill instead of improvising.
+- **User-invoked only** — name and description for each, plus instructions to
+  recommend rather than invoke them (at most one per reply).
+
+The payload also sets `reloadSkills: true`, so a session picks up skills the
+same hook installed moments earlier instead of running with a stale list.
+
+Run it standalone to see what the agent will be told:
+
+```sh
+CLAUDE_SKILLS_DIR=./skills python3 scripts/skills-briefing.py \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["hookSpecificOutput"]["additionalContext"])'
+```
+
+The briefing is generated from front matter at session start, so adding,
+renaming, or reclassifying a skill needs no edit here — but note the skill
+list further down this README is maintained by hand.
 
 ## Skills
 
