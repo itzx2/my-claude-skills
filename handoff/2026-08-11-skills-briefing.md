@@ -94,17 +94,49 @@ Please do not "simplify" these away — each fixes a bug that actually occurred.
 | 12 | Briefing edge cases (empty dir, missing dir, no front matter, quoted values, block scalars) | all handled, silent when nothing to say |
 | 13 | Hook fires in a real session | confirmed — this session's context carried the briefing |
 
-### Not yet verified — do these first
+### Verified in a real container (post-fix)
 
-1. **The fixed installer in a real fresh session.** Only sandbox and live-curl
-   deploy have been tested. Any session started before `d0076ac` still has the
-   old cached installer.
-2. **The rewritten `ask-matt` in a session with `synced/` intact.** The one real
-   run hit both bugs at once — it executed the *stale* pre-rewrite copy, and
-   `synced/` had already been deleted. See below.
-3. **Whether agents actually recommend user-invoked skills at fitting moments.**
-   This is prompt behaviour, argued about rather than measured. `skill-creator`
-   can run evals on triggering accuracy if it matters.
+A session running the fixed code confirmed the whole chain on live state, not a
+sandbox:
+
+| Check | Result |
+| --- | --- |
+| `~/.claude/skills/synced/` | **PRESENT, 14 skills** |
+| `xlsx` on disk | `~/.claude/skills/synced/xlsx/SKILL.md` reachable |
+| `session-start-hook` (environment skill, top level) | **survived** — the old `rm -rf` would have deleted it |
+| `~/.claude/.my-claude-skills.manifest` | 30 entries, all from this repo |
+| `synced` in the manifest? | **no** — so the installer cannot delete it |
+| Cached `install-skills.sh` | post-`d0076ac` |
+| Installed `ask-matt` | the rewritten roster version |
+
+`session-start-hook` surviving is the strongest single signal: it is an
+environment-provided skill sitting at the top level of `~/.claude/skills`, so it
+was collateral damage under the old installer and is untouched under the new
+one.
+
+### Not yet verified
+
+1. **The rewritten `ask-matt` answering a synced-skill question.** The one real
+   run hit both bugs at once — stale `ask-matt`, and `synced/` already deleted.
+   With both fixed, `/ask-matt` "I need to make a spreadsheet" should now name
+   `xlsx`. Only the human can run this: `ask-matt` is user-invoked.
+2. **Whether agents actually recommend user-invoked skills at fitting moments.**
+   Prompt behaviour, argued about rather than measured. `skill-creator` can run
+   evals on triggering accuracy if it matters.
+
+### Residual risk, and why no guard was added
+
+A container built from an image baked before `d0076ac` carries the pre-fix
+cached installer, which gets **one destructive run** before caching its own
+replacement. `synced/` is restored by the account sync afterwards, so the cost is
+at most one session starting without those skills.
+
+A staleness guard in `session-start.sh` was considered and rejected: a stale
+`session-start.sh` would not contain the guard either, so it cannot fix the case
+it is aimed at — it only protects against *future* installer changes, and the
+installer is now non-destructive by design. Re-running `bootstrap-env.sh`
+refreshes the cached scripts immediately and is the cheaper answer for any
+container still holding old ones.
 
 ### The one real-session failure, and what it proved
 
