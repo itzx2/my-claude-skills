@@ -15,6 +15,23 @@ MANIFEST="$HOME/.claude/.my-claude-skills.manifest"
 SYNCED="$SKILLS/synced"
 REPO_SKILLS="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)/skills"
 
+# The cached copy at ~/.claude/doctor.sh has no repo beside it. Fall back to the
+# manifest, which names the same skills, so the cached copy stays useful in a
+# session that never checked this repo out.
+OWNED_LIST="$(mktemp)"
+trap 'rm -f "$OWNED_LIST"' EXIT
+if [ -d "$REPO_SKILLS" ]; then
+  OWNED_FROM="repo"
+  (cd "$REPO_SKILLS" && ls -d */ 2>/dev/null | tr -d /) | sort > "$OWNED_LIST"
+elif [ -f "$MANIFEST" ]; then
+  OWNED_FROM="manifest"
+  sort "$MANIFEST" | grep -v '^$' > "$OWNED_LIST"
+else
+  OWNED_FROM="none"
+  : > "$OWNED_LIST"
+fi
+owned_count=$(wc -l < "$OWNED_LIST")
+
 ok()   { printf '  \033[32mok\033[0m    %s\n' "$1"; }
 warn() { printf '  \033[33mwarn\033[0m  %s\n' "$1"; }
 bad()  { printf '  \033[31mBAD\033[0m   %s\n' "$1"; }
@@ -31,18 +48,19 @@ else
   exit 1
 fi
 
-if [ -d "$REPO_SKILLS" ]; then
-  repo_count=$(find "$REPO_SKILLS" -mindepth 1 -maxdepth 1 -type d | wc -l)
+if [ "$OWNED_FROM" != "none" ]; then
   missing=""
-  for d in "$REPO_SKILLS"/*/; do
-    name="$(basename "$d")"
+  while IFS= read -r name; do
+    [ -n "$name" ] || continue
     [ -d "$SKILLS/$name" ] || missing="$missing $name"
-  done
+  done < "$OWNED_LIST"
   if [ -n "$missing" ]; then
-    bad "repo has $repo_count skills; NOT installed:$missing"
+    bad "$owned_count expected (per $OWNED_FROM); NOT installed:$missing"
   else
-    ok "all $repo_count repo skills present"
+    ok "all $owned_count skills from this repo present (per $OWNED_FROM)"
   fi
+else
+  warn "no repo checkout and no manifest — cannot tell which skills are expected"
 fi
 
 echo
@@ -85,21 +103,21 @@ fi
 
 echo
 echo "== entries preserved from other sources =="
-if [ -d "$REPO_SKILLS" ]; then
-  foreign=$(comm -13 <(ls "$REPO_SKILLS" | sort) <(ls "$SKILLS" | sort) | tr '\n' ' ')
+if [ "$OWNED_FROM" != "none" ]; then
+  foreign=$(comm -13 "$OWNED_LIST" <(ls "$SKILLS" | sort) | tr '\n' ' ')
   [ -n "${foreign// /}" ] && ok "not from this repo, left intact: $foreign" \
                           || warn "nothing here but this repo's skills"
 fi
 
 echo
 echo "== duplicates (same skill in two places, versions can differ) =="
-if [ -d "$SYNCED" ] && [ -d "$REPO_SKILLS" ]; then
+if [ -d "$SYNCED" ] && [ "$OWNED_FROM" != "none" ]; then
   dupes=0
   for d in "$SYNCED"/*/; do
     name="$(basename "$d")"
-    if [ -d "$REPO_SKILLS/$name" ]; then
+    if grep -qx "$name" "$OWNED_LIST"; then
       dupes=$((dupes + 1))
-      if cmp -s "$d/SKILL.md" "$REPO_SKILLS/$name/SKILL.md"; then
+      if cmp -s "$d/SKILL.md" "$SKILLS/$name/SKILL.md"; then
         warn "$name — in both, identical"
       else
         bad "$name — in both and DIFFERENT; unclear which one wins"

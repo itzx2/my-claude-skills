@@ -58,7 +58,7 @@ mv -f "$MANIFEST.tmp" "$MANIFEST"
 # that very file is executing, and bash reads a script incrementally by offset.
 # cp would rewrite the running file in place and make bash resume into garbage;
 # mv is an atomic rename, so the running shell keeps its handle on the old inode.
-for script in session-start.sh install-skills.sh skills-briefing.py; do
+for script in session-start.sh install-skills.sh skills-briefing.py doctor.sh; do
   if [ -f "$TMP_DIR/scripts/$script" ]; then
     cp "$TMP_DIR/scripts/$script" "$HOME/.claude/.$script.tmp"
     chmod +x "$HOME/.claude/.$script.tmp"
