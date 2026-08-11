@@ -14,9 +14,40 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 git clone --depth 1 --filter=blob:none --sparse "$REPO_URL" "$TMP_DIR" >/dev/null 2>&1
 git -C "$TMP_DIR" sparse-checkout set skills scripts >/dev/null 2>&1
 
-rm -rf "$TARGET"
-mkdir -p "$(dirname "$TARGET")"
-cp -r "$TMP_DIR/skills" "$TARGET"
+# Replace only the skills this repo owns, tracked in a manifest, and leave every
+# other entry in the directory alone.
+#
+# `rm -rf "$TARGET"` was the obvious way to do this and was wrong: Claude Code
+# syncs the account's own skills into $TARGET/synced (xlsx, docx, pdf, pptx,
+# skill-creator, morning), so wiping the directory took those out and left the
+# session unable to open a spreadsheet until the next sync restored them.
+# Deleting is still needed so a skill removed upstream disappears here rather
+# than lingering forever — hence the manifest, which records what we put there
+# last time and is the only thing we are entitled to remove.
+MANIFEST="$HOME/.claude/.my-claude-skills.manifest"
+
+mkdir -p "$TARGET"
+
+# Drop skills we installed previously that the repo no longer carries.
+if [ -f "$MANIFEST" ]; then
+  while IFS= read -r previous; do
+    [ -n "$previous" ] || continue
+    if [ ! -d "$TMP_DIR/skills/$previous" ]; then
+      rm -rf "${TARGET:?}/$previous"
+    fi
+  done < "$MANIFEST"
+fi
+
+# Install the current set, replacing each skill directory individually.
+: > "$MANIFEST.tmp"
+for skill_dir in "$TMP_DIR"/skills/*/; do
+  [ -d "$skill_dir" ] || continue
+  skill="$(basename "$skill_dir")"
+  rm -rf "${TARGET:?}/$skill"
+  cp -r "$skill_dir" "$TARGET/$skill"
+  printf '%s\n' "$skill" >> "$MANIFEST.tmp"
+done
+mv -f "$MANIFEST.tmp" "$MANIFEST"
 
 # Cache the hook scripts next to the skills. session-start.sh resolves its
 # helpers relative to its own location, so with all three in ~/.claude a session
@@ -35,4 +66,4 @@ for script in session-start.sh install-skills.sh skills-briefing.py; do
   fi
 done
 
-echo "Installed $(find "$TARGET" -mindepth 1 -maxdepth 1 -type d | wc -l) skills into $TARGET"
+echo "Installed $(wc -l < "$MANIFEST") skills into $TARGET"
