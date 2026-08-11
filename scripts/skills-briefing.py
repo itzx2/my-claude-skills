@@ -165,12 +165,12 @@ def render(model_invokable, user_invoked):
             "is the whole point of listing them, and the user has asked "
             "explicitly to hear about any skill that fits: when one does, name "
             "it in a sentence and let them decide — e.g. \"`/to-tickets` would "
-            "break this plan into tickets if you want it.\" Surface every "
-            "skill that genuinely fits the moment, not just the best one, and "
-            "never withhold one for fear of saying too much. Genuine fit is "
-            "still the gate: a skill that merely sounds related to the topic "
-            "does not fit, and a bare list of everything available helps "
-            "nobody.",
+            "break this plan into tickets if you want it.\" The test is simple: "
+            "would running this right now plausibly help the user with what "
+            "they are doing? Surface every skill that passes, not just the best "
+            "one. When you cannot tell whether one passes, say it anyway — a "
+            "suggestion they skip costs them one line, while a skill they never "
+            "hear about is one they can never use.",
             "",
         ]
         out += [
