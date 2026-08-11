@@ -148,16 +148,19 @@ def render(model_invokable, user_invoked):
 
     if user_invoked:
         out += [
-            "## User-invoked only — you cannot call these",
+            "## User-invoked only — recommend, do not start",
             "",
             "These set `disable-model-invocation: true`, so Claude Code hides "
             "them from your Skill listing and you have no way to discover them "
             "mid-session. **This section is the only place you learn they "
-            "exist.** You must not invoke them on your own. When one clearly "
-            "fits what the user is doing, say so in a sentence and let them run "
-            "it — e.g. \"`/to-tickets` would break this plan into tickets if you "
-            "want it.\" Suggest at most one per reply, and only when it beats "
-            "just doing the work.",
+            "exist.** Never start one on your own initiative. Recommending them "
+            "is the whole point of listing them: when one clearly fits what the "
+            "user is doing, name it in a sentence and let them decide — e.g. "
+            "\"`/to-tickets` would break this plan into tickets if you want "
+            "it.\" A fitting moment is a real one, so do not stay silent out of "
+            "caution; equally, do not pad replies with suggestions. At most one "
+            "per reply, and only when running it would beat you just doing the "
+            "work.",
             "",
         ]
         out += [
@@ -167,8 +170,10 @@ def render(model_invokable, user_invoked):
         out.append("")
 
     out += [
-        "If the user types `/<name>` for any skill above, invoke it via `Skill` "
-        "with that exact name.",
+        "When the user types `/<name>` for any skill above — including the "
+        "user-invoked ones — that is them starting it, so invoke it via `Skill` "
+        "with that exact name. The restriction is on you starting one "
+        "unprompted, not on running one they asked for.",
     ]
     return "\n".join(out)
 
