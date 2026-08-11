@@ -20,9 +20,25 @@ set -uo pipefail
 
 RAW_BASE="https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts"
 SETTINGS="$HOME/.claude/settings.json"
-HOOK_COMMAND="curl -fsSL $RAW_BASE/session-start.sh | bash"
+# Register a local path, not `curl ... | bash`. Fetching the hook script every
+# session makes the briefing hostage to the network: a GitHub blip at session
+# start would mean no briefing at all, even with the skills already cached on
+# disk. Running from ~/.claude keeps a session working offline; install-skills.sh
+# refreshes this copy on every successful install.
+HOOK_SCRIPT="$HOME/.claude/session-start.sh"
+HOOK_COMMAND="bash $HOOK_SCRIPT"
 
 log() { echo "[skills-bootstrap] $*" >&2; }
+
+# Piped from curl, BASH_SOURCE is unset entirely, which `set -u` treats as an
+# error mid-expansion. Resolve it once, defensively, and treat "no sibling
+# files" as the normal case rather than a failure.
+SCRIPT_DIR=""
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
+
+sibling() { [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/$1" ]; }
 
 if ! command -v python3 >/dev/null 2>&1; then
   log "python3 not found; cannot register the hook"
@@ -30,6 +46,16 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 mkdir -p "$HOME/.claude"
+
+# Seed the hook script. Only needed until the first successful install, which
+# takes over keeping it current.
+if sibling session-start.sh; then
+  cp "$SCRIPT_DIR/session-start.sh" "$HOOK_SCRIPT"
+elif ! curl -fsSL "$RAW_BASE/session-start.sh" -o "$HOOK_SCRIPT"; then
+  log "could not fetch session-start.sh; not registering a hook that cannot run"
+  exit 0
+fi
+chmod +x "$HOOK_SCRIPT"
 
 SETTINGS="$SETTINGS" HOOK_COMMAND="$HOOK_COMMAND" python3 <<'PY'
 import json
@@ -80,8 +106,8 @@ fi
 
 # Install now as well, so the very first session in this container doesn't pay
 # the clone cost inside its own startup hook.
-if [ -f "$(dirname "${BASH_SOURCE[0]:-}")/install-skills.sh" ]; then
-  bash "$(dirname "${BASH_SOURCE[0]}")/install-skills.sh" >&2 || log "initial install failed; the hook will retry each session"
+if sibling install-skills.sh; then
+  bash "$SCRIPT_DIR/install-skills.sh" >&2 || log "initial install failed; the hook will retry each session"
 else
   curl -fsSL "$RAW_BASE/install-skills.sh" | bash >&2 || log "initial install failed; the hook will retry each session"
 fi

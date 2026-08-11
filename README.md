@@ -62,6 +62,15 @@ are preserved, and a settings file it can't parse is left untouched rather
 than overwritten. Hooks merge across settings scopes, so this coexists with
 whatever the base image already registers.
 
+The registered hook runs `~/.claude/session-start.sh` from disk rather than
+piping a fresh `curl` into `bash` each session. That matters: the briefing
+would otherwise be hostage to the network, and a GitHub blip at session start
+would mean no briefing at all despite the skills already sitting in
+`~/.claude`. `install-skills.sh` refreshes the cached scripts on every
+successful install, so they stay current without the per-session fetch. With
+the origin unreachable a session still gets its full briefing from cache; only
+the skills refresh is skipped.
+
 On a local machine, register the hook in `~/.claude/settings.json` yourself —
 it persists there:
 
