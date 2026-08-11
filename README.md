@@ -128,28 +128,36 @@ list further down this README is maintained by hand.
 
 ## Skills
 
-- **ask-matt** — router over the skills in this repo; ask which skill or flow fits your situation.
-- **batch-grill-me** — relentless interview that asks every frontier question at once, round by round.
-- **code-review** — two-axis review (standards + spec) of a diff since a fixed point, via parallel sub-agents.
-- **codebase-design** — shared vocabulary and principles for designing deep modules.
-- **diagnosing-bugs** — disciplined loop for hard bugs: build a feedback loop, reproduce, hypothesise, instrument, fix.
-- **domain-modeling** — build and sharpen a project's domain model (glossary, ADRs).
-- **grill-me** — thin `/grilling` alias, user-invoked only.
-- **grill-with-docs** — `/grilling` session that also produces ADRs and glossary via `domain-modeling`.
-- **grilling** — relentless interview to stress-test a plan or design.
-- **handoff** — compact the current conversation into a handoff doc for another agent.
-- **implement** — implement a spec/tickets using TDD, typechecking, and code review.
-- **improve-codebase-architecture** — scan for deepening opportunities, present as an HTML report, then grill through the pick.
+31 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+
+- **/ask-matt** — ask which skill or flow fits your situation.
+- **/batch-grill-me** — a relentless interview that asks every frontier question at once, round by round.
+- **/claude-handoff** — hand the current conversation off to a fresh background agent that picks up the work immediately.
+- **code-review** — review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?).
+- **codebase-design** — shared vocabulary for designing deep modules.
+- **diagnosing-bugs** — diagnosis loop for hard bugs and performance regressions.
+- **domain-modeling** — build and sharpen a project's domain model.
+- **/grill-me** — a relentless interview to sharpen a plan or design.
+- **/grill-with-docs** — a relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go.
+- **grilling** — grill the user relentlessly about a plan, decision, or idea.
+- **/handoff** — compact the current conversation into a handoff document for another agent to pick up.
+- **/implement** — implement a piece of work based on a spec or set of tickets.
+- **/improve-codebase-architecture** — scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
 - **karpathy-guidelines** — behavioral guidelines to reduce common LLM coding mistakes.
-- **prototype** — build throwaway prototypes to answer a design or UI question.
-- **research** — delegate primary-source research to a background agent, captured as a Markdown file.
-- **resolving-merge-conflicts** — resolve an in-progress git merge/rebase conflict, preserving intent on both sides.
-- **scrutinize** — outsider-perspective end-to-end review of a plan/PR/code change.
-- **setup-matt-pocock-skills** — one-time per-repo config: issue tracker, triage labels, domain-doc layout.
-- **tdd** — red-green-refactor reference: what a good test is, seams, anti-patterns, loop rules.
-- **teach** — multi-session teaching workflow with HTML lessons and learning records.
-- **to-spec** — turn the current conversation into a spec/PRD and publish it to the issue tracker.
-- **to-tickets** — break a plan/spec into tracer-bullet tickets with declared blocking edges.
-- **triage** — move issues and external PRs through a state machine of triage roles.
-- **wayfinder** — plan a huge effort as a shared map of decision tickets, resolved one at a time.
-- **writing-great-skills** — reference for writing and editing skills well.
+- **/loop-me** — grill me about specs for the workflows I want to build, within this workspace.
+- **prototype** — build a throwaway prototype to answer a design question.
+- **research** — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
+- **resolving-merge-conflicts** — use when you need to resolve an in-progress git merge/rebase conflict.
+- **scrutinize** — outsider-perspective end-to-end review of a plan, PR, or code change.
+- **/setup-matt-pocock-skills** — configure this repo for the engineering skills — set up its issue tracker, triage label vocabulary, and domain doc layout.
+- **tdd** — test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+- **/teach** — teach the user a new skill or concept, within this workspace.
+- **/to-questionnaire** — turn a decision you can't fully answer into a questionnaire for someone else to fill in.
+- **/to-spec** — turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
+- **/to-tickets** — break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker — edges as text in one file per ticket locally, or native blocking links on a real tracker.
+- **/triage** — move issues and external PRs through a state machine of triage roles — categorise, verify, grill if needed, and write agent-ready briefs.
+- **/wait-what** — stop. That last message did not land — re-pitch it.
+- **/wayfinder** — plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.
+- **wizard** — generate an interactive bash wizard that walks a human through steps only they can perform.
+- **writing-for-agents** — writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.
+- **/writing-great-skills** — reference for writing and editing skills well — the vocabulary and principles that make a skill predictable.
