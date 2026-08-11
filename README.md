@@ -128,7 +128,7 @@ list further down this README is maintained by hand.
 
 ## Skills
 
-31 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+30 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
 - **/ask-matt** — ask which skill or flow fits your situation.
 - **/batch-grill-me** — a relentless interview that asks every frontier question at once, round by round.
@@ -160,4 +160,3 @@ list further down this README is maintained by hand.
 - **/wayfinder** — plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.
 - **wizard** — generate an interactive bash wizard that walks a human through steps only they can perform.
 - **writing-for-agents** — writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.
-- **/writing-great-skills** — reference for writing and editing skills well — the vocabulary and principles that make a skill predictable.
