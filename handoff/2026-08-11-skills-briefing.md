@@ -1,14 +1,24 @@
-# Handoff — session-start skills briefing, upstream sync, installer fix
+# Handoff — skills briefing, upstream sync, installer
 
-**Date:** 2026-08-11 · **`main`:** `d0076ac` · **Repo:** `itzx2/my-claude-skills`
+**Date:** 2026-08-11 · **Repo:** `itzx2/my-claude-skills` · everything below is on `main` and pushed.
 
-Everything here is on `main` and pushed. Read this if you are a fresh session
-picking this up or verifying it. Supersedes any earlier copy of this file —
-that one predates the installer fix and the `ask-matt` rewrite.
+For a fresh session picking this up. Supersedes any earlier copy of this file.
+
+## Run this first
+
+```sh
+bash scripts/doctor.sh
+```
+
+Read-only. It reports what is installed, whether the installer is the fixed one,
+whether the account-synced skills survived, and which skills exist in two places.
+**Run it before believing any claim that a skill is missing** — it distinguishes
+"absent from disk" from "present but unreported", which decides whether the fault
+is the installer or whatever is reading the roster.
 
 ---
 
-## What this repo now does
+## What this repo does
 
 Skills live in `skills/`. A `SessionStart` hook installs them into
 `~/.claude/skills` and injects a **briefing** naming all of them, so an agent
@@ -16,27 +26,30 @@ starts every session knowing the full roster.
 
 The briefing exists because Claude Code hides any skill with
 `disable-model-invocation: true` from the agent **entirely** — it cannot see,
-call, or suggest what it does not know exists. That is **17 of the 30** skills
-here. The briefing splits them:
+call, or suggest what it does not know exists. That is 17 of the 30 skills here.
 
-- **Model-invokable (13)** — already in the agent's Skill listing. The roster is
-  a recall aid; descriptions are trimmed to a first sentence because the full
-  text is already in the listing.
-- **User-invoked (17)** — full descriptions, because the briefing is the *only*
-  surface they ever appear on. Trimming these would destroy the sole trigger
-  information available.
+- **Model-invokable** — already in the agent's Skill listing; the roster is a
+  recall aid, so descriptions are trimmed to a first sentence.
+- **User-invoked** — full descriptions, because the briefing is the *only*
+  surface they appear on. Trimming these destroys their only trigger info.
 
-`reloadSkills: true` makes the session re-scan, so it sees what the same hook
-installed seconds earlier.
+`reloadSkills: true` makes the session re-scan so it sees what the hook just
+installed.
 
-### The four scripts
+Counts vary by environment: this repo contributes 30, and the briefing also picks
+up anything else sitting in `~/.claude/skills` (one container reports 31 because
+the environment's own `session-start-hook` is installed there). That is correct
+behaviour, not drift.
+
+### The scripts
 
 | File | Role |
 | --- | --- |
 | `scripts/bootstrap-env.sh` | The only thing a human pastes. Registers the hook in `~/.claude/settings.json`, installs. Once per environment. |
 | `scripts/session-start.sh` | The hook. Installs (remote only), then briefs. |
-| `scripts/install-skills.sh` | Mirrors `skills/` → `~/.claude/skills`, caches the three scripts into `~/.claude/`. |
+| `scripts/install-skills.sh` | Mirrors `skills/` → `~/.claude/skills`, caches the scripts into `~/.claude/`. |
 | `scripts/skills-briefing.py` | Reads front matter, emits the `additionalContext` payload. |
+| `scripts/doctor.sh` | Read-only diagnosis. Start here. |
 
 ```
 setup script (pasted once per environment)
@@ -49,23 +62,75 @@ every session after
 
 ---
 
+## Disappeared skills — the failure you are most likely to hit
+
+**Symptom:** a document skill is gone (`xlsx`, `docx`, `pptx`, `pdf`), the
+briefing is short, or `/ask-matt` reports that nothing covers a task.
+
+### Where those skills actually live
+
+They are **not** built in and nothing shields them. Claude Code syncs them from
+the claude.ai account into `~/.claude/skills/synced/` as ordinary directories,
+listed in `synced/manifest.json` with a `skillId` and source per entry:
+
+| Source | Skills |
+| --- | --- |
+| `anthropic` | `xlsx`, `docx`, `pptx`, `pdf` |
+| `anthropic-example` | `skill-creator`, `morning` |
+| `custom` (the user's own) | `grill-with-docs`, `handoff`, `teach`, `grilling`, `scrutinize`, `karpathy-guidelines`, `domain-modeling`, `writing-great-skills` |
+
+Because they are just files in `~/.claude/skills`, any script that clears that
+directory deletes them. That is exactly what happened.
+
+### What went wrong, and what fixed it
+
+`install-skills.sh` used to run `rm -rf "$HOME/.claude/skills"` before copying,
+so every session start destroyed `synced/`. A real session then ran `/ask-matt`
+asking for a spreadsheet and correctly answered that **no skill covers it** —
+because by then `xlsx` genuinely was not installed. `dataviz` was still offered
+because it is not on disk and so was never deleted; that asymmetry is what
+identified the cause.
+
+The installer now records what it installs in
+`~/.claude/.my-claude-skills.manifest` and replaces **only those** directories.
+Deletion is still needed so a skill removed upstream disappears rather than
+lingering, so the manifest — not the whole directory — bounds what may be removed.
+
+### Diagnosing it next time
+
+Run `scripts/doctor.sh`. It prints one of:
+
+- `synced/ is ABSENT` → the skills really are gone. Either a pre-fix installer
+  ran, or the account sync has not landed yet. It re-syncs on its own; a session
+  started before that runs without them.
+- `cached installer is PRE-FIX` → this container carries an old cached copy.
+  Re-run the bootstrap line to refresh it immediately.
+- Everything `ok` → the skills are present, so a report of "missing" is about
+  whatever is reading the roster, not the installer.
+
+### Residual risk, and why no staleness guard was added
+
+A container built from an image baked before the fix carries the pre-fix cached
+installer, which gets **one destructive run** before caching its replacement.
+`synced/` re-syncs afterwards, so the cost is at most one session without those
+skills.
+
+A guard in `session-start.sh` was considered and rejected: a stale
+`session-start.sh` would not contain the guard either, so it cannot fix the case
+it targets — it only protects against *future* installer changes, and the
+installer is now non-destructive by design. Re-running `bootstrap-env.sh` is the
+cheaper answer for any container still holding old copies.
+
+---
+
 ## Three decisions that look like over-engineering and are not
 
-Please do not "simplify" these away — each fixes a bug that actually occurred.
+Each fixes a bug that actually occurred. Please do not "simplify" them away.
 
-1. **The installer replaces only skills it owns, tracked in
-   `~/.claude/.my-claude-skills.manifest`.** It used to `rm -rf` the whole of
-   `~/.claude/skills`. Claude Code syncs the account's own skills into
-   `~/.claude/skills/synced/` — **`xlsx`, `docx`, `pdf`, `pptx`,
-   `skill-creator`, `morning` all live there** — so that wipe removed them every
-   session start. Deletion is still needed so upstream removals propagate, hence
-   the manifest bounding what may be removed.
-
+1. **Manifest-scoped deletion** — above.
 2. **The hook runs a local path, not `curl … | bash`.** Fetching it per session
    made the briefing hostage to the network: with GitHub unreachable a session
-   got no briefing at all despite skills sitting on disk. `install-skills.sh`
-   refreshes the cached copies on each successful install.
-
+   got no briefing at all despite skills sitting on disk.
 3. **Cached scripts install via `mv`, not `cp`.** `install-skills.sh` can
    overwrite `session-start.sh` while that file is the running script, and bash
    reads scripts incrementally by byte offset. In-place `cp` makes bash resume
@@ -76,159 +141,58 @@ Please do not "simplify" these away — each fixes a bug that actually occurred.
 
 ## Test results
 
-### Passing — verified in this session
+### Verified
 
 | # | Test | Result |
 | --- | --- | --- |
 | 1 | Front matter across all 30 skills (`name` matches directory, description present, under 1024 chars, no duplicates) | no issues |
-| 2 | Briefing generation | 13 + 17 = 30, valid JSON, `reloadSkills: true`, ~1315 tokens |
+| 2 | Briefing generation | valid JSON, `reloadSkills: true`, ~1315 tokens |
 | 3 | Live deploy from `main` into a clean `HOME` | hook registered, 30 installed, briefing emitted |
-| 4 | **`synced/` preserved** (sandbox, live deploy, first-install, re-run) | `synced/xlsx` INTACT in all four |
-| 5 | Upstream removal still propagates | stale `writing-great-skills` removed via manifest |
-| 6 | Total outage (no HTTP origin, dead git remote) | full briefing from cache, **30 skills still intact** |
-| 7 | Bootstrap idempotency | re-run adds no duplicate hook entry |
-| 8 | Bootstrap with foreign settings | `env`, `Stop`, and the image's git-identity `SessionStart` hook all preserved |
-| 9 | Bootstrap with corrupt `settings.json` | refuses to write, exits 0 |
-| 10 | New skill added upstream | appears in the **same** session (install runs before briefing) |
-| 11 | Skill reclassified / removed upstream | moves bucket / disappears correctly |
-| 12 | Briefing edge cases (empty dir, missing dir, no front matter, quoted values, block scalars) | all handled, silent when nothing to say |
-| 13 | Hook fires in a real session | confirmed — this session's context carried the briefing |
-
-### Verified in a real container (post-fix)
-
-A session running the fixed code confirmed the whole chain on live state, not a
-sandbox:
-
-| Check | Result |
-| --- | --- |
-| `~/.claude/skills/synced/` | **PRESENT, 14 skills** |
-| `xlsx` on disk | `~/.claude/skills/synced/xlsx/SKILL.md` reachable |
-| `session-start-hook` (environment skill, top level) | **survived** — the old `rm -rf` would have deleted it |
-| `~/.claude/.my-claude-skills.manifest` | 30 entries, all from this repo |
-| `synced` in the manifest? | **no** — so the installer cannot delete it |
-| Cached `install-skills.sh` | post-`d0076ac` |
-| Installed `ask-matt` | the rewritten roster version |
-
-`session-start-hook` surviving is the strongest single signal: it is an
-environment-provided skill sitting at the top level of `~/.claude/skills`, so it
-was collateral damage under the old installer and is untouched under the new
-one.
+| 4 | `synced/` preserved — sandbox, live deploy, first install, re-run | `synced/xlsx` INTACT in all four |
+| 5 | **Live container after the fix** | `synced/` 14 skills, `xlsx`/`docx`/`pptx`/`pdf` all reachable |
+| 6 | Environment's own `session-start-hook` at top level | **survived** — collateral damage under the old installer |
+| 7 | `synced` absent from the manifest | confirmed — installer cannot delete it |
+| 8 | Upstream removal still propagates | stale `writing-great-skills` removed via manifest |
+| 9 | Total outage (no HTTP origin, dead git remote) | full briefing from cache, 30 skills intact |
+| 10 | Bootstrap idempotency / foreign settings / corrupt settings | no duplicate entry; `env`, `Stop`, git-identity hook preserved; refuses to write over unparseable JSON |
+| 11 | New skill added upstream | appears in the **same** session |
+| 12 | Skill reclassified / removed upstream | moves bucket / disappears |
+| 13 | Briefing edge cases (empty, missing, no front matter, quoted, block scalars) | handled; silent when nothing to say |
+| 14 | `doctor.sh` against a broken container | correctly reports pre-fix installer and absent `synced/` |
 
 ### Not yet verified
 
-1. **The rewritten `ask-matt` answering a synced-skill question.** The one real
-   run hit both bugs at once — stale `ask-matt`, and `synced/` already deleted.
-   With both fixed, `/ask-matt` "I need to make a spreadsheet" should now name
-   `xlsx`. Only the human can run this: `ask-matt` is user-invoked.
-2. **Whether agents actually recommend user-invoked skills at fitting moments.**
-   Prompt behaviour, argued about rather than measured. `skill-creator` can run
-   evals on triggering accuracy if it matters.
-
-### Residual risk, and why no guard was added
-
-A container built from an image baked before `d0076ac` carries the pre-fix
-cached installer, which gets **one destructive run** before caching its own
-replacement. `synced/` is restored by the account sync afterwards, so the cost is
-at most one session starting without those skills.
-
-A staleness guard in `session-start.sh` was considered and rejected: a stale
-`session-start.sh` would not contain the guard either, so it cannot fix the case
-it is aimed at — it only protects against *future* installer changes, and the
-installer is now non-destructive by design. Re-running `bootstrap-env.sh`
-refreshes the cached scripts immediately and is the cheaper answer for any
-container still holding old ones.
-
-### The one real-session failure, and what it proved
-
-A fresh session ran `/ask-matt` with "I need to make a spreadsheet". It replied
-that no skill covers it. **That answer was correct** — `ls ~/.claude/skills` in
-that session showed no `synced/` directory, so `xlsx` genuinely was not
-installed. `dataviz` was still offered because it is not on disk and so was
-never deleted; that asymmetry is what identified the cause.
-
-Two separate faults, both now fixed on `main`: the installer wiped `synced/`
-(fix 1 above), and the session was running the pre-rewrite `ask-matt` because
-`~/.claude/skills` was installed before that commit landed.
+1. **`/ask-matt` answering a synced-skill question.** The one real run hit both
+   bugs at once — stale `ask-matt`, and `synced/` already deleted. With both
+   fixed, `/ask-matt` "I need to make a spreadsheet" should now name `xlsx`.
+   **Only the human can run this** — `ask-matt` is user-invoked.
+2. **Whether agents recommend user-invoked skills at fitting moments.** Prompt
+   behaviour, argued about rather than measured. `skill-creator` can run evals on
+   triggering accuracy.
 
 ---
 
-## Verification checklist
+## Known issues
 
-Run from a clone of `main`. Use a temp `HOME` for anything that installs — with
-your real `HOME` these rewrite `~/.claude/skills`.
-
-**1. Front matter**
-
-```sh
-python3 - <<'PY'
-import os, importlib.util
-spec=importlib.util.spec_from_file_location('b','scripts/skills-briefing.py')
-b=importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
-bad=[]
-for s in sorted(os.listdir('skills')):
-    f=b.parse_front_matter(os.path.join('skills',s,'SKILL.md'))
-    if not f.get('name'): bad.append(f"{s}: no name")
-    elif f['name']!=s: bad.append(f"{s}: name '{f['name']}' != directory")
-    if not f.get('description'): bad.append(f"{s}: no description")
-print(len(os.listdir('skills')), "skills;", bad or "no issues")
-PY
-```
-Expect `30 skills; no issues`
-
-**2. Briefing**
-
-```sh
-CLAUDE_SKILLS_DIR=./skills python3 scripts/skills-briefing.py \
-  | python3 -c 'import json,sys; print(json.load(sys.stdin)["hookSpecificOutput"]["additionalContext"])'
-```
-Expect 13 plain entries, 17 `/`-prefixed.
-
-**3. `synced/` survives — the regression that matters most**
-
-```sh
-export TESTHOME=$(mktemp -d); mkdir -p $TESTHOME/.claude/skills/synced/xlsx
-echo x > $TESTHOME/.claude/skills/synced/xlsx/SKILL.md
-curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/bootstrap-env.sh | HOME=$TESTHOME bash
-[ -f $TESTHOME/.claude/skills/synced/xlsx/SKILL.md ] && echo "INTACT" || echo "REGRESSION"
-rm -rf $TESTHOME
-```
-Expect `INTACT`
-
-**4. Outage resilience**
-
-```sh
-export TESTHOME=$(mktemp -d)
-curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/bootstrap-env.sh | HOME=$TESTHOME bash
-sed -i 's|REPO_URL=.*|REPO_URL="/nonexistent/repo.git"|' $TESTHOME/.claude/install-skills.sh
-HOME=$TESTHOME CLAUDE_CODE_REMOTE=true bash $TESTHOME/.claude/session-start.sh 2>&1 >/dev/null
-ls $TESTHOME/.claude/skills | wc -l
-rm -rf $TESTHOME
-```
-Expect `install failed; continuing…` on stderr, exit 0, and **30** skills still present.
-
-**5. The real test — a fresh session**
-
-Type `/ask-matt` and ask for something only a synced skill answers ("I need to
-make a spreadsheet"). Expect `xlsx` named. If it says no skill covers it, check
-`ls ~/.claude/skills` for `synced/` before assuming the router is at fault.
-
----
-
-## Caveats — not bugs
-
-- **Containers created before `d0076ac` have no manifest**, so the new
-  installer's first run deletes nothing stale. Self-corrects after one cycle.
-- **The briefing tracks `main`**, since `install-skills.sh` clones it. A skill on
-  a branch reaches no session until merged.
-- **`~/.claude/skills` is a mirror.** Author skills in `skills/` in this repo.
-  Other tools' subdirectories (`synced/`) are now safe; your own loose files
-  there are not tracked and will simply be ignored.
-- **`handoff` is protected.** It is the only skill with a local edit — store the
-  handoff under `handoff/` and push to the working branch. Do not refresh it
-  from upstream without porting that forward.
-- **The account sync still carries `writing-great-skills`**, so it reappears
-  under `synced/` although the repo dropped it for `writing-for-agents`.
-  Harmless; remove it in claude.ai if it bothers you.
+- **7 skills exist in both `synced/` and this repo**, and two differ:
+  `grilling` and `handoff` (synced copies dated 2026-07-01 and 2026-07-15,
+  predating the upstream refresh). Which copy the harness prefers is **not
+  verified** — do not guess. The clean fix is deleting the 8 `custom` skills from
+  the claude.ai account, since this repo is their source of truth and syncs them
+  everywhere already. That leaves `synced/` holding only the Anthropic skills.
+  `doctor.sh` flags these.
+- **`writing-great-skills` still syncs from the account** although the repo
+  dropped it for `writing-for-agents`.
+- **A foreign skill can have `name` ≠ directory** — the environment's
+  `session-start-hook` directory declares `name: startup-hook-skill`, and the
+  briefing uses the `name` field. Harmless, but explains a mismatch.
+- **Containers created before the installer fix have no manifest**, so its first
+  run deletes nothing stale. Self-corrects after one cycle.
+- **The briefing tracks `main`** — a skill on a branch reaches no session until
+  merged.
+- **`handoff` is protected.** It is the only skill with a local edit (store the
+  handoff under `handoff/`, push to the working branch). Do not refresh it from
+  upstream without porting that forward.
 - **`loop-me` and `claude-handoff`** come from upstream's `in-progress` bucket,
   which may change or vanish without warning.
 - **`writing-great-skills`'s 181-line `GLOSSARY.md`** was not carried forward —
@@ -238,11 +202,11 @@ make a spreadsheet"). Expect `xlsx` named. If it says no skill covers it, check
 
 ---
 
-## Setup for the human — one action
+## Setup for the human
 
-Merging covers sessions on this repo. For **every other repo**, paste into
-**Claude Code on the web → environment settings → setup script**, once per
-environment:
+Sessions on this repo are covered by the committed `.claude/settings.json`. For
+**every other repo**, paste into **Claude Code on the web → environment settings
+→ setup script**, once per environment:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts/bootstrap-env.sh | bash
@@ -250,8 +214,8 @@ curl -fsSL https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts
 
 ## Open, if wanted
 
-- 8 upstream skills deliberately not taken: `writing-fragments`,
-  `writing-shape`, `writing-beats`, `setup-ts-deep-modules` (in-progress);
+- 8 upstream skills deliberately not taken: `writing-fragments`, `writing-shape`,
+  `writing-beats`, `setup-ts-deep-modules` (in-progress);
   `git-guardrails-claude-code`, `setup-pre-commit`, `migrate-to-shoehorn`,
   `scaffold-exercises` (misc, tied to their toolchain).
 - Generating the README skill list from front matter so it stops drifting.
