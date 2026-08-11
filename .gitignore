@@ -8,3 +8,7 @@ desktop.ini
 *~
 .vscode/
 .idea/
+
+# python
+__pycache__/
+*.pyc
