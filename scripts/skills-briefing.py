@@ -114,7 +114,13 @@ def collect(skills_dir):
             continue
         fields = parse_front_matter(skill_md)
         name = fields.get(NAME) or entry
-        description = first_sentence(fields.get(DESCRIPTION, ""))
+        # Keep the full description here; render() decides how much to show.
+        # The two buckets differ: a model-invokable skill's full description is
+        # already in the agent's Skill listing, so the roster only needs enough
+        # to jog recall. A user-invoked skill appears nowhere else at all, so
+        # trimming its description destroys the only trigger information the
+        # agent will ever have about it.
+        description = " ".join(fields.get(DESCRIPTION, "").split())
         bucket = user_invoked if is_truthy(fields.get(DISABLE, "")) else model_invokable
         bucket.append((name, description))
     return model_invokable, user_invoked
@@ -141,7 +147,9 @@ def render(model_invokable, user_invoked):
             "",
         ]
         out += [
-            f"- `{name}` — {description}" if description else f"- `{name}`"
+            f"- `{name}` — {first_sentence(description)}"
+            if description
+            else f"- `{name}`"
             for name, description in model_invokable
         ]
         out.append("")
@@ -154,13 +162,15 @@ def render(model_invokable, user_invoked):
             "them from your Skill listing and you have no way to discover them "
             "mid-session. **This section is the only place you learn they "
             "exist.** Never start one on your own initiative. Recommending them "
-            "is the whole point of listing them: when one clearly fits what the "
-            "user is doing, name it in a sentence and let them decide — e.g. "
-            "\"`/to-tickets` would break this plan into tickets if you want "
-            "it.\" A fitting moment is a real one, so do not stay silent out of "
-            "caution; equally, do not pad replies with suggestions. At most one "
-            "per reply, and only when running it would beat you just doing the "
-            "work.",
+            "is the whole point of listing them, and the user has asked "
+            "explicitly to hear about any skill that fits: when one does, name "
+            "it in a sentence and let them decide — e.g. \"`/to-tickets` would "
+            "break this plan into tickets if you want it.\" Surface every "
+            "skill that genuinely fits the moment, not just the best one, and "
+            "never withhold one for fear of saying too much. Genuine fit is "
+            "still the gate: a skill that merely sounds related to the topic "
+            "does not fit, and a bare list of everything available helps "
+            "nobody.",
             "",
         ]
         out += [
