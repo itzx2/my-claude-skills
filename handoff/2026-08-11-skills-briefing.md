@@ -36,12 +36,11 @@ session on some other repo.
 is the installer or whatever is reading the roster. That distinction was the
 whole difficulty the first time this went wrong.
 
-**A clean doctor report is not yet a clean bill of health.** It does not check
-the manifest entry count, and a corrupt manifest is the symptom of the live hook
-race in Known issues. Until that check exists, run
-`wc -l < ~/.claude/.my-claude-skills.manifest` alongside it and expect it to
-equal the number of directories in `skills/` (30 today). Anything else means the
-install raced.
+One gap: the doctor does not check the manifest entry count, so it reports all
+clear on a container whose manifest was corrupted by the hook race in Known
+issues. That race is low-severity and fails safe, so this is worth knowing rather
+than worrying about — `wc -l < ~/.claude/.my-claude-skills.manifest` should equal
+the number of directories in `skills/` (30 today).
 
 It is deliberately **not** wired into the session-start hook. The briefing
 already names the full roster every session, so a short or wrong briefing is the
@@ -225,8 +224,9 @@ and `synced/` already deleted — so a pass here rules out both.
 ## Known issues
 
 - **Two SessionStart hooks race on this repo, and the install is not
-  concurrency-safe.** Found 2026-08-11, unfixed. This is the live defect; start
-  here.
+  concurrency-safe.** Found 2026-08-11, unfixed. **Low severity — read the
+  blast radius below before treating it as urgent.** Nothing is broken today:
+  every skill installs and the briefing works.
 
   Sessions **on this repo** register the hook twice: once user-level in
   `~/.claude/settings.json` (`bash /root/.claude/session-start.sh`, written by
@@ -249,11 +249,27 @@ and `synced/` already deleted — so a pass here rules out both.
   | `cp: cannot create directory '…/iota': File exists` → **install exits 1** | one process `rm -rf`s a skill dir while the other is mid-`cp` into it |
   | `mv: cannot stat '….tmp'` → **install exits 1** | the other process already claimed the temp |
 
-  This container is in the 1-entry state right now. The damage is that the
-  "drop skills removed upstream" loop reads the manifest, so it now considers a
-  single skill: **upstream removals silently stop propagating**, which is the one
-  job the manifest exists to do. Test 8 below passed on a clean container and
-  would fail here.
+  This container is in the 1-entry state right now.
+
+  **Blast radius, and why this is not urgent.** The corruption fails safe. Every
+  manifest entry is a basename of a directory in the freshly cloned `skills/`,
+  and the deletion loop fires only for entries **absent** from that clone. So a
+  raced manifest — truncated, duplicated, any subset — produces *zero*
+  deletions. The installer cannot remove a skill it should have kept; it can only
+  fail to remove one it should have dropped. The failure direction is always
+  "deletes less."
+
+  So the whole practical symptom is: remove a skill from `skills/` upstream and a
+  stale copy may linger in `~/.claude/skills` instead of disappearing. Test 8
+  below passed on a clean container and would fail here. No skill is ever lost,
+  no session is left without a briefing, and an install that exits 1 degrades to
+  "skills weren't refreshed this session" — the ones on disk are already correct.
+
+  Confined to **this repo**, too. Every other repo carries only the bootstrap
+  hook, runs one install, and never races.
+
+  The real everyday cost is smaller and more constant: **both hooks emit a
+  briefing**, so every session here pays the ~1315-token payload twice.
 
   It also hides itself. `session-start.sh` runs the install as
   `… || log "install failed; continuing"`, so a raced, exit-1 install degrades to
