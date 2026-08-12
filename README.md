@@ -128,8 +128,13 @@ list further down this README is maintained by hand.
 
 ## Skills
 
-30 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+38 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
+Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills) — marked ⬇ below. They are design-engineering skills (animation and interface craft) rather than personal ones, kept here so they install and brief through the same path as everything else. See [Vendored skills](#vendored-skills) for what was changed on the way in.
+
+- **animate** ⬇ — build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits.
+- **animation-vocabulary** ⬇ — reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in).
+- **apple-design** ⬇ — Apple's approach to interface design and fluid, physical motion, translated for the web.
 - **/ask-matt** — ask which skill or flow fits your situation.
 - **/batch-grill-me** — a relentless interview that asks every frontier question at once, round by round.
 - **/claude-handoff** — hand the current conversation off to a fresh background agent that picks up the work immediately.
@@ -137,17 +142,22 @@ list further down this README is maintained by hand.
 - **codebase-design** — shared vocabulary for designing deep modules.
 - **diagnosing-bugs** — diagnosis loop for hard bugs and performance regressions.
 - **domain-modeling** — build and sharpen a project's domain model.
+- **emil-design-eng** ⬇ — Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.
+- **find-animation-opportunities** ⬇ — search a codebase or UI for places that don't animate but should, and reject everything that shouldn't.
 - **/grill-me** — a relentless interview to sharpen a plan or design.
 - **/grill-with-docs** — a relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go.
 - **grilling** — grill the user relentlessly about a plan, decision, or idea.
 - **/handoff** — compact the current conversation into a handoff document for another agent to pick up.
 - **/implement** — implement a piece of work based on a spec or set of tickets.
+- **improve-animations** ⬇ — survey a codebase's animation and motion code, then produce a prioritized audit and self-contained implementation plans for other agents (or cheaper models) to execute.
 - **/improve-codebase-architecture** — scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
 - **karpathy-guidelines** — behavioral guidelines to reduce common LLM coding mistakes.
 - **/loop-me** — grill me about specs for the workflows I want to build, within this workspace.
+- **pick-ui-library** ⬇ — pick the right library for a given frontend task from a curated, opinionated list — toasts, UI primitives, command menus, charts, virtualization, drag and drop, animated numbers, OTP inputs, state, styling.
 - **prototype** — build a throwaway prototype to answer a design question.
 - **research** — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
 - **resolving-merge-conflicts** — use when you need to resolve an in-progress git merge/rebase conflict.
+- **/review-animations** ⬇ — review animation and motion code against a high craft bar; default to flagging, approval is earned.
 - **scrutinize** — outsider-perspective end-to-end review of a plan, PR, or code change.
 - **/setup-matt-pocock-skills** — configure this repo for the engineering skills — set up its issue tracker, triage label vocabulary, and domain doc layout.
 - **tdd** — test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
@@ -160,3 +170,47 @@ list further down this README is maintained by hand.
 - **/wayfinder** — plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.
 - **wizard** — generate an interactive bash wizard that walks a human through steps only they can perform.
 - **writing-for-agents** — writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.
+
+## Vendored skills
+
+The ⬇ skills above are copied from [emilkowalski/skills](https://github.com/emilkowalski/skills)
+(vendored at upstream commit `78761e1`, 2026-08-10) rather than installed via
+`npx skills add`, so they ride the same install-and-brief path as everything
+else here.
+
+**Not taken:** `prototype`, `ask-sonner`. `prototype` would have collided with
+the personal skill of the same name.
+
+**Changed on the way in:** `pick-ui-library`'s front matter only. Upstream it
+sets `disable-model-invocation: true`, which made it invisible to the agent —
+and left `animate`'s "stop and invoke `pick-ui-library`" pointing at something
+the agent could never reach. Since the skill exists precisely to catch an agent
+about to hand-roll a dropdown or install an abandoned package, it can't do that
+job if only a human can start it. The flag is dropped here, so the pointer in
+`animate` resolves.
+
+Its description changed with the flag, because the old one ended "Only runs
+when explicitly invoked; it does not trigger on its own" — an instruction that
+would have suppressed the very invocation the flag removal enables. It now
+carries real trigger conditions instead: before adding a frontend dependency,
+and before hand-rolling a toast, dropdown, dialog, command palette, or
+virtualized list.
+
+Every other file is byte-identical to upstream, `animate` included.
+
+**Known upstream issues, carried as-is.** Left unpatched deliberately, so
+re-pulling from upstream stays a clean copy rather than a merge:
+
+- The `prefers-reduced-motion` snippet in `emil-design-eng`, `animate`,
+  `review-animations/STANDARDS.md`, and `improve-animations/AUDIT.md` *adds* an
+  animation instead of cancelling the transform it's meant to replace. Copying
+  it verbatim ships a reduced-motion block that doesn't reduce motion.
+  `apple-design` has the correct form (`transform: none !important`).
+- `improve-animations`' Hard Rules ("never modify source code", "read-only
+  analysis only") contradict its own `execute <plan>` invocation variant.
+- `emil-design-eng` and `apple-design` disagree on the default spring
+  (`bounce: 0.2` vs `bounce: 0`).
+- `review-animations` never defines what "the diff" is, so its scope varies run
+  to run.
+- The rule catalog (frequency table, duration table, easing tokens) is
+  duplicated across 5–7 files with no source of truth.
