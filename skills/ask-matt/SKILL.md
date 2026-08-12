@@ -73,12 +73,13 @@ A starting situation that generates work, then merges onto the main flow.
 
 ## Interface craft
 
-Seven vendored skills covering animation and interface design. Their descriptions route between them unusually well, so match on those — what follows is only what the descriptions leave out.
+Eight vendored skills covering animation and interface design. Their descriptions route between them unusually well, so match on those — what follows is only what the descriptions leave out.
 
 - **Four do the work, split by verb.** **`/animate`** writes new motion; **`/review-animations`** judges motion in a diff; **`/improve-animations`** audits a whole repo and emits plans; **`/find-animation-opportunities`** finds what is *missing*, and is required to report what it deliberately rejected — that rejection list is the reason to reach for it over a general "make this nicer". When two seem to fit, the verb decides.
 - **They chain onto the main flow at the same joints the engineering skills do.** `/find-animation-opportunities` → `/improve-animations plan <suggestion>` turns one row into a self-contained plan; `/improve-animations` writes plans into `plans/` for **`/implement`** to execute. `/animate` then `/review-animations` is the write-then-check pair, the same shape as `/implement` closing with `/code-review`.
 - **`/emil-design-eng`** is the superset the other four were carved out of, and its description carries no trigger — so it fires as a catch-all or not at all. Prefer whichever of the four matches the verb; reach for it only when the question is philosophy rather than a task.
 - **`/apple-design`** and **`/animation-vocabulary`** are references, not flows. The first for gesture physics, springs, momentum, materials, and typography; the second to put a name to an effect ("that iOS pull-and-snap" → *rubber-banding*) before asking anyone to build it. Both sit underneath the four the way `/codebase-design` sits under `/tdd`.
+- **`/pick-ui-library`** is the dependency question, not the motion one — a curated list of trusted picks by task. `/animate` hands off to it the moment a request turns out to need a *component* (a toast, a drawer, a command menu) rather than an animation, so it fires mid-flow rather than being asked for. Reach for it directly before adding any frontend dependency.
 - **Where they contradict each other, say so instead of picking silently.** `/apple-design` defaults springs to no bounce and reserves bounce for gestures that carried momentum; the other four give `bounce: 0.2` as the default. See the README's *Vendored skills* section for the rest.
 
 ## Vocabulary underneath

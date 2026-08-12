@@ -128,9 +128,9 @@ list further down this README is maintained by hand.
 
 ## Skills
 
-37 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+38 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
-Seven of them are vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills) — marked ⬇ below. They are design-engineering skills (animation and interface craft) rather than personal ones, kept here so they install and brief through the same path as everything else. See [Vendored skills](#vendored-skills) for what was changed on the way in.
+Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills) — marked ⬇ below. They are design-engineering skills (animation and interface craft) rather than personal ones, kept here so they install and brief through the same path as everything else. See [Vendored skills](#vendored-skills) for what was changed on the way in.
 
 - **animate** ⬇ — build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits.
 - **animation-vocabulary** ⬇ — reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in).
@@ -153,6 +153,7 @@ Seven of them are vendored from [emilkowalski/skills](https://github.com/emilkow
 - **/improve-codebase-architecture** — scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
 - **karpathy-guidelines** — behavioral guidelines to reduce common LLM coding mistakes.
 - **/loop-me** — grill me about specs for the workflows I want to build, within this workspace.
+- **pick-ui-library** ⬇ — pick the right library for a given frontend task from a curated, opinionated list — toasts, UI primitives, command menus, charts, virtualization, drag and drop, animated numbers, OTP inputs, state, styling.
 - **prototype** — build a throwaway prototype to answer a design question.
 - **research** — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
 - **resolving-merge-conflicts** — use when you need to resolve an in-progress git merge/rebase conflict.
@@ -177,15 +178,25 @@ The ⬇ skills above are copied from [emilkowalski/skills](https://github.com/em
 `npx skills add`, so they ride the same install-and-brief path as everything
 else here.
 
-**Not taken:** `pick-ui-library`, `prototype`, `ask-sonner`. `prototype` would
-have collided with the personal skill of the same name.
+**Not taken:** `prototype`, `ask-sonner`. `prototype` would have collided with
+the personal skill of the same name.
 
-**Changed on the way in:** one line. `animate` told the agent to "stop and
-invoke `pick-ui-library`", which isn't installed here — and upstream that
-pointer was already dead, since `pick-ui-library` sets
-`disable-model-invocation: true` and so is invisible to the agent anyway. It
-now names the primitives directly (Base UI, cmdk, Sonner). Everything else is
-byte-identical to upstream.
+**Changed on the way in:** `pick-ui-library`'s front matter only. Upstream it
+sets `disable-model-invocation: true`, which made it invisible to the agent —
+and left `animate`'s "stop and invoke `pick-ui-library`" pointing at something
+the agent could never reach. Since the skill exists precisely to catch an agent
+about to hand-roll a dropdown or install an abandoned package, it can't do that
+job if only a human can start it. The flag is dropped here, so the pointer in
+`animate` resolves.
+
+Its description changed with the flag, because the old one ended "Only runs
+when explicitly invoked; it does not trigger on its own" — an instruction that
+would have suppressed the very invocation the flag removal enables. It now
+carries real trigger conditions instead: before adding a frontend dependency,
+and before hand-rolling a toast, dropdown, dialog, command palette, or
+virtualized list.
+
+Every other file is byte-identical to upstream, `animate` included.
 
 **Known upstream issues, carried as-is.** Left unpatched deliberately, so
 re-pulling from upstream stays a clean copy rather than a merge:
