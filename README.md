@@ -4,26 +4,42 @@ Personal Claude Code skills, synced across devices.
 
 ## Install on a new machine
 
-Skills live under the `skills/` folder in this repo, so clone the repo
-elsewhere and symlink that folder into `~/.claude/skills`:
+This repo is a Claude Code plugin marketplace. Install it:
 
 ```sh
-git clone https://github.com/itzx2/my-claude-skills.git ~/my-claude-skills
-ln -s ~/my-claude-skills/skills ~/.claude/skills
+claude plugin marketplace add https://github.com/itzx2/my-claude-skills.git
+claude plugin install my-claude-skills@my-claude-skills
 ```
 
-On Windows (PowerShell, run as Administrator):
+That installs at **user scope**, so the skills load in every session in every
+directory, and the SessionStart briefing (below) ships with it. Restart Claude
+Code afterwards — skills are enumerated once, at session start.
 
-```powershell
-git clone https://github.com/itzx2/my-claude-skills.git $env:USERPROFILE\my-claude-skills
-New-Item -ItemType SymbolicLink -Path $env:USERPROFILE\.claude\skills -Target $env:USERPROFILE\my-claude-skills\skills
-```
+No clone, no symlink, no Administrator shell on Windows. Update later with
+`claude plugin update my-claude-skills`.
 
-Restart Claude Code after cloning.
+### Invocation names are namespaced
+
+Claude Code namespaces plugin-provided skills, so anything installed this way is
+invoked as **`/my-claude-skills:<name>`** — not `/<name>`. The bare form applies
+only to loose skills sitting directly in `~/.claude/skills`.
+
+The older symlink install (clone elsewhere, `ln -s` the `skills/` folder into
+`~/.claude/skills`) still works and keeps the bare names, but needs an
+Administrator shell on Windows and does not carry the briefing hook. Prefer the
+plugin.
 
 ## Install on a Claude Code cloud/remote environment
 
-`scripts/session-start.sh` is the entry point. It does two things:
+**Prefer the plugin here too.** If `claude plugin install` is available in the
+container, running the two commands from [Install on a new
+machine](#install-on-a-new-machine) in the setup script is the whole story: it
+brings the skills *and* the briefing hook, with nothing to merge into
+`~/.claude/settings.json`. The rest of this section is the fallback for
+environments where that isn't available.
+
+`scripts/session-start.sh` is the entry point for that fallback. It does two
+things:
 
 1. Mirrors `skills/` into `~/.claude/skills` (remote environments only — on a
    local machine that path is the symlink created above, and reinstalling
@@ -36,15 +52,27 @@ Both steps need nothing but outbound HTTPS — no GitHub App / repo-source
 access — so this works even in environments that don't have this repo
 attached as a source.
 
+Note that this path installs skills *bare* into `~/.claude/skills`, so they are
+invoked as `/<name>` with no plugin prefix. `scripts/skills-briefing.py` emits
+bare names to match, which is correct for this scenario and wrong for the plugin
+one — that is why the plugin carries its own briefing in `hooks/briefing.js`
+rather than reusing this script.
+
 ### Scope: which sessions get this
 
 | Where it's registered | Covers |
 | --- | --- |
-| `.claude/settings.json` (in this repo, committed) | sessions opened on **this repo** only |
+| the plugin's own `hooks/hooks.json` | **every** session wherever the plugin is installed — the path this repo now uses |
 | `~/.claude/settings.json` (user scope) | **every** session in that environment, whichever repo is open |
 
-The repo-local file is already committed, so this repo needs nothing. For
-everything else you need the user-scope registration — and in a cloud
+Installing the plugin registers the briefing hook by itself, so there is nothing
+further to do on a machine that has it.
+
+The repo-local `.claude/settings.json` that used to register this hook has been
+removed: with the plugin shipping its own, a session opened on this repo fired
+both and emitted two conflicting briefings.
+
+For the fallback path you need the user-scope registration — and in a cloud
 container that is the catch: `~/.claude` is rebuilt from the image on every
 provision, so anything written there by hand is gone next time.
 
@@ -103,32 +131,60 @@ from the agent completely — it can't see it, can't call it, and can't suggest
 it, because it has no idea the skill exists. Roughly half the skills here are
 in that group.
 
-`scripts/skills-briefing.py` closes that gap. It reads the front matter of
-every skill in `~/.claude/skills` and emits a `SessionStart`
-`additionalContext` payload splitting them into:
+`hooks/briefing.js` closes that gap. It ships **inside the plugin** and
+registers itself via `hooks/hooks.json`, so installing the plugin is the only
+setup step — there is no `~/.claude/settings.json` to edit and no repo-relative
+path to get wrong.
 
-- **Model-invokable** — a compact roster, as a recall aid, with a nudge to
-  reach for a matching skill instead of improvising.
-- **User-invoked only** — name and description for each, plus instructions to
-  recommend rather than invoke them (at most one per reply).
+At session start it walks what is actually installed:
 
-The payload also sets `reloadSkills: true`, so a session picks up skills the
-same hook installed moments earlier instead of running with a stale list.
+- every **enabled** plugin's `skills/` *and* `commands/` directories, with paths
+  read from `~/.claude/plugins/installed_plugins.json` and enabled state from
+  `~/.claude/settings.json`
+- `~/.claude/skills` and `~/.claude/commands` for loose personal ones
+
+then emits a `SessionStart` `additionalContext` payload splitting them into:
+
+- **Model-invocable** — a compact roster, as a recall aid, with a nudge to reach
+  for a matching skill instead of improvising.
+- **User-invoked only** — name and full description for each, plus instructions
+  to recommend rather than invoke them.
+
+Both directories matter: a plugin can ship behaviour as a skill (a directory
+with `SKILL.md`) or a command (a single `.md` file), and Claude Code lists both.
+Reading only `skills/` silently drops whole plugins.
+
+Each entry carries its exact invocation, `plugin:` prefix included, since that
+is the one thing the agent cannot reconstruct on its own.
 
 Run it standalone to see what the agent will be told:
 
 ```sh
-CLAUDE_SKILLS_DIR=./skills python3 scripts/skills-briefing.py \
-  | python3 -c 'import json,sys; print(json.load(sys.stdin)["hookSpecificOutput"]["additionalContext"])'
+node hooks/briefing.js \
+  | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).hookSpecificOutput.additionalContext))'
 ```
 
+**Why Node rather than bash + python.** On Windows `bash` frequently resolves to
+WSL — a different filesystem with a different `$HOME` — and `python3` to the
+Microsoft Store stub, so a shell-shimmed hook silently briefs nothing. Node is
+one binary that behaves identically everywhere Claude Code runs.
+
 The briefing is generated from front matter at session start, so adding,
-renaming, or reclassifying a skill needs no edit here — but note the skill
-list further down this README is maintained by hand.
+renaming, or reclassifying a skill needs no edit here — but note the skill list
+further down this README is maintained by hand.
+
+### Scope note
+
+The briefing sees local plugins only. Skills that arrive with the harness or
+from claude.ai-managed plugins never touch `~/.claude/plugins`, so they appear
+in the agent's Skill listing but not here. The two sources are complementary,
+which is why `ask-matt` reads both.
 
 ## Skills
 
 38 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+
+The leading `/` below is a **marker for that distinction, not the invocation**. Installed as a plugin, every name here is prefixed: `/my-claude-skills:to-spec`, `my-claude-skills:grilling`, and so on. Only the legacy symlink install leaves them bare.
 
 Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills) — marked ⬇ below. They are design-engineering skills (animation and interface craft) rather than personal ones, kept here so they install and brief through the same path as everything else. See [Vendored skills](#vendored-skills) for what was changed on the way in.
 
