@@ -122,6 +122,7 @@ Off the main flow. Each line carries what its description omits — reach for th
 - **`wizard`** — for steps only a **human** can take. Model-invoked, so the agent reaches for it on hitting a wall only you can pass. Where the agent could do it itself, it should.
 - **`/my-claude-skills:wait-what`** — the corrective for a message that didn't land, usable mid-conversation inside any other skill. It works after the fact; `/my-claude-skills:grill-with-docs` is the upfront cure, since a shared language agreed early stops the jargon arriving.
 - **`resolving-merge-conflicts`** — resolves by **intent** traced to each side's primary source rather than by picking lines, then finishes the operation. It never runs `--abort`.
+- **`/my-claude-skills:project-brain`** — writes the `AGENTS.md` router over a project and scaffolds the four layers beneath it: navigation, vocabulary, decisions, state. On a new project it runs **after** `/my-claude-skills:grill-with-docs`, never before — it routes to `CONTEXT.md` and the ADRs, so those have to exist for it to point at. It then writes standing rules into the router that keep the layers current through ordinary work, so re-run it only when the repo's *shape* changes: a new top-level directory, a layer moving home. Where `writing-for-agents` is the reference for how such a file should read, this is the procedure that produces one.
 - **`writing-for-agents`** — the reference for writing skills, `AGENTS.md`, and pointed-at docs. Consult it whenever you are editing any of them, including the skills in this map.
 
 ## Precondition
