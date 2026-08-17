@@ -182,7 +182,7 @@ which is why `ask-matt` reads both.
 
 ## Skills
 
-38 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+39 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
 The leading `/` below is a **marker for that distinction, not the invocation**. Installed as a plugin, every name here is prefixed: `/my-claude-skills:to-spec`, `my-claude-skills:grilling`, and so on. Only the legacy symlink install leaves them bare.
 
@@ -210,6 +210,7 @@ Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkow
 - **karpathy-guidelines** — behavioral guidelines to reduce common LLM coding mistakes.
 - **/loop-me** — grill me about specs for the workflows I want to build, within this workspace.
 - **pick-ui-library** ⬇ — pick the right library for a given frontend task from a curated, opinionated list — toasts, UI primitives, command menus, charts, virtualization, drag and drop, animated numbers, OTP inputs, state, styling.
+- **/project-brain** — scaffold a project's `AGENTS.md` router and domain model so any agent can orient cold.
 - **prototype** — build a throwaway prototype to answer a design question.
 - **research** — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
 - **resolving-merge-conflicts** — use when you need to resolve an in-progress git merge/rebase conflict.
