@@ -23,9 +23,14 @@ That is the roster. It supersedes every name below: a skill in the roster is ava
 
 ### Invocation names are namespaced
 
-Claude Code namespaces plugin-provided skills as **`plugin:skill`** and leaves loose personal skills bare. Everything in the map below ships in the **`my-claude-skills`** plugin, so it is invoked as `/my-claude-skills:<name>` — written out in full throughout. `/clear` and `/compact` are Claude Code built-ins and stay bare.
+Claude Code namespaces plugin-provided skills as **`plugin:skill`** and leaves loose personal skills bare. Everything in the map below ships in the **`my-claude-skills`** plugin, so nothing here is invoked by its bare name: a bare `/to-spec` no longer resolves.
 
-Take the exact string from the roster rather than reconstructing it: a bare `/to-spec` no longer resolves.
+The map writes each skill the way you will reach it:
+
+- **`/my-claude-skills:<name>`** — user-invoked. Only the human can start it, so the map shows the full string to type.
+- **`<name>`** — model-invocable. Written short for readability; you call it through `Skill` as `my-claude-skills:<name>`, and its full description is already in your Skill listing.
+
+`/clear` and `/compact` are Claude Code built-ins and stay bare. Where the two forms disagree, the roster wins — take the exact string from there rather than reconstructing it.
 
 ## 2. Match the situation against the whole roster
 
@@ -89,8 +94,6 @@ Eight vendored skills covering animation and interface design. Their description
 - **`pick-ui-library`** is the dependency question, not the motion one — a curated list of trusted picks by task. `animate` hands off to it the moment a request turns out to need a *component* (a toast, a drawer, a command menu) rather than an animation, so it fires mid-flow rather than being asked for. Reach for it directly before adding any frontend dependency.
 - **Where they contradict each other, say so instead of picking silently.** `apple-design` defaults springs to no bounce and reserves bounce for gestures that carried momentum; the other four give `bounce: 0.2` as the default. See the README's *Vendored skills* section for the rest.
 
-Most of this family is model-invocable, so it already appears in your Skill listing under the `my-claude-skills:` prefix; only `/my-claude-skills:review-animations` is user-invoked.
-
 ## Vocabulary underneath
 
 Two model-invoked references running *beneath* the other skills, each the single source of truth for its vocabulary. Reach for them when the **words**, not the process, are the problem.
@@ -104,7 +107,8 @@ A **phase** is a chunk of work inside a session — the grilling, the implementa
 
 - **Continue** — stay put. Costs nothing, loses nothing.
 - **`/clear`** — empty the window, when nothing here matters to what's next.
-- **`/my-claude-skills:handoff`** — write a portable markdown file. Narrow: a **new harness**, a **new directory**, a **colleague**, or forking a side task **mid-phase**. What it buys is portability.
+- **`/my-claude-skills:handoff`** — write a portable markdown file. Narrow: a **new harness**, a **new directory**, a **colleague**, or forking a side task **mid-phase**. What it buys is portability. It fills a fixed template and is done only when a fresh agent could take the next action from the file alone.
+- **`/my-claude-skills:claude-handoff`** — the same compaction, but it *launches* rather than saves: the summary becomes a background agent's prompt via `claude --bg`, running immediately in the current directory. Pick it over `handoff` when the next session should start now and unattended; pick `handoff` when a human, another harness, or a later you will pick the work up.
 - **Subagent** — send a tightly-scoped task to its own window and get a report back.
 - **`/compact`** — compress this context and seed a fresh session with it. The **default**, at the bottom of the tree rather than the first reach.
 
@@ -115,12 +119,17 @@ Read [PHASE-BOUNDARIES.md](PHASE-BOUNDARIES.md) for the ordered tree — the fiv
 Off the main flow. Each line carries what its description omits — reach for the roster's description for the rest.
 
 - **`/my-claude-skills:grill-me`** — the same interview as `/my-claude-skills:grill-with-docs` but **stateless**. For when there is no repo under the work. In a working directory, `grill-with-docs` is strictly better.
-- **`grilling`** — the interview primitive: rounds, the frontier, facts are the agent's job and decisions are yours. `/my-claude-skills:triage`, `/my-claude-skills:wayfinder` and `/my-claude-skills:improve-codebase-architecture` all run it internally. Reach for it directly to get the interview with no wrapper. Model-invocable, so it is in your Skill listing as `my-claude-skills:grilling`.
+- **`/my-claude-skills:batch-grill-me`** — `grill-me` with the rounds collapsed: every frontier question at once, round by round, instead of one narrow frontier at a time. Reach for it when you already hold the whole design in your head and want the interrogation over in one pass; the round-by-round version is better when each answer genuinely reshapes the next question.
+- **`/my-claude-skills:loop-me`** — grilling aimed specifically at the **specs for workflows you want to build**, inside this workspace. Where `grill-with-docs` sharpens one idea, this one is for repeatedly turning "I want a thing that does X" into a spec you can hand to `/my-claude-skills:to-spec`.
+- **`grilling`** — the interview primitive: rounds, the frontier, facts are the agent's job and decisions are yours. `/my-claude-skills:triage`, `/my-claude-skills:wayfinder` and `/my-claude-skills:improve-codebase-architecture` all run it internally. Reach for it directly to get the interview with no wrapper.
 - **`prototype`** — throwaway is a constraint on how the code is written, not a promise to destroy it: the answer folds into the real code, and the prototype is kept as a **primary source** on a `prototype/<name>` branch off main, pointed at from the implementation issue.
 - **`research`** — the cited file it leaves is material to take *into* `/my-claude-skills:grill-with-docs`. Research feeds the thinking; it doesn't replace it.
 - **`/my-claude-skills:to-questionnaire`** — the inverse of `/my-claude-skills:grill-me`: it interviews you about the **send** — who it's going to, what you need back — and aims the questions at the gap. What returns is material for `/my-claude-skills:grill-with-docs` or `/my-claude-skills:to-spec`.
-- **`wizard`** — for steps only a **human** can take. Model-invoked, so the agent reaches for it on hitting a wall only you can pass. Where the agent could do it itself, it should.
+- **`wizard`** — for steps only a **human** can take. The agent reaches for it on hitting a wall only you can pass; where it could do the step itself, it should.
 - **`/my-claude-skills:wait-what`** — the corrective for a message that didn't land, usable mid-conversation inside any other skill. It works after the fact; `/my-claude-skills:grill-with-docs` is the upfront cure, since a shared language agreed early stops the jargon arriving.
+- **`scrutinize`** — the outsider read on a plan, PR, or change: it questions the *intent* first — would something simpler reach the same goal — then traces the real code path rather than the diff to check the change does what it claims. `code-review` asks "does this match our standards and the spec?"; scrutinize asks "should this exist in this shape at all?" Reach for both on anything hard to reverse.
+- **`karpathy-guidelines`** — the behavioural floor for writing code: surgical changes, surfaced assumptions, verifiable success criteria, no overcomplication. It runs *underneath* `tdd` and `/my-claude-skills:implement` rather than instead of them, and is worth naming explicitly when a session has been sprawling.
+- **`/my-claude-skills:teach`** — for when the goal is *you* understanding something, not the repo changing. Use it when you would otherwise accept a working diff you could not defend.
 - **`resolving-merge-conflicts`** — resolves by **intent** traced to each side's primary source rather than by picking lines, then finishes the operation. It never runs `--abort`.
 - **`/my-claude-skills:project-brain`** — writes the `AGENTS.md` router over a project and scaffolds the four layers beneath it: navigation, vocabulary, decisions, state. On a new project it runs **after** `/my-claude-skills:grill-with-docs`, never before — it routes to `CONTEXT.md` and the ADRs, so those have to exist for it to point at. It then writes standing rules into the router that keep the layers current through ordinary work, so re-run it only when the repo's *shape* changes: a new top-level directory, a layer moving home. Where `writing-for-agents` is the reference for how such a file should read, this is the procedure that produces one.
 - **`writing-for-agents`** — the reference for writing skills, `AGENTS.md`, and pointed-at docs. Consult it whenever you are editing any of them, including the skills in this map.
