@@ -91,6 +91,8 @@ claude plugin list
 ```
 
 Done when `plugin list` shows **every** plugin from `enabledPlugins`, each once.
+In this repo `bash scripts/verify-install.sh` answers the same question with an
+exit code, which is the form an agent can branch on.
 Extract the default branch rather than cloning locally: a local clone follows
 your stale local ref and silently tests an old hook.
 

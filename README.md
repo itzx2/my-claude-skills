@@ -135,6 +135,16 @@ At session start it walks what is actually installed:
   read from `~/.claude/plugins/installed_plugins.json` and enabled state from
   `~/.claude/settings.json`
 - `~/.claude/skills` and `~/.claude/commands` for loose personal ones
+- `$CLAUDE_PROJECT_DIR/.claude/skills` and `commands` for the open repo's own,
+  listed under their own heading since they vanish when another repo is opened
+
+The skills walk **recurses**, because a skills directory can hold container
+directories rather than skills — `~/.claude/skills/synced/` groups the
+account-synced ones. A directory holding `SKILL.md` is a skill and is never
+descended into; anything else is a container and is walked. Nesting never
+contributes to the name: `synced/xlsx` is invoked as `xlsx`, since only a
+plugin's identity creates a prefix. (Commands are the deliberate exception —
+`commands/foo/bar.md` really is `foo:bar`.)
 
 then emits a `SessionStart` `additionalContext` payload splitting them into:
 
@@ -150,7 +160,36 @@ Reading only `skills/` silently drops whole plugins.
 Each entry carries its exact invocation, `plugin:` prefix included, since that
 is the one thing the agent cannot reconstruct on its own.
 
-Run it standalone to see what the agent will be told:
+A name that resolves from two places at once — the classic being a leftover
+`~/.claude/skills` symlink alongside the same skills installed as a plugin — is
+listed under **⚠ Installed more than once** rather than deduped. Both
+invocations really do work, so dropping one would make the roster lie; but it
+almost always means a half-finished migration, and this briefing is the only
+thing positioned to notice.
+
+The roster also states what it *cannot* see. Skills supplied by the harness
+rather than installed on disk can't be enumerated by any hook, so the briefing
+says so and points at the Skill tool listing for them, instead of implying that
+an absent name means an absent skill.
+
+Two scripts check it, and both exit non-zero on failure:
+
+```sh
+bash scripts/test-briefing.sh    # fixture tests for the walk itself
+bash scripts/verify-install.sh   # is every skill in skills/ reachable right now?
+```
+
+`test-briefing.sh` builds throwaway directories — a nested container, a plugin
+with skills and commands, a disabled plugin, a project dir, a deliberate
+duplicate — and asserts the rendered roster. Every bug it guards against is a
+silent one: a wrong walk still emits a plausible roster, just short. That is how
+the `synced/` gap survived unnoticed.
+
+`verify-install.sh` is the machine answer to "did the install work?", for use
+after the session-start hook in a fresh container. It accepts either installed
+shape, plugin-namespaced or bare.
+
+Run the briefing standalone to see what the agent will be told:
 
 ```sh
 node hooks/briefing.js \
