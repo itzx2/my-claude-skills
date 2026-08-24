@@ -5,12 +5,31 @@ argument-hint: "What will the next session be used for?"
 disable-model-invocation: true
 ---
 
-Write a handoff document so a fresh agent can continue this work with **no access to this conversation**.
+Write a handoff document that hands **this** session to a **new working agent**
+— one that has not seen this conversation and never will.
 
 That agent has your files and your git history. What it lacks is everything that
 only ever existed in the conversation: why a path was abandoned, which decision
 is settled, what you were about to do next. Carry that; leave the rest where it
 already lives.
+
+## A handoff is a snapshot
+
+One session, one file, **written once**.
+
+A handoff is fixed at the moment it is written. When the work moves on, write a
+**new** handoff — new file, new date-slug — and leave every earlier one exactly
+as it was. Nothing writes back into one: the receiving agent reads it, works
+from it, and records its own state in its own handoff when its turn ends.
+
+So `handoff/` is an append-only record of what was known at each pass, not a
+status file that tracks the work. Two things follow, and both matter to whoever
+reads the folder next:
+
+- **The newest handoff is the live brief.** Every older one is history.
+- **An older handoff describes what was true when it was written**, not what is
+  true now. Treat a stale one as a record of a decision, never as current state
+  — check the repo for that.
 
 ## Steps
 
@@ -67,3 +86,6 @@ Skill names the next agent should reach for, one line each on why.
 
 A fresh agent, given only this file, can name the next action and take it —
 without asking you a question, and without reading this conversation.
+
+Once pushed, the file is final. Anything you would have added to it belongs in
+the next handoff instead.
