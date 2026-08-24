@@ -12,7 +12,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 git clone --depth 1 --filter=blob:none --sparse "$REPO_URL" "$TMP_DIR" >/dev/null 2>&1
-git -C "$TMP_DIR" sparse-checkout set skills scripts >/dev/null 2>&1
+git -C "$TMP_DIR" sparse-checkout set skills scripts hooks >/dev/null 2>&1
 
 # Replace only the skills this repo owns, tracked in a manifest, and leave every
 # other entry in the directory alone.
@@ -58,12 +58,20 @@ mv -f "$MANIFEST.tmp" "$MANIFEST"
 # that very file is executing, and bash reads a script incrementally by offset.
 # cp would rewrite the running file in place and make bash resume into garbage;
 # mv is an atomic rename, so the running shell keeps its handle on the old inode.
-for script in session-start.sh install-skills.sh skills-briefing.py doctor.sh; do
+for script in session-start.sh install-skills.sh doctor.sh; do
   if [ -f "$TMP_DIR/scripts/$script" ]; then
     cp "$TMP_DIR/scripts/$script" "$HOME/.claude/.$script.tmp"
     chmod +x "$HOME/.claude/.$script.tmp"
     mv -f "$HOME/.claude/.$script.tmp" "$HOME/.claude/$script"
   fi
 done
+
+# briefing.js lives in hooks/, not scripts/, because the plugin's hooks.json
+# points at it there. Cache it beside the others so the fallback path can brief
+# without the network.
+if [ -f "$TMP_DIR/hooks/briefing.js" ]; then
+  cp "$TMP_DIR/hooks/briefing.js" "$HOME/.claude/.briefing.js.tmp"
+  mv -f "$HOME/.claude/.briefing.js.tmp" "$HOME/.claude/briefing.js"
+fi
 
 echo "Installed $(wc -l < "$MANIFEST") skills into $TARGET"

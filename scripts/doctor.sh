@@ -129,20 +129,24 @@ fi
 
 echo
 echo "== briefing =="
-BRIEF="$HOME/.claude/skills-briefing.py"
-[ -f "$BRIEF" ] || BRIEF="$(dirname "${BASH_SOURCE[0]:-$0}")/skills-briefing.py"
-if [ -f "$BRIEF" ] && command -v python3 >/dev/null 2>&1; then
-  CLAUDE_SKILLS_DIR="$SKILLS" python3 "$BRIEF" | python3 -c '
-import json, sys
-try:
-    c = json.load(sys.stdin)["hookSpecificOutput"]["additionalContext"]
-except Exception as exc:
-    print(f"  \033[31mBAD\033[0m   briefing did not produce valid JSON: {exc}")
-    raise SystemExit(0)
-lines = c.splitlines()
-mi = [l for l in lines if l.startswith("- `") and not l.startswith("- `/")]
-ui = [l for l in lines if l.startswith("- `/")]
-print(f"  \033[32mok\033[0m    generates: {len(mi)} model-invokable + {len(ui)} user-only = {len(mi)+len(ui)}")
+BRIEF="$(dirname "${BASH_SOURCE[0]:-$0}")/../hooks/briefing.js"
+[ -f "$BRIEF" ] || BRIEF="$HOME/.claude/briefing.js"
+if [ -f "$BRIEF" ] && command -v node >/dev/null 2>&1; then
+  node "$BRIEF" | node -e '
+let s = "";
+process.stdin.on("data", d => s += d).on("end", () => {
+  let c;
+  try {
+    c = JSON.parse(s).hookSpecificOutput.additionalContext;
+  } catch (e) {
+    console.log(`  \x1b[31mBAD\x1b[0m   briefing did not produce valid JSON: ${e.message}`);
+    return;
+  }
+  const lines = c.split("\n");
+  const mi = lines.filter(l => l.startsWith("- `") && !l.startsWith("- `/"));
+  const ui = lines.filter(l => l.startsWith("- `/"));
+  console.log(`  \x1b[32mok\x1b[0m    generates: ${mi.length} model-invocable + ${ui.length} user-only = ${mi.length + ui.length}`);
+});
 ' || bad "briefing failed to run"
 else
   warn "briefing generator not found"

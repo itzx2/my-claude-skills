@@ -31,46 +31,39 @@ plugin.
 
 ## Install on a Claude Code cloud/remote environment
 
-**Prefer the plugin here too.** If `claude plugin install` is available in the
-container, running the two commands from [Install on a new
-machine](#install-on-a-new-machine) in the setup script is the whole story: it
-brings the skills *and* the briefing hook, with nothing to merge into
-`~/.claude/settings.json`. The rest of this section is the fallback for
-environments where that isn't available.
+**Nothing to configure — this repo installs itself.** `.claude/settings.json`
+declares the marketplace and enables the plugin, and
+`.claude/hooks/session-start.sh` fetches and installs it on every session start.
+A cloud container clones the repo, the hook runs, and the skills are there.
 
-`scripts/session-start.sh` is the entry point for that fallback. It does two
-things:
+That indirection is required, not belt-and-braces: declaring a marketplace in
+`.claude/settings.json` does not put it on disk, and as of Claude Code v2.1.195 a
+plugin enabled only by project settings and sourced from GitHub does not load
+until something installs it. The hook is that something. See
+[`.claude/PLUGIN-SETUP.md`](./.claude/PLUGIN-SETUP.md) for the failure modes,
+and copy that pair of files into any repo that wants the same.
 
-1. Mirrors `skills/` into `~/.claude/skills` (remote environments only — on a
-   local machine that path is the symlink created above, and reinstalling
-   would delete it).
-2. Prints a briefing describing every installed skill, so the agent in that
-   session knows what it has. See [Telling the agent what it
-   has](#telling-the-agent-what-it-has) below.
-
-Both steps need nothing but outbound HTTPS — no GitHub App / repo-source
-access — so this works even in environments that don't have this repo
-attached as a source.
-
-Note that this path installs skills *bare* into `~/.claude/skills`, so they are
-invoked as `/<name>` with no plugin prefix. `scripts/skills-briefing.py` emits
-bare names to match, which is correct for this scenario and wrong for the plugin
-one — that is why the plugin carries its own briefing in `hooks/briefing.js`
-rather than reusing this script.
+`scripts/session-start.sh` + `scripts/bootstrap-env.sh` remain as a **fallback**
+for environments where you cannot commit to the repo — they install skills loose
+into `~/.claude/skills` and brief from there. Prefer the committed hook.
 
 ### Scope: which sessions get this
 
 | Where it's registered | Covers |
 | --- | --- |
-| the plugin's own `hooks/hooks.json` | **every** session wherever the plugin is installed — the path this repo now uses |
+| this repo's `.claude/settings.json` | every session **on this repo** — installs the plugin so a fresh container has it |
+| the plugin's own `hooks/hooks.json` | **every** session wherever the plugin is installed — where the briefing comes from |
 | `~/.claude/settings.json` (user scope) | **every** session in that environment, whichever repo is open |
 
 Installing the plugin registers the briefing hook by itself, so there is nothing
 further to do on a machine that has it.
 
-The repo-local `.claude/settings.json` that used to register this hook has been
-removed: with the plugin shipping its own, a session opened on this repo fired
-both and emitted two conflicting briefings.
+The repo-local `.claude/settings.json` is back, but it no longer briefs. It
+installs. The plugin still ships the only briefing, in `hooks/briefing.js`, so
+the two hooks compose rather than collide: one line of install status from the
+repo hook, the roster from the plugin. The earlier double-briefing came from
+`scripts/skills-briefing.py` emitting a second, bare-named roster; that script is
+deleted.
 
 For the fallback path you need the user-scope registration — and in a cloud
 container that is the catch: `~/.claude` is rebuilt from the image on every
