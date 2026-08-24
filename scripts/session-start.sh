@@ -19,7 +19,8 @@
 # network blip degrades this to "no new skills", not "session won't start".
 set -uo pipefail
 
-RAW_BASE="https://raw.githubusercontent.com/itzx2/my-claude-skills/main/scripts"
+RAW_ROOT="https://raw.githubusercontent.com/itzx2/my-claude-skills/main"
+RAW_BASE="$RAW_ROOT/scripts"
 SKILLS_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
 
 # `pipefail` plus a piped invocation means $0 may not be a real path; fall back
@@ -53,15 +54,20 @@ if [ ! -d "$SKILLS_DIR" ]; then
   exit 0
 fi
 
-if ! command -v python3 >/dev/null 2>&1; then
-  log "python3 not found; skipping the skills briefing"
+if ! command -v node >/dev/null 2>&1; then
+  log "node not found; skipping the skills briefing"
   exit 0
 fi
 
 # Prefer a copy on disk (a checkout of this repo, or the one install-skills.sh
 # leaves behind) and only reach for the network as a last resort.
+#
+# briefing.js, not the old skills-briefing.py: it is the same walk the plugin
+# runs, so a session briefed through this fallback and one briefed by the plugin
+# describe the roster the same way. It reads $CLAUDE_CONFIG_DIR (or ~/.claude)
+# directly rather than a passed-in skills directory.
 BRIEFING=""
-for candidate in "$SCRIPT_DIR/skills-briefing.py" "$HOME/.claude/skills-briefing.py"; do
+for candidate in "$SCRIPT_DIR/../hooks/briefing.js" "$HOME/.claude/briefing.js"; do
   if [ -n "$candidate" ] && [ -f "$candidate" ]; then
     BRIEFING="$candidate"
     break
@@ -69,10 +75,9 @@ for candidate in "$SCRIPT_DIR/skills-briefing.py" "$HOME/.claude/skills-briefing
 done
 
 if [ -n "$BRIEFING" ]; then
-  CLAUDE_SKILLS_DIR="$SKILLS_DIR" python3 "$BRIEFING" || log "briefing failed"
+  node "$BRIEFING" || log "briefing failed"
 else
-  curl -fsSL "$RAW_BASE/skills-briefing.py" \
-    | CLAUDE_SKILLS_DIR="$SKILLS_DIR" python3 - || log "briefing failed"
+  curl -fsSL "$RAW_ROOT/hooks/briefing.js" | node - || log "briefing failed"
 fi
 
 exit 0
