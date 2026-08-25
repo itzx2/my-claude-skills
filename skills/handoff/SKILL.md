@@ -13,38 +13,49 @@ only ever existed in the conversation: why a path was abandoned, which decision
 is settled, what you were about to do next. Carry that; leave the rest where it
 already lives.
 
-## A handoff is a snapshot
+## One live handoff, ever
 
-One session, one file, **written once**.
+`handoff/` holds **exactly one file** — the live brief. Every earlier one lives
+in `handoff/archive/`, which nothing reads: not you while writing, not the agent
+receiving this.
 
-A handoff is fixed at the moment it is written. When the work moves on, write a
-**new** handoff — new file, new date-slug — and leave every earlier one exactly
-as it was. Nothing writes back into one: the receiving agent reads it, works
-from it, and records its own state in its own handoff when its turn ends.
+That is structural on purpose. A handoff is a snapshot of a single session,
+written once and never edited. When two are readable at once the newer one starts
+explaining the older one instead of standing on its own, and the next agent
+inherits a chain to read backwards rather than a brief to act on.
 
-So `handoff/` is an append-only record of what was known at each pass, not a
-status file that tracks the work. Two things follow, and both matter to whoever
-reads the folder next:
-
-- **The newest handoff is the live brief.** Every older one is history.
-- **An older handoff describes what was true when it was written**, not what is
-  true now. Treat a stale one as a record of a decision, never as current state
-  — check the repo for that.
+So a handoff **never cites another handoff** — it does not correct one, summarise
+one, or mark parts of one still good. Moving the old file to `handoff/archive/`
+is what marks it stale; that is the only statement about it you ever make.
 
 ## Steps
 
-1. **Write the file** to `handoff/YYYY-MM-DD-<slug>.md`, creating `handoff/` if
-   it does not exist. The slug names the work, not the session.
-2. **Send it to the chat** so the user sees it without opening the file.
-3. **Commit and push** it to the current working branch.
+All of this happens on invocation. Nothing here is left for the user to remember.
+
+1. **Rescue.** If `handoff/` holds a file, read it once — solely to find anything
+   still true that lives **nowhere else**. Move each such fact *out* to where it
+   belongs: an ADR, `CONTEXT.md`, the issue it concerns, or a comment beside the
+   code. Content travels out to a primary source, never into the new handoff.
+2. **Archive.** `git mv` every file currently in `handoff/` into
+   `handoff/archive/`, creating that folder if needed. A first run moves nothing;
+   a folder that has accumulated several moves all of them.
+3. **Write** the new file at `handoff/YYYY-MM-DD-<slug>.md`. The slug names the
+   work, not the session.
+4. **Send it to the chat** so the user sees it without opening the file.
+5. **Commit and push** the new file and the archive moves together, on the
+   current working branch.
 
 ## Template
 
 Every section appears. When one is genuinely empty write `None` — a section
 padded to look full is worse than one honestly blank.
 
-```markdown
+````markdown
 # <Title: the work, not the session>
+
+> **Stale once replaced.** The live brief is the single file in `handoff/`. If
+> you are reading this from `handoff/archive/`, a later handoff has replaced it
+> — read that one instead.
 
 ## Task
 What this work is, in a sentence or two, and what finishing it looks like.
@@ -69,13 +80,17 @@ The single concrete thing to do first. Not a list.
 
 ## Suggested skills
 Skill names the next agent should reach for, one line each on why.
-```
+````
 
 ## Rules
 
 - **Reference, don't restate.** Anything already in a spec, plan, ADR, issue,
   commit, or diff goes in **Artifacts** as a path or URL. The doc carries only
   what lives nowhere else.
+- **Never point at another handoff.** It is the one artifact that is never a
+  valid reference — an archived one is stale by definition, and knowledge worth
+  keeping was rescued to a primary source in step 1. Point at that source
+  instead.
 - **Redact secrets.** API keys, tokens, passwords, personal data: replace each
   with a description of what it is and where it is kept, so the next agent knows
   to fetch it rather than that it exists.
@@ -85,7 +100,8 @@ Skill names the next agent should reach for, one line each on why.
 ## Done when
 
 A fresh agent, given only this file, can name the next action and take it —
-without asking you a question, and without reading this conversation.
+without asking you a question, without reading this conversation, and **without
+opening any other handoff**.
 
 Once pushed, the file is final. Anything you would have added to it belongs in
 the next handoff instead.
