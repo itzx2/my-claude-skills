@@ -39,6 +39,17 @@ if [ -f "$MANIFEST" ]; then
 fi
 
 # Install the current set, replacing each skill directory individually.
+#
+# Known race, low severity, fails safe. Two SessionStart hooks on one container
+# run this concurrently and both write this fixed temp path, so the manifest that
+# survives can be truncated — every skill is still on disk, installed by whichever
+# process won, and only the manifest count betrays it. `doctor.sh` asserts that
+# count against the repo's skill count, which is the one check that catches it.
+#
+# Fix direction, not yet implemented: serialise the whole install under an flock
+# on a lockfile so the second hook waits and then no-ops. A unique temp filename
+# alone would fix the manifest but leave the rm -rf/cp collision below, which is
+# the half that actually fails an install.
 : > "$MANIFEST.tmp"
 for skill_dir in "$TMP_DIR"/skills/*/; do
   [ -d "$skill_dir" ] || continue
