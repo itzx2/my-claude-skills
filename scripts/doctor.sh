@@ -66,7 +66,22 @@ fi
 echo
 echo "== installer scope =="
 if [ -f "$MANIFEST" ]; then
-  ok "manifest present, $(wc -l < "$MANIFEST") entries"
+  manifest_n="$(grep -c . "$MANIFEST")"
+  ok "manifest present, $manifest_n entries"
+  # A short manifest is the only symptom of two SessionStart hooks racing: both
+  # installs write the same fixed temp file, so the survivor can be truncated
+  # while every skill is still present on disk. Every other check here passes in
+  # that state, which is why this one exists. Only meaningful when the counts
+  # come from different places — with OWNED_FROM=manifest the comparison is
+  # circular.
+  if [ "$OWNED_FROM" = "repo" ]; then
+    owned_n="$(grep -c . "$OWNED_LIST")"
+    if [ "$manifest_n" -eq "$owned_n" ]; then
+      ok "manifest count matches the repo's $owned_n skills"
+    else
+      bad "manifest has $manifest_n entries but the repo ships $owned_n — a raced install truncated it; re-run install-skills.sh"
+    fi
+  fi
   if grep -qx "synced" "$MANIFEST"; then
     bad "'synced' is in the manifest — the installer would delete it"
   else

@@ -44,6 +44,13 @@ console.log(Object.values(j.plugins)[0].slice(-1)[0].installPath)'
 The path must end in the version you just shipped, and the files under it must
 contain your change.
 
+## Check the remote before concluding work is missing
+
+`git rev-list --left-right main...origin/main` reports `0 0` when **both** refs
+are stale, which reads as "this never landed" and sends you chasing a merge that
+already happened. A container's clone can be older than the remote. Run
+`git fetch origin main` first, every time.
+
 ## Before pushing any change
 
 ```sh
