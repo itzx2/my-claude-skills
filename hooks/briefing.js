@@ -396,6 +396,14 @@ function render({ modelInvocable, userInvoked }) {
   return lines.join('\n');
 }
 
+/**
+ * No `reloadSkills` in the payload, deliberately.
+ *
+ * The retired `skills-briefing.py` set it because the same hook *installed*
+ * skills moments earlier, so the session had to re-scan to see them. This hook
+ * installs nothing: the plugin is already in place before it runs, and Claude
+ * Code has enumerated it. Adding the flag back would only cost a re-scan.
+ */
 function main() {
   const roster = buildRoster();
   if (!roster.modelInvocable.length && !roster.userInvoked.length) return 0;
