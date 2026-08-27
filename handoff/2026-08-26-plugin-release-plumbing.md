@@ -16,12 +16,12 @@ task an agent can do alone, two decisions, and one thing only a human can do.
 
 ## State
 
-**Branch:** `claude/latest-handoff-status-4bw3tz`, cut from `main` at `b500583`.
-`main` is clean and holds PRs #4–#10.
+**Branch:** `claude/handoff-2026-08-26`, cut from `main` at `d084ccd`. `main`
+itself is clean and holds PRs #4–#9.
 
-**Version 1.5.0** in both manifests. Verified after 1.4.0 that a cold install
+**Version 1.4.1** in both manifests. Verified after 1.4.0 that a cold install
 resolves to a fresh cache directory and serves the new content — that is the
-check that matters, and now the only one: releases are not tagged.
+check that matters, not the tag.
 
 **Two things that will surprise you:**
 
@@ -46,9 +46,9 @@ check that matters, and now the only one: releases are not tagged.
 | Vocabulary: roster, location, tier, hidden, blind spot, invocation | `CONTEXT.md` |
 | The install hook consumers copy | `.claude/settings.json`, `.claude/hooks/session-start.sh` |
 | Briefing walk, and the rationale comments | `hooks/briefing.js` |
-| Fixture tests (14), the race tests (7), and the install assertion | `scripts/test-briefing.sh`, `scripts/test-install-race.sh`, `scripts/verify-install.sh` |
-| The install race, its evidence, and the lock that closes it | `scripts/install-skills.sh`, above the `flock` |
-| PRs: install hook, briefing coverage, skill edits, v1.3.0, release rule, handoff redesign, rescue, handoff | #4, #5, #6, #7, #8, #9, #10 |
+| Fixture tests (14) and the install assertion | `scripts/test-briefing.sh`, `scripts/verify-install.sh` |
+| The install race, documented at its site | `scripts/install-skills.sh`, above `: > "$MANIFEST.tmp"` |
+| PRs: install hook, briefing coverage, skill edits, v1.3.0, release rule, handoff redesign, rescue | #4, #5, #6, #7, #8, #9 |
 
 ## Decisions
 
@@ -68,38 +68,32 @@ check that matters, and now the only one: releases are not tagged.
   deliberate call, not an oversight.
 - **Suggested-skills entries carry names only**, not full namespaced
   invocations.
-- **Releases are not tagged.** Settled 2026-08-26: `claude plugin install`
-  resolves the marketplace at the default branch and keys its cache on
-  `plugin.json`, so a tag is read by nothing and can only disagree with the
-  version that is. `CLAUDE.md` carries the rule and names the two leftover tags.
 
 ## Open
 
-- **Eleven merged branches and two tags on the remote.** Needs a human; see
-  *State* for why. Everything except `main` and the working branch is merged.
+- **Ten merged branches on the remote.** Needs a human; see *State* for why.
+  Everything except `main` is merged and safe.
+- **Tagging is half-broken and unresolved.** `1.3.0` and `1.4.x` are untagged,
+  and the bare `Release` tag points at the *initial commit*. Recommendation on
+  the table was to drop tagging entirely, since the manifest version is the real
+  source of truth and `CLAUDE.md` already enforces it. Waiting on a decision.
 - **Voice-of-Customer contradicts the handoff skill.** Its `AGENTS.md` and
   `handoff/README.md` mandate numbered, explicitly-chained handoffs — *"each
   supersedes the last and says so at the top"* — plus a table keeping old ones
   alive as partial references. An agent there gets two incompatible instructions
   and the repo-local rules usually win. Separate repo, separate decision.
-
-## Done since
-
-- **The install race is fixed.** `scripts/install-skills.sh` serialises the
-  whole install under a lock — `flock` where it exists, an atomic `mkdir` with a
-  stale break on macOS, which ships no `flock(1)`. A second hook through the
-  lock no-ops against a stamp of the source revision, but only when the manifest
-  still names exactly what the source carries and each skill is on disk, so a
-  manual re-run repairs a damaged directory and a manifest truncated by a
-  pre-lock installer heals instead of persisting behind the stamp.
-  `scripts/test-install-race.sh` runs the real installer two-up; against an
-  unlocked copy it reproduces the original failures (13 manifest entries for 10
-  skills, `cp: cannot create directory` exiting 1).
+- **The install race has a fix direction, not a fix.** Two SessionStart hooks on
+  one container both write the fixed `"$MANIFEST.tmp"`. `doctor.sh` now detects
+  it; nothing prevents it.
 
 ## Next action
 
-Nothing is blocked. The remaining work is the Voice-of-Customer convention
-conflict, which is a decision rather than a task.
+Implement the `flock` serialisation in `scripts/install-skills.sh`. The comment
+above `: > "$MANIFEST.tmp"` states the shape: take a lock around the **whole**
+install so a second hook waits and then no-ops. A unique temp filename alone is
+not enough — it fixes the manifest and leaves the `rm -rf`/`cp` collision, which
+is the half that actually fails an install. Then confirm `doctor.sh` still
+reports the manifest count matching, and bump the version.
 
 ## Suggested skills
 
