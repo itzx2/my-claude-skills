@@ -232,7 +232,7 @@ Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkow
 - **apple-design** ⬇ — Apple's approach to interface design and fluid, physical motion, translated for the web.
 - **/ask-matt** — ask which skill or flow fits your situation.
 - **/batch-grill-me** — a relentless interview that asks every frontier question at once, round by round.
-- **/claude-handoff** — hand the current conversation off to a fresh background agent that picks up the work immediately.
+- **/claude-handoff** — hand the current conversation off to a fresh background agent that picks up the work immediately. Deliberately *not* aligned with `/handoff`: it seeds an agent's prompt rather than writing a file, so none of the live-brief rules apply to it.
 - **code-review** — review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?).
 - **codebase-design** — shared vocabulary for designing deep modules.
 - **diagnosing-bugs** — diagnosis loop for hard bugs and performance regressions.

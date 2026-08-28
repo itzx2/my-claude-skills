@@ -44,6 +44,20 @@ console.log(Object.values(j.plugins)[0].slice(-1)[0].installPath)'
 The path must end in the version you just shipped, and the files under it must
 contain your change.
 
+### The session you are in can be running a stale skill
+
+The same cache serves *this* agent. A session has been observed executing
+`skills/handoff` from the `1.2.0` cache while `main` was on `1.4.0` — a skill
+body two releases behind, with no error and nothing to notice. Before trusting a
+skill you were served, check the directory it came from against
+`.claude-plugin/plugin.json`:
+
+```sh
+ls ~/.claude/plugins/cache/my-claude-skills/my-claude-skills/
+```
+
+A version there that is not the manifest's is what you are actually running.
+
 ### Tag the merge commit, right after merging
 
 **Every version bump gets a matching `vX.Y.Z` tag on the commit that merged it,
@@ -56,8 +70,9 @@ twice — which is worse than useless, because it is confidently wrong.
 
 **A Claude Code web session cannot do this step.** `git push <tag>` returns 403
 through the session proxy, and the GitHub MCP server has no create-tag or
-create-release tool — only read ones. So an agent finishes at the merge and
-hands the tag to the human:
+create-release tool — only read ones. The same 403 blocks `git push --delete`
+and any force-push, so deleting a merged branch is a human's job too. An agent
+finishes at the merge and hands both over:
 
 ```sh
 git tag -a v1.6.0 <merge-sha> -m "v1.6.0 — <one line>"
@@ -75,6 +90,18 @@ commit, and it carries the stale GitHub Release entry) and
 `my-claude-skills--v1.2.0` (right commit, superseded naming). Versions `1.3.0`
 through `1.5.0` are permanently untagged; they shipped while the rule said not
 to, and inventing notes for them now would be fiction.
+
+## Handoffs
+
+`docs/handoff/` holds exactly one handoff — the live brief. Read it; leave
+`docs/handoff/archive/` alone. A handoff is **published** the moment the
+invocation that wrote it ends, and a published handoff is read-only to every
+session including the one that wrote it: the way to change what one says is a
+new one, written by the `handoff` skill, which is the only thing that writes
+them. It is user-invoked — `/handoff`, or `/my-claude-skills:handoff` as a
+plugin — so it will not appear in your own skill listing. A brief going stale is
+its normal condition, not a defect: say so once if it matters and let the user
+invoke the skill.
 
 ## Check the remote before concluding work is missing
 
