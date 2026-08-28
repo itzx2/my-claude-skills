@@ -71,9 +71,11 @@ if [ -f "$MANIFEST" ]; then
   # A short manifest is the only symptom of two SessionStart hooks racing: both
   # installs write the same fixed temp file, so the survivor can be truncated
   # while every skill is still present on disk. Every other check here passes in
-  # that state, which is why this one exists. Only meaningful when the counts
-  # come from different places — with OWNED_FROM=manifest the comparison is
-  # circular.
+  # that state, which is why this one exists. The installer now serialises under
+  # a lock, so a mismatch means a container still running a cached pre-lock copy
+  # — re-running the current installer both repairs it and replaces that copy.
+  # Only meaningful when the counts come from different places — with
+  # OWNED_FROM=manifest the comparison is circular.
   if [ "$OWNED_FROM" = "repo" ]; then
     owned_n="$(grep -c . "$OWNED_LIST")"
     if [ "$manifest_n" -eq "$owned_n" ]; then

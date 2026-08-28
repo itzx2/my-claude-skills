@@ -172,11 +172,12 @@ rather than installed on disk can't be enumerated by any hook, so the briefing
 says so and points at the Skill tool listing for them, instead of implying that
 an absent name means an absent skill.
 
-Two scripts check it, and both exit non-zero on failure:
+Three scripts check it, and all exit non-zero on failure:
 
 ```sh
-bash scripts/test-briefing.sh    # fixture tests for the walk itself
-bash scripts/verify-install.sh   # is every skill in skills/ reachable right now?
+bash scripts/test-briefing.sh      # fixture tests for the walk itself
+bash scripts/test-install-race.sh  # two installs at once stay correct
+bash scripts/verify-install.sh     # is every skill in skills/ reachable right now?
 ```
 
 `test-briefing.sh` builds throwaway directories — a nested container, a plugin
@@ -184,6 +185,12 @@ with skills and commands, a disabled plugin, a project dir, a deliberate
 duplicate — and asserts the rendered roster. Every bug it guards against is a
 silent one: a wrong walk still emits a plausible roster, just short. That is how
 the `synced/` gap survived unnoticed.
+
+`test-install-race.sh` runs the real installer two-up against a fixture source.
+A session on this repo registers the SessionStart hook twice — user-level and
+repo-level — and Claude Code runs both in parallel, so overlapping installs are
+the normal case here, not an edge one. Before `install-skills.sh` took a lock,
+ten such trials produced a correct manifest zero times.
 
 `verify-install.sh` is the machine answer to "did the install work?", for use
 after the session-start hook in a fresh container. It accepts either installed

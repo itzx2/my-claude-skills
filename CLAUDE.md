@@ -44,6 +44,21 @@ console.log(Object.values(j.plugins)[0].slice(-1)[0].installPath)'
 The path must end in the version you just shipped, and the files under it must
 contain your change.
 
+### Do not tag releases
+
+**The manifest version is the only release marker. Don't create git tags, and
+don't restore the ones that exist.** A tag here marks nothing: `claude plugin
+install` resolves the marketplace at the default branch and keys its cache on
+`plugin.json`, so a tag is never read by anything and can only disagree with the
+version that is. That is what happened — tagging was done by hand, drifted
+immediately, and left `1.3.0` and `1.4.x` unmarked while a bare `Release` tag
+pointed at the initial commit. The rule above already enforces the one number
+that matters, in the same PR as the change it describes.
+
+Two tags predate this decision and are being deleted by hand:
+`Release` and `my-claude-skills--v1.2.0`. If you still see them, they are
+leftovers, not a convention to follow.
+
 ## Check the remote before concluding work is missing
 
 `git rev-list --left-right main...origin/main` reports `0 0` when **both** refs
@@ -54,11 +69,12 @@ already happened. A container's clone can be older than the remote. Run
 ## Before pushing any change
 
 ```sh
-bash scripts/test-briefing.sh    # fixture tests for the briefing walk
-bash scripts/verify-install.sh   # every skill in skills/ reachable right now
+bash scripts/test-briefing.sh      # fixture tests for the briefing walk
+bash scripts/test-install-race.sh  # two concurrent installs stay correct
+bash scripts/verify-install.sh     # every skill in skills/ reachable right now
 ```
 
-Both exit non-zero on failure.
+All three exit non-zero on failure.
 
 ## Where the rest is written down
 
@@ -66,6 +82,9 @@ Both exit non-zero on failure.
   hand-maintained skill list. Update that list when you add or remove a skill.
 - **`.claude/PLUGIN-SETUP.md`** — wiring this plugin into another repo, and the
   four `claude plugin` behaviours that each cost a debugging cycle.
-- **`CONTEXT.md`** — the vocabulary: roster, location, tier, hidden, blind spot,
-  invocation.
+- **`CONTEXT.md`** — the vocabulary, in two clusters: *briefing* (roster,
+  location, tier, hidden, blind spot, invocation, hand-rolled invocation) and
+  *handoff* (live brief, published, archive).
+- **`docs/adr/`** — decisions worth their reasoning. `0001` records that handoff
+  integrity is instructed rather than enforced, and what that costs.
 - **`skills/writing-for-agents/`** — the reference for editing any skill here.
