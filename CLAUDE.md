@@ -44,20 +44,37 @@ console.log(Object.values(j.plugins)[0].slice(-1)[0].installPath)'
 The path must end in the version you just shipped, and the files under it must
 contain your change.
 
-### Do not tag releases
+### Tag the merge commit, right after merging
 
-**The manifest version is the only release marker. Don't create git tags, and
-don't restore the ones that exist.** A tag here marks nothing: `claude plugin
-install` resolves the marketplace at the default branch and keys its cache on
-`plugin.json`, so a tag is never read by anything and can only disagree with the
-version that is. That is what happened — tagging was done by hand, drifted
-immediately, and left `1.3.0` and `1.4.x` unmarked while a bare `Release` tag
-pointed at the initial commit. The rule above already enforces the one number
-that matters, in the same PR as the change it describes.
+**Every version bump gets a matching `vX.Y.Z` tag on the commit that merged it,
+and a GitHub Release built from that tag.** Nothing installs from it: `claude
+plugin install` resolves the marketplace at the default branch and keys its
+cache on `plugin.json`, so no tool ever reads a tag here. The tag is for people.
+GitHub's Releases panel is what a human checks to see whether a repo is alive,
+and while tagging was off it read *"2 months ago"* on a day this repo shipped
+twice — which is worse than useless, because it is confidently wrong.
 
-Two tags predate this decision and are being deleted by hand:
-`Release` and `my-claude-skills--v1.2.0`. If you still see them, they are
-leftovers, not a convention to follow.
+**A Claude Code web session cannot do this step.** `git push <tag>` returns 403
+through the session proxy, and the GitHub MCP server has no create-tag or
+create-release tool — only read ones. So an agent finishes at the merge and
+hands the tag to the human:
+
+```sh
+git tag -a v1.6.0 <merge-sha> -m "v1.6.0 — <one line>"
+git push origin refs/tags/v1.6.0
+```
+
+Do it immediately after the merge, while the version is still in front of you. A
+tag added "later" is exactly how the previous drift started: hand-tagging left
+`1.3.0` through `1.5.0` unmarked while a bare `Release` tag sat on the *initial
+commit*, which is why tagging was briefly abandoned altogether. See
+`docs/adr/0002` for why it came back rather than staying dropped.
+
+Two tags predate the `vX.Y.Z` scheme and should be deleted: `Release` (wrong
+commit, and it carries the stale GitHub Release entry) and
+`my-claude-skills--v1.2.0` (right commit, superseded naming). Versions `1.3.0`
+through `1.5.0` are permanently untagged; they shipped while the rule said not
+to, and inventing notes for them now would be fiction.
 
 ## Check the remote before concluding work is missing
 
