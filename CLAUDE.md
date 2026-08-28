@@ -82,6 +82,9 @@ All three exit non-zero on failure.
   hand-maintained skill list. Update that list when you add or remove a skill.
 - **`.claude/PLUGIN-SETUP.md`** — wiring this plugin into another repo, and the
   four `claude plugin` behaviours that each cost a debugging cycle.
-- **`CONTEXT.md`** — the vocabulary: roster, location, tier, hidden, blind spot,
-  invocation.
+- **`CONTEXT.md`** — the vocabulary, in two clusters: *briefing* (roster,
+  location, tier, hidden, blind spot, invocation, hand-rolled invocation) and
+  *handoff* (live brief, published, archive).
+- **`docs/adr/`** — decisions worth their reasoning. `0001` records that handoff
+  integrity is instructed rather than enforced, and what that costs.
 - **`skills/writing-for-agents/`** — the reference for editing any skill here.
