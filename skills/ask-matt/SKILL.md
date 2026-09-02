@@ -61,6 +61,8 @@ Most paths run along one **main flow**, with two **on-ramps** merging onto it. E
 
    Either way, **`/my-claude-skills:implement`** drives **`/my-claude-skills:tdd`** internally — one red-green slice at a time — then closes out by running **`/my-claude-skills:code-review`** before committing. Reach for **`/my-claude-skills:tdd`** alone to build a concrete behaviour test-first without a full spec, and **`/my-claude-skills:code-review`** alone to review a branch or PR against a fixed point.
 
+4. **The branch lifecycle brackets that step.** **`using-git-worktrees`** opens it — an isolated workspace on a green baseline, so the checkout you were sitting in keeps its state and every later red test is attributable. **`finishing-a-development-branch`** closes it, and is where the chain used to just stop: it verifies the suite on the tree about to be integrated, then puts merge / PR / keep to you and executes the answer, cleaning up only the workspace the first one created. Both fire from `/my-claude-skills:implement`, so on the main flow you get them without asking; reach for `finishing-a-development-branch` by hand when a branch has been sitting finished for a while.
+
 ### Context hygiene
 
 Keep steps 1–3 in **one unbroken context window** — compact or clear only after `/my-claude-skills:to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/my-claude-skills:implement` then starts fresh from the ticket.

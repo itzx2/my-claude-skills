@@ -75,8 +75,8 @@ and any force-push, so deleting a merged branch is a human's job too. An agent
 finishes at the merge and hands both over:
 
 ```sh
-git tag -a v1.6.0 <merge-sha> -m "v1.6.0 — <one line>"
-git push origin refs/tags/v1.6.0
+git tag -a v<version> <merge-sha> -m "v<version> — <one line>"
+git push origin refs/tags/v<version>
 ```
 
 Do it immediately after the merge, while the version is still in front of you. A
@@ -85,11 +85,12 @@ tag added "later" is exactly how the previous drift started: hand-tagging left
 commit*, which is why tagging was briefly abandoned altogether. See
 `docs/adr/0002` for why it came back rather than staying dropped.
 
-Two tags predate the `vX.Y.Z` scheme and should be deleted: `Release` (wrong
-commit, and it carries the stale GitHub Release entry) and
-`my-claude-skills--v1.2.0` (right commit, superseded naming). Versions `1.3.0`
-through `1.5.0` are permanently untagged; they shipped while the rule said not
-to, and inventing notes for them now would be fiction.
+Every tag on the remote now follows the `vX.Y.Z` scheme. The two that predated
+it — `Release`, which sat on the initial commit and carried a stale GitHub
+Release entry, and `my-claude-skills--v1.2.0` — were deleted on 2026-09-02,
+along with that Release entry. Versions `1.3.0` through `1.5.0` are permanently
+untagged; they shipped while the rule said not to, and inventing notes for them
+now would be fiction.
 
 ## Handoffs
 

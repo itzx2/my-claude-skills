@@ -65,3 +65,20 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+### Claim on evidence
+
+A criterion is only worth as much as the check behind it, so state a result once you have watched it. Before any claim that something passes, is fixed, or is done: name the command that proves it, run it fresh and in full, read the output and its exit code, then make the claim **with** that output. A run from earlier in the session proves the tree it ran on, not the one you are describing now.
+
+What each claim costs:
+
+| Claim | Proven by |
+| --- | --- |
+| Tests pass | The suite's own output, 0 failures |
+| Build succeeds | The build command, exit 0 — a linter checks other things |
+| Bug fixed | The original symptom, re-run, now passing |
+| Regression test works | Red-green watched: revert the fix, see it fail, restore, see it pass |
+| Requirements met | The plan re-read line by line, each item checked off |
+| A delegated agent finished | The VCS diff, read yourself |
+
+Where the check has not run, the honest report is the state you actually have: what passed, what you have not verified, and what you would run next.
