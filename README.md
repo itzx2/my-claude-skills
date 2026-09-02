@@ -221,11 +221,11 @@ which is why `ask-matt` reads both.
 
 ## Skills
 
-39 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+41 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
 The leading `/` below is a **marker for that distinction, not the invocation**. Installed as a plugin, every name here is prefixed: `/my-claude-skills:to-spec`, `my-claude-skills:grilling`, and so on. Only the legacy symlink install leaves them bare.
 
-Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkowalski/skills) — marked ⬇ below. They are design-engineering skills (animation and interface craft) rather than personal ones, kept here so they install and brief through the same path as everything else. See [Vendored skills](#vendored-skills) for what was changed on the way in.
+Ten of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), and two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers). See [Vendored skills](#vendored-skills) for what changed on the way in.
 
 - **animate** ⬇ — build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits.
 - **animation-vocabulary** ⬇ — reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in).
@@ -239,6 +239,7 @@ Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkow
 - **domain-modeling** — build and sharpen a project's domain model.
 - **emil-design-eng** ⬇ — Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.
 - **find-animation-opportunities** ⬇ — search a codebase or UI for places that don't animate but should, and reject everything that shouldn't.
+- **finishing-a-development-branch** ⬇ — decide how finished work gets integrated — merge locally, open a PR, or keep the branch — then execute that choice and clean up the workspace.
 - **/grill-me** — a relentless interview to sharpen a plan or design.
 - **/grill-with-docs** — a relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go.
 - **grilling** — grill the user relentlessly about a plan, decision, or idea.
@@ -262,6 +263,7 @@ Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkow
 - **/to-spec** — turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed.
 - **/to-tickets** — break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker — edges as text in one file per ticket locally, or native blocking links on a real tracker.
 - **/triage** — move issues and external PRs through a state machine of triage roles — categorise, verify, grill if needed, and write agent-ready briefs.
+- **using-git-worktrees** ⬇ — set up an isolated workspace on a green baseline, so feature work leaves the current checkout untouched.
 - **/wait-what** — stop. That last message did not land — re-pitch it.
 - **/wayfinder** — plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear.
 - **wizard** — generate an interactive bash wizard that walks a human through steps only they can perform.
@@ -269,7 +271,13 @@ Eight of them are vendored from [emilkowalski/skills](https://github.com/emilkow
 
 ## Vendored skills
 
-The ⬇ skills above are copied from [emilkowalski/skills](https://github.com/emilkowalski/skills)
+Two upstreams, vendored on different terms. The design-engineering set is
+copied nearly verbatim; the branch-lifecycle pair was rewritten on the way in,
+for the reason recorded under its own heading.
+
+### From emilkowalski/skills
+
+Copied from [emilkowalski/skills](https://github.com/emilkowalski/skills)
 (vendored at upstream commit `78761e1`, 2026-08-10) rather than installed via
 `npx skills add`, so they ride the same install-and-brief path as everything
 else here.
@@ -310,3 +318,52 @@ re-pulling from upstream stays a clean copy rather than a merge:
   to run.
 - The rule catalog (frequency table, duration table, easing tokens) is
   duplicated across 5–7 files with no source of truth.
+
+### From obra/superpowers
+
+`using-git-worktrees` and `finishing-a-development-branch`, taken from
+[obra/superpowers](https://github.com/obra/superpowers) at `6.3.0`. They close
+the one real hole in the main flow: `/implement` ended at "commit to the
+current branch" and nothing said what happened to the branch after that. Both
+are wired into `/implement` — the first opens the branch lifecycle, the second
+closes it.
+
+**Rewritten, not copied.** Unlike the emilkowalski set, no file here is
+upstream's. Superpowers builds every skill around prohibition — a "Common
+Rationalizations" table, a "Red Flags — STOP" list, an "Iron Law" — and
+[`writing-for-agents`](skills/writing-for-agents/SKILL.md) names that exact
+technique as a failure mode: steering by prohibition drags the forbidden
+behaviour into context and makes it *more* available, not less. Copying these
+verbatim would have imported an anti-pattern this repo documents against. Each
+rationalization row was checked instead: the ones restating a step already
+present were dropped, and the ones carrying a real guardrail (`--force` on a
+refused worktree removal, force-pushing over a moved remote) were kept as
+prohibitions paired with the positive target, which is the escape hatch
+`writing-for-agents` allows. Both came out shorter — 167 → 94 lines, and
+225 → 169, where the length is genuine stepwise procedure.
+
+**Also changed:** upstream's second-person register ("your human partner",
+9 occurrences across the two) is addressed to the user directly here, and
+`finishing-a-development-branch` no longer identifies worktrees it may clean by
+asking whether *Superpowers* made them — it points at `using-git-worktrees` and
+the `.worktrees/` convention instead.
+
+**Absorbed rather than vendored:** two more superpowers skills earned their
+content a home but not a file of their own.
+`verification-before-completion` became the *Claim on evidence* subsection of
+[`karpathy-guidelines`](skills/karpathy-guidelines/SKILL.md), whose §4 already
+owned success criteria and lacked only the gate on asserting one is met.
+`dispatching-parallel-agents` became the subagent guidance under option 4 of
+[`PHASE-BOUNDARIES.md`](skills/ask-matt/PHASE-BOUNDARIES.md), which already
+owned *when* to reach for a subagent and needed only the *how*. Both were 120+
+line files whose unique content was a dozen lines.
+
+**Not taken:** `receiving-code-review`. The gap is real — `code-review` and
+`scrutinize` both produce findings and nothing here governs reacting to them —
+but the file is 13 sections of mostly style prohibition ("❌ ANY gratitude
+expression"), it hard-codes another maintainer's stated preferences as
+doctrine, and the harness already covers the substance. The two load-bearing
+rules — verify a suggestion against this codebase before implementing it, and
+clarify every unclear item before starting any of them — are worth a short
+skill written here, not a vendoring. The other nine superpowers skills all
+duplicate something this repo already does better.
