@@ -78,6 +78,60 @@ claude plugin install my-claude-skills@my-claude-skills -y
 A consuming repo has no such problem: it is not the plugin, so the GitHub URL is
 always what it wants.
 
+## Installing does not brief
+
+A plugin's own `SessionStart` hook cannot run in the session that installs it.
+Claude Code enumerates plugin hooks from what is on disk when the session
+starts; an installing hook runs *after* that, so `hooks/briefing.js` is
+registered for the next session and never for this one.
+
+That costs more than it sounds, because of what only the briefing carries.
+Skills setting `disable-model-invocation: true` are hidden from the agent's
+Skill listing completely, and the briefing is the only thing that tells the
+agent they exist. Eighteen skills here set it — every `/`-only one, including
+`handoff`, `implement`, `to-tickets`, `triage`, `wayfinder`, `ask-matt` and
+`grill-with-docs`.
+
+So a hook that installs and stops gets the model-invocable skills and silently
+loses the rest. The symptom is not an error. A user types
+`/my-claude-skills:grill-with-docs`; the agent cannot see it in its listing,
+concludes it does not exist, and substitutes the nearest visible name —
+`grilling` — announcing the swap as a correction. The skill was installed the
+whole time and would have run if invoked. Only discovery was missing, and the
+half of the work that made it worth choosing (the ADRs and glossary that
+`grill-with-docs` adds over `grilling`) silently did not happen.
+
+**Any hook that installs this plugin must emit the briefing itself.** After the
+install loop:
+
+```bash
+for candidate in "$HOME"/.claude/plugins/cache/my-claude-skills/my-claude-skills/*/hooks/briefing.js; do
+  [ -f "$candidate" ] || continue
+  node "$candidate" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{process.stdout.write(JSON.parse(s).hookSpecificOutput.additionalContext)})'
+  break
+done
+```
+
+Three things that are easy to get wrong here:
+
+- **`briefing.js` takes no arguments and needs no `CLAUDE_PLUGIN_ROOT`.** It
+  reads `$CLAUDE_CONFIG_DIR` (or `~/.claude`) itself. The variable in the
+  plugin's own `hooks.json` only locates the script.
+- **Unwrap the JSON whenever the hook also writes a plain status line.** Claude
+  Code parses stdout as a `hookSpecificOutput` payload only when that is all
+  stdout holds; a payload mixed with prose is parsed as neither. Plain text for
+  both keeps all of it in context. A hook whose stdout is *only* the briefing
+  can print `node "$candidate"` raw — which is what `scripts/session-start.sh`
+  does.
+- **Read from disk only.** The plugin was installed moments earlier by the same
+  hook, so a briefing that cannot be found means that install failed — which the
+  hook already reports. A network fallback hides the real fault.
+
+Report a missing roster rather than passing over it. The rule the status line
+already follows — never claim skills are ready when they are not — applies to
+discovery at a finer grain: skills the agent cannot see are skills it will deny
+having.
+
 ## Prove it cold
 
 A warm re-run passes whatever you did. Only a cold run proves the setup, so wipe
@@ -90,7 +144,10 @@ CLAUDE_CODE_REMOTE=true CLAUDE_PROJECT_DIR=/tmp/coldstart /tmp/coldstart/.claude
 claude plugin list
 ```
 
-Done when `plugin list` shows **every** plugin from `enabledPlugins`, each once.
+Done when `plugin list` shows **every** plugin from `enabledPlugins`, each once,
+**and the hook's stdout carries the roster** — the `# Skills installed in this
+session` heading, with the full entry count under it. A roster that is merely
+short is the silent failure `scripts/test-briefing.sh` exists to catch.
 In this repo `bash scripts/verify-install.sh` answers the same question with an
 exit code, which is the form an agent can branch on.
 Extract the default branch rather than cloning locally: a local clone follows
@@ -99,3 +156,6 @@ your stale local ref and silently tests an old hook.
 Two results worth knowing so you don't re-derive them: plugins install cold in
 about 30s, and they are available in the *same* session the hook installs them —
 no restart needed, despite what `plugin update --help` implies.
+What is *not* available in that session is the plugin's own `SessionStart` hook,
+which is why the briefing has to come from the installing hook instead (see
+*Installing does not brief*).
