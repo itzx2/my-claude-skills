@@ -90,6 +90,57 @@ has '`plug-skill`'                && ok "both invocations still listed"     || b
 echo "== blind spots =="
 has 'cannot see'                  && ok "roster declares its own limits"    || bad "roster still claims completeness"
 
+
+echo "== context budget =="
+# Claude Code caps hook context at 10,000 characters. Over that it writes the
+# output to a file and hands the model only the path plus a 2,000-character
+# preview, and never asks the model to read the file. So a roster that is merely
+# a bit too long is not "a bit truncated": everything past 2,000 is gone. That is
+# how the user-invoked section, the only place those skills appear, silently
+# stopped reaching sessions once the roster grew past the cap.
+budget() { # <label> <config-dir> <hidden-name>...
+  local label="$1" cfg="$2"; shift 2
+  CLAUDE_CONFIG_DIR="$cfg" node "$BRIEFING" | node -e '
+    let s=""; process.stdin.on("data",d=>s+=d).on("end",()=>{
+      let c=""; try { c = JSON.parse(s).hookSpecificOutput.additionalContext; } catch {}
+      const hidden = process.argv.slice(1), fails = [];
+      if (!c) fails.push("no briefing");
+      if (c.length > 10000) fails.push(`${c.length} chars, over the 10,000 cap`);
+      const ui = c.indexOf("## User-invoked");
+      if (ui < 0 || ui > 2000) fails.push(`user-invoked section at ${ui}, outside the 2,000 preview`);
+      const rule = c.indexOf("even when it is absent from your Skill listing");
+      if (rule < 0 || rule > 2000) fails.push(`/name rule at ${rule}, outside the 2,000 preview`);
+      const lost = hidden.filter(h => !c.includes("`/" + h + "`"));
+      if (lost.length) fails.push(`lost ${lost.length} hidden skill(s): ${lost.slice(0,3).join(", ")}`);
+      console.log(fails.join("; ")); process.exit(fails.length ? 1 : 0);
+    });' "$@"
+}
+
+# The real roster: this repo's own skills, installed as the plugin.
+mkdir -p "$TMP/real/plugins"
+# node reads this path, so on Git Bash it must be a drive path, not /d/...
+root_for_node=$(cygpath -m "$ROOT" 2>/dev/null || echo "$ROOT")
+echo "{\"plugins\":{\"my-claude-skills@my-claude-skills\":[{\"installPath\":\"$root_for_node\"}]}}" > "$TMP/real/plugins/installed_plugins.json"
+echo '{}' > "$TMP/real/settings.json"
+real_hidden=$(grep -l '^disable-model-invocation: true' "$ROOT"/skills/*/SKILL.md | sed 's|.*/skills/||;s|/SKILL.md||;s|^|my-claude-skills:|')
+msg=$(budget real "$TMP/real" $real_hidden) && ok "this repo's roster fits the cap, key parts in the preview" || bad "this repo's roster: $msg"
+
+# Headroom: a roster twice today's size must still land. Growth is what broke it.
+mkdir -p "$TMP/big/plugins" "$TMP/bigplug/skills"
+long="Does a great deal of carefully described work across many situations, with caveats, edge cases, trigger phrases, and examples that make this description far longer than a roster line should ever need to be."
+stress_hidden=""
+for i in $(seq 1 70); do
+  d="$TMP/bigplug/skills/model-$i"; mkdir -p "$d"
+  printf -- '---\nname: model-%s\ndescription: %s\n---\n' "$i" "$long" > "$d/SKILL.md"
+done
+for i in $(seq 1 30); do
+  d="$TMP/bigplug/skills/hidden-$i"; mkdir -p "$d"
+  printf -- '---\nname: hidden-%s\ndescription: %s\ndisable-model-invocation: true\n---\n' "$i" "$long" > "$d/SKILL.md"
+  stress_hidden="$stress_hidden big:hidden-$i"
+done
+echo "{\"plugins\":{\"big@market\":[{\"installPath\":\"$TMP/bigplug\"}]}}" > "$TMP/big/plugins/installed_plugins.json"
+echo '{}' > "$TMP/big/settings.json"
+msg=$(budget stress "$TMP/big" $stress_hidden) && ok "100-skill roster still fits, no hidden skill dropped" || bad "stress roster: $msg"
 echo
 printf '%s passed, %s failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

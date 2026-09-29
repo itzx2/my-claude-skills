@@ -297,7 +297,7 @@ function findCollisions({ modelInvocable, userInvoked }) {
  */
 function renderGroup(entries, fmt, describe) {
   const line = ({ qualified, description }) =>
-    description ? `- ${fmt(qualified)} — ${describe(description)}` : `- ${fmt(qualified)}`;
+    description && describe ? `- ${fmt(qualified)} — ${describe(description)}` : `- ${fmt(qualified)}`;
 
   const project = entries.filter((e) => e.source === 'project');
   const rest = entries.filter((e) => e.source !== 'project');
@@ -310,59 +310,76 @@ function renderGroup(entries, fmt, describe) {
   return lines;
 }
 
-function render({ modelInvocable, userInvoked }) {
+/**
+ * Claude Code caps hook context at 10,000 characters. Over that, the model gets
+ * the file path and a 2,000-character preview instead, and nothing asks it to
+ * open the file — so "slightly too long" means "everything past 2,000 is gone".
+ * That is how the user-invoked section, the only place those skills appear,
+ * stopped reaching sessions once the roster outgrew the cap.
+ *
+ * Two defences, both needed: stay under the cap with margin, and put what must
+ * survive regardless — the /name rule and the user-invoked section — inside the
+ * first 2,000 characters. scripts/test-briefing.sh asserts both.
+ */
+const BUDGET = 9500;
+
+function render(roster) {
+  // Shrink only what is safe to lose, in order, until it fits: user-invoked
+  // descriptions first, then the model-invocable list's line breaks. Names are
+  // never dropped — a hidden skill left out is a hidden skill nobody can use.
+  const steps = [[140, false], [90, false], [50, false], [0, false], [0, true]];
+  let out = '';
+  for (const [limit, compact] of steps) {
+    out = renderAt(roster, limit, compact);
+    if (out.length <= BUDGET) break;
+  }
+  return out;
+}
+
+function renderAt({ modelInvocable, userInvoked }, limit, compact) {
   const lines = [
     '# Skills installed in this session',
     '',
-    'Built at session start by walking what is on disk: every enabled plugin, ' +
-      '`~/.claude/skills`, and this project\'s `.claude/skills`.',
+    'Built at session start from what is on disk: every enabled plugin, ' +
+      '`~/.claude/skills`, and this project\'s `.claude/skills`. They encode how ' +
+      'this user wants recurring work done, so prefer a matching skill over ' +
+      'improvising.',
     '',
-    '**What this roster cannot see.** Skills supplied by the harness or the ' +
-      'environment rather than installed on disk — document and data-format ' +
-      'skills, artifact and config helpers, and the like — exist only inside the ' +
-      'running session, so no hook can enumerate them. They are all ' +
-      'model-invocable, so your Skill tool listing already covers them: treat ' +
-      'that listing as authoritative for those, and this roster as ' +
-      'authoritative for anything hidden from it. An absent name means "not ' +
-      'installed on disk", never "does not exist".',
-    '',
-    'These encode how this user wants recurring work done, so prefer a matching ' +
-      'skill over improvising your own approach.',
+    '**When the user types `/<name>`, invoke it via `Skill` with that exact name, ' +
+      'even when it is absent from your Skill listing.** The user-invoked skills ' +
+      'below are hidden from that listing by design. Never tell the user one does ' +
+      'not exist, and never substitute a similar visible name for it.',
     '',
   ];
+
+  if (userInvoked.length) {
+    const describe = limit ? (d) => firstSentence(d, limit) : null;
+    lines.push(
+      '## User-invoked only — recommend, do not start',
+      '',
+      'These set `disable-model-invocation: true`, so this section is the only place ' +
+        'you learn they exist. Never start one yourself. When one would plausibly help ' +
+        'with what the user is doing, name it in a sentence and let them decide — a ' +
+        'skipped suggestion costs one line; an unmentioned skill is never used.',
+      '',
+      ...renderGroup(userInvoked, (q) => `\`/${q}\``, describe),
+      ''
+    );
+  }
 
   if (modelInvocable.length) {
     lines.push(
       '## Model-invocable — you may call these yourself',
       '',
-      'Already in your Skill tool listing with full descriptions. Invoke via `Skill` ' +
-        'as soon as a request matches one, without asking permission first. The list ' +
-        'below is a recall aid, not the authoritative trigger text.',
-      '',
-      ...renderGroup(modelInvocable, (q) => `\`${q}\``, firstSentence),
+      'Already in your Skill tool listing with full descriptions, which is the ' +
+        'authoritative trigger text. Invoke via `Skill` as soon as a request matches.',
       ''
     );
-  }
-
-  if (userInvoked.length) {
-    lines.push(
-      '## User-invoked only — recommend, do not start',
-      '',
-      'These set `disable-model-invocation: true`, so Claude Code hides them from ' +
-        'your Skill listing entirely. **This section is the only place you learn ' +
-        'they exist.** Never start one on your own initiative. Recommending them is ' +
-        'the whole point of listing them, and the user has asked explicitly to hear ' +
-        'about any skill that fits: when one does, name it in a sentence and let ' +
-        'them decide — e.g. "`/my-claude-skills:to-tickets` would break this plan ' +
-        'into tickets if you want it." The test is simple: would running this right ' +
-        'now plausibly help with what the user is doing? Surface every skill that ' +
-        'passes, not just the best one. When you cannot tell, say it anyway — a ' +
-        'suggestion they skip costs one line, while a skill they never hear about is ' +
-        'one they can never use.',
-      '',
-      ...renderGroup(userInvoked, (q) => `\`/${q}\``, (d) => d),
-      ''
-    );
+    if (compact) {
+      lines.push(modelInvocable.map((e) => `\`${e.qualified}\``).join(', '), '');
+    } else {
+      lines.push(...renderGroup(modelInvocable, (q) => `\`${q}\``, null), '');
+    }
   }
 
   const collisions = findCollisions({ modelInvocable, userInvoked });
@@ -370,10 +387,9 @@ function render({ modelInvocable, userInvoked }) {
     lines.push(
       '## ⚠ Installed more than once',
       '',
-      'These names resolve from two places at once. Both invocations work, so ' +
-        'nothing here is broken — but this usually means a half-finished ' +
-        'migration, such as a leftover `~/.claude/skills` symlink alongside the ' +
-        'same skills installed as a plugin. Worth telling the user about once.',
+      'These resolve from two places. Both work, but it usually means a ' +
+        'half-finished migration (e.g. a leftover `~/.claude/skills` symlink beside ' +
+        'the same plugin). Worth telling the user once.',
       '',
       ...collisions.map(
         ({ name, invocations }) => `- \`${name}\` — ${invocations.map((i) => `\`${i}\``).join(' and ')}`
@@ -383,14 +399,11 @@ function render({ modelInvocable, userInvoked }) {
   }
 
   lines.push(
-    'Invocation names above are exact, including any `plugin:` prefix — Claude Code ' +
-      'namespaces plugin-provided skills and leaves loose personal ones bare. Use the ' +
-      'name as written.',
+    '**What this roster cannot see:** skills supplied by the harness rather than ' +
+      'installed on disk. They are all model-invocable, so your Skill listing covers ' +
+      'them. An absent name here means "not installed on disk", never "does not exist".',
     '',
-    'When the user types `/<name>` for any skill above — including the user-invoked ' +
-      'ones — that is them starting it, so invoke it via `Skill` with that exact ' +
-      'name. The restriction is on you starting one unprompted, not on running one ' +
-      'they asked for.'
+    'Names above are exact, including any `plugin:` prefix. Use them as written.'
   );
 
   return lines.join('\n');

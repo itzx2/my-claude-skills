@@ -145,9 +145,13 @@ claude plugin list
 ```
 
 Done when `plugin list` shows **every** plugin from `enabledPlugins`, each once,
-**and the hook's stdout carries the roster** — the `# Skills installed in this
-session` heading, with the full entry count under it. A roster that is merely
-short is the silent failure `scripts/test-briefing.sh` exists to catch.
+**and the roster reached the model** — not merely the hook's stdout. Claude Code
+caps hook context at 10,000 characters; over that it saves the output to a file
+and hands the model a 2,000-character preview, so a roster can be emitted in full
+and still arrive without its user-invoked section. Check what was *delivered*:
+in the session transcript, the `hook_additional_context` entry must hold the
+roster inline, not a `<persisted-output>` notice. `scripts/test-briefing.sh`
+asserts the size budget and that the key parts sit inside the preview.
 In this repo `bash scripts/verify-install.sh` answers the same question with an
 exit code, which is the form an agent can branch on.
 Extract the default branch rather than cloning locally: a local clone follows
