@@ -221,11 +221,11 @@ which is why `ask-matt` reads both.
 
 ## Skills
 
-41 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+42 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
 The leading `/` below is a **marker for that distinction, not the invocation**. Installed as a plugin, every name here is prefixed: `/my-claude-skills:to-spec`, `my-claude-skills:grilling`, and so on. Only the legacy symlink install leaves them bare.
 
-Ten of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), and two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers). See [Vendored skills](#vendored-skills) for what changed on the way in.
+Eleven of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers), and one reverse-engineering skill from [morluto/rea](https://github.com/morluto/rea). See [Vendored skills](#vendored-skills) for what changed on the way in.
 
 - **animate** ⬇ — build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits.
 - **animation-vocabulary** ⬇ — reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in).
@@ -254,6 +254,7 @@ Ten of them are **vendored** — copied in from another repo rather than install
 - **prototype** — build a throwaway prototype to answer a design question.
 - **research** — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
 - **resolving-merge-conflicts** — use when you need to resolve an in-progress git merge/rebase conflict.
+- **reverse-engineer-anything** ⬇ — reverse engineer native, managed, Electron/JavaScript, packaged, and browser applications with REA. Needs REA's MCP server; see [From morluto/rea](#from-morlutorea).
 - **/review-animations** ⬇ — review animation and motion code against a high craft bar; default to flagging, approval is earned.
 - **scrutinize** — outsider-perspective end-to-end review of a plan, PR, or code change.
 - **/setup-matt-pocock-skills** — configure this repo for the engineering skills — set up its issue tracker, triage label vocabulary, and domain doc layout.
@@ -271,9 +272,10 @@ Ten of them are **vendored** — copied in from another repo rather than install
 
 ## Vendored skills
 
-Two upstreams, vendored on different terms. The design-engineering set is
-copied nearly verbatim; the branch-lifecycle pair was rewritten on the way in,
-for the reason recorded under its own heading.
+Three upstreams, vendored on different terms. The design-engineering set is
+copied nearly verbatim; the branch-lifecycle pair was rewritten on the way in;
+the reverse-engineering skill is copied exactly, because it is half of a
+versioned pair. Each heading records why.
 
 ### From emilkowalski/skills
 
@@ -367,3 +369,35 @@ rules — verify a suggestion against this codebase before implementing it, and
 clarify every unclear item before starting any of them — are worth a short
 skill written here, not a vendoring. The other nine superpowers skills all
 duplicate something this repo already does better.
+
+### From morluto/rea
+
+`reverse-engineer-anything`, taken from [morluto/rea](https://github.com/morluto/rea)
+at upstream commit `52bf709` (2026-10-05; skill metadata `version: "23"`).
+MIT-licensed; upstream's `LICENSE` travels with it in the skill directory.
+
+**Copied exactly, not rewritten.** Every file is byte-identical to upstream.
+The skill is the agent-facing half of REA: it routes by target type to tools
+that REA's MCP server provides (`open_binary`,
+`analyze_javascript_application`, `inspect_artifact`, and the rest), and its
+front matter pins the tool catalog it was written against (`tool_count`,
+`catalog_digest`). A local edit would turn a clean re-pull into a merge against
+a catalog that moves often. To update, copy `skills/reverse-engineer-anything/`
+from upstream again and record the new commit here.
+
+**It does nothing on its own.** Without REA's MCP server registered, every tool
+the skill names is missing. Install that once per machine:
+
+```sh
+npx rea-agents setup
+```
+
+Setup also writes REA's own managed copy of this skill to
+`~/.agents/skills/reverse-engineer-anything`. An agent that reads that
+directory as well will list the skill twice; the two are the same text until
+upstream moves past the commit above.
+
+**Platform.** REA supports macOS and Linux. Upstream's README marks Windows
+operations unavailable, so on a Windows machine the skill loads but its tools
+do not run; use WSL or a macOS/Linux host. Native-binary work also needs
+Hopper or Ghidra, which setup can connect.
