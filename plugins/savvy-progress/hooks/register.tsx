@@ -909,10 +909,14 @@ export const register: Register = (on, options) => {
   // Safety net: worker launches move the faint layer even if the orchestrator forgets to report.
   on('tool.call', { tool: 'Agent' }, async ($, e, next) => {
     const type = String(e.subagent_type ?? '')
-    if (!type.startsWith('savvy-')) return next(e)
+    // Patched in my-claude-skills: with autoOpen "any", every subagent starts a flow, so the band and its
+    // reopen button draw even where the progress tool never reaches the model (the desktop app).
+    const isSavvy = type.startsWith('savvy-')
+    if (!isSavvy && options.autoOpen !== 'any') return next(e)
 
     await update($, flow, prev => {
-      const base = prev && !prev.isFinished ? { ...blank(), ...prev } : blank()
+      const fresh = isSavvy ? blank() : { ...blank(), title: 'Subagents' }
+      const base = prev && !prev.isFinished ? { ...blank(), ...prev } : fresh
       return { ...base, running: base.running + 1, phase: base.phase === 'plan' ? 'delegate' : base.phase }
     })
     try {

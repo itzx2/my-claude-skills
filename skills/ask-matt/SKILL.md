@@ -93,7 +93,7 @@ A starting situation that generates work, then merges onto the main flow.
 
 - **`/my-claude-skills:chief-of-staff`** — pursue one goal that outlives any single spec, in one long session. All work runs in background subagents so the session stays in dialogue with you; it hands them context pointers (notes, commits) rather than pasted context, and it works two tracks at once: the task in front of it, and the environment, so the next task goes better. Where `/my-claude-skills:implement-spec` builds one spec's tickets and stops, chief-of-staff keeps the goal. Patched here with savvy-flow's discipline: it picks each subagent's model and effort per task and reads every diff before accepting the work. Experimental upstream, so expect it to change between syncs.
 
-With the `savvy-progress` plugin loaded, both chief-of-staff and `/my-claude-skills:implement-spec` report to its progress bar and agents panel (`/agents-info`), so every subagent's model, steps, cost and time stay visible while they run.
+With the `savvy-progress` plugin loaded, every subagent either of them runs shows in its agents panel (model, context, cost, time), and the Subagents band above the prompt reopens the panel after you close it (`/agents-info` toggles it too). Both skills also report plans and steps to the mod's tools when those are present; the desktop app does not expose them, so there that part is skipped.
 
 ## Codebase health
 

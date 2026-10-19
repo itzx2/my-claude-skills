@@ -18,7 +18,7 @@
     },
     {
       "name": "savvy-progress",
-      "description": "Mod: a progress bar above the prompt and a live agents panel showing every subagent's model, effort, steps, context, cost and time. Vendored from JohnnyVizz/claude-kit; the panel opens whenever any subagent starts.",
+      "description": "Mod: a live agents panel showing every subagent's model, effort, context, cost and time, and a Subagents band above the prompt that reopens it. Vendored from JohnnyVizz/claude-kit; the panel opens whenever any subagent starts.",
       "version": "1.2.1",
       "source": "./plugins/savvy-progress",
       "author": {

@@ -27,12 +27,19 @@ The marketplace holds two plugins:
   `git checkout .` / `git restore .`. Claude Code marks a subagent's tool calls
   with `agent_id`, which is how the hook tells them apart. `reset --hard` stays
   allowed, because `implement-spec`'s implementers reset their own worktrees.
-- **`savvy-progress`** — a mod: a progress bar above the prompt and an agents
-  panel (`/agents-info`) showing every subagent's model, effort, steps,
-  context, cost and time. `chief-of-staff` and `implement-spec` report to it
-  when it is loaded. It is a separate plugin because mods use an early-access
-  API that older Claude Code versions reject, and a refusal should cost only
-  the panel — see [`docs/adr/0005`](docs/adr/0005-the-progress-mod-ships-as-its-own-plugin.md).
+- **`savvy-progress`** — a mod: an agents panel showing every subagent's
+  model, effort, context, cost and time, and a **Subagents** band above the
+  prompt whose `×N` button reopens the panel after you close it
+  (`/agents-info` toggles it too). It is a separate plugin because mods use an
+  early-access API that older Claude Code versions reject, and a refusal
+  should cost only the panel — see [`docs/adr/0005`](docs/adr/0005-the-progress-mod-ships-as-its-own-plugin.md).
+
+  The mod also registers two tools, `progress` (a planned-task bar) and
+  `step` (per-step progress on each subagent's row), and `chief-of-staff` and
+  `implement-spec` call them when present. **The desktop app does not hand
+  them to the model** — tested on 2.1.299, both hot-reloaded and loaded at
+  session start — so there those features are absent and the skills skip
+  them silently. The panel and the band do not depend on them.
 
 ### Invocation names are namespaced
 
@@ -296,8 +303,10 @@ design-engineering set are copied verbatim apart from recorded patches; the
 branch-lifecycle pair was rewritten on the way in, for the reason recorded under
 its own heading; and one plugin, `savvy-progress`, comes from
 [JohnnyVizz/claude-kit](https://github.com/JohnnyVizz/claude-kit) at `c871c15`
-with one patch — its agents panel opens whenever any subagent starts, not only
-savvy-flow's workers. savvy-flow itself is not taken: its review gate and its
+with two patches — its agents panel opens whenever any subagent starts, not
+only savvy-flow's workers, and any subagent launch starts the Subagents band
+that carries the panel's reopen button, which upstream draws only once its
+`progress` tool has been called. savvy-flow itself is not taken: its review gate and its
 per-task model and effort are patched into `chief-of-staff` instead, and
 `implement-spec` already covers ticket orchestration.
 

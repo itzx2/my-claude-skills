@@ -387,7 +387,7 @@
           "path": "plugins/savvy-progress",
           "dest": "plugins/savvy-progress",
           "status": "patched",
-          "note": "A mod (function hooks, early-access API), shipped as its own plugin in this marketplace so an older Claude Code that rejects it loses only the mod. See docs/adr/0005.",
+          "note": "A mod (function hooks, early-access API), shipped as its own plugin in this marketplace so an older Claude Code that rejects it loses only the mod. See docs/adr/0005. In the desktop app (2.1.299) the mod's progress and step tools never reach the model, so only the agents panel and the band from the second patch work there.",
           "patches": [
             {
               "purpose": "Open the agents panel whenever any subagent starts, not only savvy-flow workers, since nothing here ships savvy-flow: autoOpen defaults to any.",
@@ -396,6 +396,23 @@
                 {
                   "file": ".claude-plugin/plugin.json",
                   "contains": "\"default\": \"any\""
+                }
+              ]
+            },
+            {
+              "purpose": "Subagents band: with autoOpen any, every subagent launch starts a flow titled Subagents, so the band and its reopen button draw even where the progress tool never reaches the model. Tested in hooks/subagents-band.test.ts.",
+              "checks": [
+                {
+                  "file": "hooks/register.tsx",
+                  "contains": "options.autoOpen !== 'any'"
+                },
+                {
+                  "file": "hooks/register.tsx",
+                  "contains": "title: 'Subagents'"
+                },
+                {
+                  "file": "hooks/subagents-band.test.ts",
+                  "contains": "any subagent starts a Subagents band"
                 }
               ]
             }
