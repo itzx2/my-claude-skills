@@ -26,6 +26,9 @@ or create-release tool. The release therefore ends with a handoff to a human,
 and the hand-tagging that drifted before is now structural rather than
 accidental. The mitigation is timing, not tooling — tag at the merge, never
 "later" — because the earlier drift came entirely from tags added out of band.
+If tags drift again despite that, the tooling fix is a GitHub Action that tags
+the merge commit whenever `plugin.json`'s version changes on `main`; until then
+the rule stays manual.
 
 Versions `1.3.0` through `1.5.0` stay untagged. They shipped under the opposite
 rule, and back-filling releases for them would mean writing notes after the
