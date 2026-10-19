@@ -21,9 +21,12 @@
  * to this plugin's invocations on the way in (`"tdd"` on a Skill-tool line
  * becomes `"my-claude-skills:tdd"`, `/tdd` becomes `/my-claude-skills:tdd`).
  * A bare name is not reliable: the Skill tool resolves some (`karpathy-
- * guidelines`) and answers "Unknown skill" for others (`prototype`, which a
- * hidden built-in shadows), so every reference is rewritten rather than only
- * the ones known to clash today.
+ * guidelines`) and answers "Unknown skill" for others (`prototype`, which
+ * clashes with a hidden built-in), so every reference is rewritten rather than
+ * only the ones known to clash today.
+ *
+ * A patch may list files it `adds` beside upstream's (a test, say). `take`
+ * keeps them when it replaces the folder, and `check` insists they exist.
  */
 
 'use strict';
@@ -37,6 +40,11 @@ const ROOT = path.resolve(__dirname, '..');
 const RECORD_PATH = path.join(ROOT, 'vendor', 'record.json');
 const CACHE = path.join(os.tmpdir(), 'my-claude-skills-vendor');
 const STATUSES = ['verbatim', 'patched', 'forked', 'absorbed', 'skipped'];
+const SHIPPED = new Set(['verbatim', 'patched', 'forked']); // statuses whose folder ships
+const TAKEN = new Set(['verbatim', 'patched']); // statuses `take` copies in from upstream
+
+const destOf = (skill, e) => e.dest || `skills/${skill}`;
+const addsOf = (e) => (e.patches || []).flatMap((p) => p.adds || []);
 
 const readRecord = () => JSON.parse(fs.readFileSync(RECORD_PATH, 'utf8'));
 const writeRecord = (r) =>
@@ -71,6 +79,8 @@ function clone(name, u, ref) {
 }
 
 const resolve = (dir, ref) => gitText(dir, ['rev-parse', `${ref}^{commit}`]);
+// A branch name means upstream's branch, not the stale local one the clone made.
+const remoteRef = (dir, ref) => (hasCommit(dir, `origin/${ref}`) ? `origin/${ref}` : ref);
 const filesAt = (dir, ref, p) =>
   gitText(dir, ['ls-tree', '-r', '--name-only', ref, '--', p]).split('\n').filter(Boolean);
 const blobAt = (dir, ref, file) => git(dir, ['show', `${ref}:${file}`]);
@@ -138,9 +148,8 @@ const norm = (buf) => buf.toString('utf8').replace(/\r\n/g, '\n');
 function report(name, refArg) {
   const record = readRecord();
   const u = upstreamOf(record, name);
-  const dir = clone(name, u);
-  git(dir, ['fetch', '--quiet', '--tags', 'origin']);
-  const ref = resolve(dir, refArg || 'origin/HEAD');
+  const dir = clone(name, u); // no ref asked for, so this fetches
+  const ref = resolve(dir, refArg ? remoteRef(dir, refArg) : 'origin/HEAD');
   const pin = resolve(dir, u.pin);
   const count = gitText(dir, ['rev-list', '--count', `${pin}..${ref}`]);
   console.log(`${name}: pin ${pin.slice(0, 7)} -> ${ref.slice(0, 7)} (${count} commits)\n`);
@@ -148,7 +157,7 @@ function report(name, refArg) {
   const now = offered(dir, ref, u.discover || 'SKILL.md');
   const lines = { changed: [], moved: [], removed: [], unchanged: [] };
   for (const [skill, e] of Object.entries(u.skills)) {
-    if (!e.path || e.status === 'skipped' && !now.has(skill)) continue;
+    if (!e.path || (e.status === 'skipped' && !now.has(skill))) continue;
     let p = e.path;
     if (!filesAt(dir, ref, p).length) {
       if (now.has(skill)) { lines.moved.push(`  ${skill} [${e.status}]: ${p} -> ${now.get(skill)}`); p = now.get(skill); }
@@ -173,14 +182,18 @@ function take(name, skill, refArg) {
   const u = upstreamOf(record, name);
   const e = u.skills[skill];
   if (!e) throw new Error(`"${skill}" is not in the record for ${name}; add it first`);
-  if (!['verbatim', 'patched'].includes(e.status)) {
+  if (!TAKEN.has(e.status)) {
     throw new Error(`"${skill}" is ${e.status}; only verbatim and patched entries are taken`);
   }
   const dir = clone(name, u, refArg || u.pin);
-  const ref = resolve(dir, refArg || u.pin);
+  const ref = resolve(dir, refArg ? remoteRef(dir, refArg) : u.pin);
   const files = filesAt(dir, ref, e.path);
   if (!files.length) throw new Error(`${e.path} does not exist at ${ref.slice(0, 7)}`);
-  const dest = path.join(ROOT, e.dest || `skills/${skill}`);
+  const dest = path.join(ROOT, destOf(skill, e));
+  // Files a patch adds beside upstream's survive the replacement.
+  const kept = addsOf(e)
+    .filter((f) => fs.existsSync(path.join(dest, f)))
+    .map((f) => [f, fs.readFileSync(path.join(dest, f))]);
   fs.rmSync(dest, { recursive: true, force: true });
   const names = shippedNames().add(skill);
   for (const f of files) {
@@ -188,15 +201,20 @@ function take(name, skill, refArg) {
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, incoming(u, f, blobAt(dir, ref, f), names, record.namespace));
   }
-  console.log(`took ${skill} from ${name}@${ref.slice(0, 7)} (${files.length} files)` +
+  for (const [f, buf] of kept) {
+    fs.mkdirSync(path.dirname(path.join(dest, f)), { recursive: true });
+    fs.writeFileSync(path.join(dest, f), buf);
+  }
+  console.log(`took ${skill} from ${name}@${ref.slice(0, 7)} (${files.length} files` +
+    (kept.length ? `, kept ${kept.length} added by patches` : '') + ')' +
     (e.status === 'patched' ? '; re-apply its patches, then run check' : ''));
 }
 
 function pin(name, refArg) {
   const record = readRecord();
   const u = upstreamOf(record, name);
-  const dir = clone(name, u, refArg);
-  u.pin = resolve(dir, refArg);
+  const dir = clone(name, u); // always fetch: a pin should name upstream as it is now
+  u.pin = resolve(dir, remoteRef(dir, refArg));
   writeRecord(record);
   console.log(`${name} pinned at ${u.pin}`);
 }
@@ -213,7 +231,7 @@ function check(only) {
   const shippedDest = new Set(record.own?.map((n) => `skills/${n}`));
   for (const u of Object.values(record.upstreams)) {
     for (const [s, e] of Object.entries(u.skills)) {
-      if (['verbatim', 'patched', 'forked'].includes(e.status)) shippedDest.add(e.dest || `skills/${s}`);
+      if (SHIPPED.has(e.status)) shippedDest.add(destOf(s, e));
     }
   }
 
@@ -222,11 +240,11 @@ function check(only) {
     let dir = null;
     const at = () => (dir ??= clone(name, u, u.pin));
     for (const [skill, e] of Object.entries(u.skills)) {
-      const rel = e.dest || `skills/${skill}`;
+      const rel = destOf(skill, e);
       const dest = path.join(ROOT, rel);
       const present = fs.existsSync(dest);
       if (!STATUSES.includes(e.status)) { fail(`${skill}: unknown status "${e.status}"`); continue; }
-      if (['verbatim', 'patched', 'forked'].includes(e.status)) {
+      if (SHIPPED.has(e.status)) {
         if (rel.startsWith('skills/')) claimed.add(skill);
         if (!present) { fail(`${skill}: ${e.status} but ${rel} is missing`); continue; }
       } else if (present && !shippedDest.has(rel)) {
@@ -254,10 +272,14 @@ function check(only) {
       }
       for (const patch of e.patches || []) {
         for (const c of patch.checks || []) {
-          const file = path.join(dest, c.file || 'SKILL.md');
+          const where = c.file || 'SKILL.md';
+          const file = path.join(dest, where);
           const t = fs.existsSync(file) ? norm(fs.readFileSync(file)) : '';
-          if (c.contains && !t.includes(c.contains)) fail(`${skill}: patch "${patch.purpose}" not found (${c.file || 'SKILL.md'} lacks "${c.contains}")`);
-          if (c.absent && t.includes(c.absent)) fail(`${skill}: patch "${patch.purpose}" undone (${c.file || 'SKILL.md'} has "${c.absent}")`);
+          if (c.contains && !t.includes(c.contains)) fail(`${skill}: patch "${patch.purpose}" not found (${where} lacks "${c.contains}")`);
+          if (c.absent && t.includes(c.absent)) fail(`${skill}: patch "${patch.purpose}" undone (${where} has "${c.absent}")`);
+        }
+        for (const f of patch.adds || []) {
+          if (!fs.existsSync(path.join(dest, f))) fail(`${skill}: patch adds ${f}, which is missing`);
         }
       }
       if (e.status === 'absorbed') {
@@ -273,10 +295,14 @@ function check(only) {
     for (const n of record.own || []) if (!names.has(n)) fail(`own skill ${n} is missing`);
     const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
     for (const n of names) if (!new RegExp(`\\*\\*/?${n}\\*\\*`).test(readme)) fail(`README does not list ${n}`);
-    const plugin = JSON.parse(fs.readFileSync(path.join(ROOT, '.claude-plugin/plugin.json'), 'utf8'));
+    // Every plugin this marketplace lists carries the same version in both
+    // places: the cache is keyed on it, so drift serves stale files silently.
     const market = JSON.parse(fs.readFileSync(path.join(ROOT, '.claude-plugin/marketplace.json'), 'utf8'));
-    const entry = market.plugins.find((p) => p.name === plugin.name);
-    if (!entry || entry.version !== plugin.version) fail(`marketplace.json version for ${plugin.name} is not ${plugin.version}`);
+    for (const entry of market.plugins) {
+      const manifest = path.join(ROOT, entry.source, '.claude-plugin/plugin.json');
+      const version = fs.existsSync(manifest) ? JSON.parse(fs.readFileSync(manifest, 'utf8')).version : undefined;
+      if (entry.version !== version) fail(`marketplace.json lists ${entry.name} at ${entry.version}, its plugin.json says ${version}`);
+    }
   }
 
   if (fails.length) {

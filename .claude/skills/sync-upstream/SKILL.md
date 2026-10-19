@@ -1,6 +1,6 @@
 ---
 name: sync-upstream
-description: Sync this plugin's vendored skills from an upstream (mattpocock, emilkowalski, superpowers, claude-kit) to a new pin, driven by vendor/record.json and scripts/vendor.js. Use when asked to sync, update or pull skills from an upstream, to vendor a new upstream skill or plugin, or to change a vendored entry's status.
+description: Sync this plugin's vendored skills from an upstream to a new pin, driven by the vendor record. Use when asked to sync an upstream's skills, or to vendor, re-pin or change the status of a vendored skill or plugin.
 ---
 
 # Sync an upstream
@@ -30,7 +30,7 @@ node scripts/vendor.js pin <upstream> <ref>          # usually origin/HEAD
 node scripts/vendor.js take <upstream> <entry>       # each verbatim and patched entry
 ```
 
-`take` replaces the entry's folder with upstream's files at the pin. For an upstream marked `"rewrite": "namespace"` it also rewrites skill references to full invocations, because a bare name is not reliable: the Skill tool resolves some and answers "Unknown skill" for others that a hidden built-in shadows. If the set of shipped skills changed in this sync, take everything a second time so the rewrite sees every name. Delete the folders of entries that are now skipped or absorbed.
+`take` replaces the entry's folder with upstream's files at the pin. For an upstream marked `"rewrite": "namespace"` it also rewrites skill references to full invocations, because a bare name is not reliable: the Skill tool resolves some and answers "Unknown skill" for others that clash with a hidden built-in. Files a patch lists under `adds` (a test of our own, say) are kept when the folder is replaced. If the set of shipped skills changed in this sync, take everything a second time so the rewrite sees every name. Delete the folders of entries that are now skipped or absorbed.
 
 ## 4. Re-apply each patch from its purpose
 

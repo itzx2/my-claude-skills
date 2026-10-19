@@ -298,8 +298,8 @@ sync is the first one the record describes.
 **Skill references are rewritten on the way in.** Matt's skills call each
 other by short name (`call the Skill tool with "tdd"`), and a short name is not
 reliable inside a plugin: the Skill tool resolves `karpathy-guidelines` but
-answers "Unknown skill" for `prototype`, which a hidden Claude Code built-in
-shadows. Every reference becomes its full invocation
+answers "Unknown skill" for `prototype`, which clashes with a hidden Claude
+Code built-in. Every reference becomes its full invocation
 (`"my-claude-skills:tdd"`, `/my-claude-skills:to-spec`), mechanically, so a
 verbatim skill differs from upstream only by that rewrite.
 
