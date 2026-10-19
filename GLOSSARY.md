@@ -3,7 +3,8 @@
 The language for the two things a fresh session lacks and cannot recover on its
 own: which skills it actually has, and what the session before it knew. Both are
 invisible by default — Claude Code hides some skills from the agent entirely,
-and a conversation leaves no trace once it ends.
+and a conversation leaves no trace once it ends. Alongside them, the language
+for where the shipped skills come from.
 
 ## Language
 
@@ -67,3 +68,55 @@ _Avoid_: committed, merged, final, saved
 Where a handoff goes when a newer one replaces it. Nothing reads it — moving a
 file there is the only statement ever made that it is stale.
 _Avoid_: history, old handoffs, previous versions
+
+### Vendoring
+
+**Upstream**:
+A repository this plugin takes skills from rather than writing them here.
+_Avoid_: source, origin, vendor
+
+**Vendored**:
+A skill this plugin ships that came from an upstream, whether verbatim,
+patched or forked.
+_Avoid_: imported, third-party, external
+
+**Pin**:
+The upstream commit a vendored skill was last taken from. Every verbatim or
+patched skill has exactly one.
+_Avoid_: version, baseline, snapshot
+
+**Verbatim**:
+A vendored skill identical to its upstream at the pin, apart from the
+namespace rewrite its upstream may ask for.
+_Avoid_: unmodified, stock, vanilla
+
+**Patched**:
+A vendored skill taken from upstream at the pin with an edit of ours that is
+recorded and re-applied on every sync.
+_Avoid_: modified, customised, tweaked
+
+**Forked**:
+A skill that started from an upstream one but is now maintained here and no
+longer synced; upstream changes reach it only by hand.
+_Avoid_: diverged, rewritten, ours
+
+**Absorbed**:
+Upstream content merged into one of this plugin's own skills or hooks
+instead of shipping as a skill of its own.
+_Avoid_: merged, folded in, inlined
+
+**Sync**:
+Re-taking every verbatim and patched skill from one upstream at a new pin.
+_Avoid_: update, upgrade, pull
+
+**Vendor record**:
+The one file listing every upstream with its pin, and every vendored skill
+with its status and, for a patched one, each edit's purpose and the check that
+proves it landed.
+_Avoid_: manifest, lockfile, registry
+
+**Clash**:
+A short skill name the Skill tool would resolve to something other than this
+plugin's skill, such as a harness built-in of the same name. Vendored
+references to a clashing name are rewritten to its full invocation.
+_Avoid_: collision, conflict, shadowing

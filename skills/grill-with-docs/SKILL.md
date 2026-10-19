@@ -4,4 +4,4 @@ description: A relentless interview to sharpen a plan or design, which also crea
 disable-model-invocation: true
 ---
 
-Run a `/my-claude-skills:grilling` session, using the `my-claude-skills:domain-modeling` skill.
+Call the Skill tool twice, for "my-claude-skills:grilling" and "my-claude-skills:domain-modeling".

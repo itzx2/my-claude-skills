@@ -42,6 +42,8 @@ The completion criterion is coverage: **every roster entry considered**. A skill
 
 Name the exact invocation, say in one sentence what it buys, and give the order when several chain. Recommend every skill that fits, and say when nothing does.
 
+Before stating what a skill does or recommending that one of its steps be skipped, read that skill's `SKILL.md`: the summaries here are for orientation only.
+
 ---
 
 # The map
@@ -50,22 +52,28 @@ Most paths run along one **main flow**, with two **on-ramps** merging onto it. E
 
 ## The main flow: idea → ship
 
-1. **`/my-claude-skills:grill-with-docs`** — sharpen the idea by interview. Start here whenever you are **working in a working directory**: it's stateful, retaining what it learns in `CONTEXT.md` and ADRs. Outside a working directory use `/my-claude-skills:grill-me`. Both run the same `grilling` primitive; `grill-with-docs` leaves the paper trail, so it wins wherever a repo exists to leave it in.
+1. **`/my-claude-skills:grill-with-docs`** — sharpen the idea by interview. Start here whenever you are **working in a working directory**: it's stateful, retaining what it learns in `GLOSSARY.md` and ADRs. Outside a working directory use `/my-claude-skills:grill-me`. Both run the same `grilling` primitive; `grill-with-docs` leaves the paper trail, so it wins wherever a repo exists to leave it in.
 2. **Branch — can you settle every question in conversation?** If a question needs a runnable answer (state, business logic, a UI you have to see), detour through a prototype, bridged by **`/my-claude-skills:handoff`** in both directions:
    - **`/my-claude-skills:handoff`** out, then open a fresh session against that file,
    - **`/my-claude-skills:prototype`** to answer the question with throwaway code,
    - **`/my-claude-skills:handoff`** back what you learned, and reference it from the original idea thread.
 3. **Branch — is this a multi-session build?**
-   - **Yes** → **`/my-claude-skills:to-spec`** (turn the thread into a spec), then **`/my-claude-skills:to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. On a local tracker that's one file per ticket under `.scratch/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed — kick off **`/my-claude-skills:implement`** per ticket, **`/clear`ing context between each one**. Each ticket is self-contained, so the last one's context is disposable.
+   - **Yes** → **`/my-claude-skills:to-spec`** (turn the thread into a spec), then **`/my-claude-skills:to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. Then work the tickets one of two ways:
+     - **`/my-claude-skills:implement`** per ticket, **`/clear`ing context between each one**. On a local tracker that's one file per ticket under `.scratch/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed. Each ticket is self-contained, so the last one's context is disposable.
+     - **`/my-claude-skills:implement-spec`** for the whole spec in one run. It reads the tickets as a **task graph**, runs implementer subagents across the ready **frontier** in parallel, each in its own worktree, and lands everything on one **integration branch**. Reach for it when you'd rather orchestrate the build than drive each ticket yourself.
    - **No** → **`/my-claude-skills:implement`** right here, in the same context window.
 
-   Either way, **`/my-claude-skills:implement`** drives **`/my-claude-skills:tdd`** internally — one red-green slice at a time — then closes out by running **`/my-claude-skills:code-review`** before committing. Reach for **`/my-claude-skills:tdd`** alone to build a concrete behaviour test-first without a full spec, and **`/my-claude-skills:code-review`** alone to review a branch or PR against a fixed point.
+   Either way, the code is built by driving **`/my-claude-skills:tdd`** — one red-green slice at a time — and closes out with **`/my-claude-skills:code-review`**. `/my-claude-skills:implement` runs both per ticket; `/my-claude-skills:implement-spec`'s implementers each drive `tdd`, and it runs one `code-review` over the integration branch. Reach for **`/my-claude-skills:tdd`** alone to build a concrete behaviour test-first without a full spec, and **`/my-claude-skills:code-review`** alone to review a branch or PR against a fixed point.
+
+   When the work goes up as a pull request, **`pr`** shapes the body: the smallest visual that shows the change, before/after evidence that it works, and a one-way or two-way door call. It's model-invoked, so it fires whenever a PR gets written.
 
 4. **The branch lifecycle brackets that step.** **`using-git-worktrees`** opens it — an isolated workspace on a green baseline, so the checkout you were sitting in keeps its state and every later red test is attributable. **`finishing-a-development-branch`** closes it, and is where the chain used to just stop: it verifies the suite on the tree about to be integrated, then puts merge / PR / keep to you and executes the answer, cleaning up only the workspace the first one created. Both fire from `/my-claude-skills:implement`, so on the main flow you get them without asking; reach for `finishing-a-development-branch` by hand when a branch has been sitting finished for a while.
 
+5. **`/my-claude-skills:retro`** closes the loop. After a build, and especially one that went sideways, it looks back over the session and suggests changes to the agent's **environment**, not the code: navigation pointers, automated checks, the coding standards `code-review` enforces, steering files, tooling. Mechanical mistakes become deterministic checks; judgement calls become coding standards.
+
 ### Context hygiene
 
-Keep steps 1–3 in **one unbroken context window** — compact or clear only after `/my-claude-skills:to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/my-claude-skills:implement` then starts fresh from the ticket.
+Keep steps 1–3 in **one unbroken context window** — compact or clear only after `/my-claude-skills:to-tickets` — so the grilling, spec, and tickets all build on the same thinking. Each `/my-claude-skills:implement` then starts fresh from the ticket. Run `/my-claude-skills:retro` in the session it looks back on, before you clear; after clearing, point it at that session's log instead.
 
 The limit is the **[smart zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**: the window (~150k tokens on state-of-the-art models) within which the model still reasons sharply. If a session approaches it before `/my-claude-skills:to-tickets`, `/compact` at the nearest phase boundary and carry on.
 
@@ -75,15 +83,20 @@ A starting situation that generates work, then merges onto the main flow.
 
 - **Bugs and requests piling up** → **`/my-claude-skills:triage`**. Moves issues through triage roles and produces agent-ready issues that **`/my-claude-skills:implement`** later picks up. Triage is for issues **you didn't create** — bug reports, incoming requests, anything arriving raw. Tickets from `/my-claude-skills:to-tickets` are already agent-ready; send those straight to `/my-claude-skills:implement`.
 
-- **Something's broken** → **`/my-claude-skills:diagnosing-bugs`**. For the hard ones: the bug that resists a first glance, the intermittent flake, the regression between two known-good states. It refuses to theorise until it has a **tight feedback loop** — one command that already goes red on *this* bug — then fixes with a regression test. Its post-mortem hands off to **`/my-claude-skills:improve-codebase-architecture`** when the real finding is that there's no good seam to lock the bug down.
+- **Something's broken** → **`/my-claude-skills:diagnosing-bugs`**. For the hard ones: the bug that resists a first glance, the intermittent flake, the regression between two known-good states. It refuses to theorise until it has a **tight feedback loop** — one command that already goes red on *this* bug — then fixes with a regression test. Its post-mortem hands off to **`/my-claude-skills:improve-codebase-architecture`** when the real finding is that there's no good seam to lock the bug down; once the fix is in, run **`/my-claude-skills:retro`** in the same session so the next bug of its kind is caught by a check.
 
 - **A huge, foggy effort, too big for one session** → **`/my-claude-skills:wayfinder`**, the most cognitively demanding flow here. When the way to the destination isn't visible yet, it charts a **shared map** of **decision tickets** and resolves them one at a time — producing **decisions, not deliverables** — until the way is clear. Where `/my-claude-skills:grill-with-docs` sharpens an idea you can hold in one session, wayfinder is for the idea you can't. Save it for exactly that.
 
   When the map clears, **it hands off, it doesn't build**: merge onto the main flow at **`/my-claude-skills:to-spec`**, which collapses the map's linked decisions into a buildable plan, then `/my-claude-skills:to-tickets` and `/my-claude-skills:implement`. Go straight to `/my-claude-skills:implement` only when the effort turned out genuinely small — looping the map into it otherwise throws the linked detail away.
 
+## A long-running goal
+
+- **`/my-claude-skills:chief-of-staff`** — pursue one goal that outlives any single spec, in one long session. All work runs in background subagents so the session stays in dialogue with you; it hands them context pointers (notes, commits) rather than pasted context, and it works two tracks at once: the task in front of it, and the environment, so the next task goes better. Where `/my-claude-skills:implement-spec` builds one spec's tickets and stops, chief-of-staff keeps the goal. Experimental upstream, so expect it to change between syncs.
+
 ## Codebase health
 
 - **`/my-claude-skills:improve-codebase-architecture`** — run in a spare moment to keep the codebase good for agents to operate in. It surfaces **deepening opportunities**; picking one _generates an idea_ for the main flow at `/my-claude-skills:grill-with-docs`. It's the survey that finds candidates; `codebase-design` is the bench you design the chosen one on.
+- **`setup-pre-commit`** and **`/my-claude-skills:setup-ts-deep-modules`** — environment, not features: the first wires Husky, lint-staged, typechecking and tests into a JS/TS repo's commits; the second makes dependency-cruiser enforce deep modules in a TypeScript repo, so each package's internals are reachable only through its entry points. Both are the deterministic checks `/my-claude-skills:retro` and `/my-claude-skills:chief-of-staff` keep asking for.
 
 ## Interface craft
 
@@ -100,7 +113,7 @@ Eight vendored skills covering animation and interface design. Their description
 
 Two model-invoked references running *beneath* the other skills, each the single source of truth for its vocabulary. Reach for them when the **words**, not the process, are the problem.
 
-- **`domain-modeling`** — the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. The discipline `/my-claude-skills:grill-with-docs` drives to keep `CONTEXT.md` a clean glossary.
+- **`domain-modeling`** — the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. The discipline `/my-claude-skills:grill-with-docs` drives to keep `GLOSSARY.md` a clean glossary.
 - **`codebase-design`** — the deep-module vocabulary (module, interface, depth, seam, adapter, leverage, locality) for designing a module's *shape*. `tdd` and `/my-claude-skills:improve-codebase-architecture` both speak it.
 
 ## Phase boundaries
@@ -121,7 +134,6 @@ Read [PHASE-BOUNDARIES.md](PHASE-BOUNDARIES.md) for the ordered tree — the fiv
 Off the main flow. Each line carries what its description omits — reach for the roster's description for the rest.
 
 - **`/my-claude-skills:grill-me`** — the same interview as `/my-claude-skills:grill-with-docs` but **stateless**. For when there is no repo under the work. In a working directory, `grill-with-docs` is strictly better.
-- **`/my-claude-skills:batch-grill-me`** — `grill-me` with the rounds collapsed: every frontier question at once, round by round, instead of one narrow frontier at a time. Reach for it when you already hold the whole design in your head and want the interrogation over in one pass; the round-by-round version is better when each answer genuinely reshapes the next question.
 - **`/my-claude-skills:loop-me`** — grilling aimed specifically at the **specs for workflows you want to build**, inside this workspace. Where `grill-with-docs` sharpens one idea, this one is for repeatedly turning "I want a thing that does X" into a spec you can hand to `/my-claude-skills:to-spec`.
 - **`grilling`** — the interview primitive: rounds, the frontier, facts are the agent's job and decisions are yours. `/my-claude-skills:triage`, `/my-claude-skills:wayfinder` and `/my-claude-skills:improve-codebase-architecture` all run it internally. Reach for it directly to get the interview with no wrapper.
 - **`prototype`** — throwaway is a constraint on how the code is written, not a promise to destroy it: the answer folds into the real code, and the prototype is kept as a **primary source** on a `prototype/<name>` branch off main, pointed at from the implementation issue.
@@ -132,8 +144,7 @@ Off the main flow. Each line carries what its description omits — reach for th
 - **`scrutinize`** — the outsider read on a plan, PR, or change: it questions the *intent* first — would something simpler reach the same goal — then traces the real code path rather than the diff to check the change does what it claims. `code-review` asks "does this match our standards and the spec?"; scrutinize asks "should this exist in this shape at all?" Reach for both on anything hard to reverse.
 - **`karpathy-guidelines`** — the behavioural floor for writing code: surgical changes, surfaced assumptions, verifiable success criteria, no overcomplication. It runs *underneath* `tdd` and `/my-claude-skills:implement` rather than instead of them, and is worth naming explicitly when a session has been sprawling.
 - **`/my-claude-skills:teach`** — for when the goal is *you* understanding something, not the repo changing. Use it when you would otherwise accept a working diff you could not defend.
-- **`resolving-merge-conflicts`** — resolves by **intent** traced to each side's primary source rather than by picking lines, then finishes the operation. It never runs `--abort`.
-- **`/my-claude-skills:project-brain`** — writes the `AGENTS.md` router over a project and scaffolds the four layers beneath it: navigation, vocabulary, decisions, state. On a new project it runs **after** `/my-claude-skills:grill-with-docs`, never before — it routes to `CONTEXT.md` and the ADRs, so those have to exist for it to point at. It then writes standing rules into the router that keep the layers current through ordinary work, so re-run it only when the repo's *shape* changes: a new top-level directory, a layer moving home. Where `writing-for-agents` is the reference for how such a file should read, this is the procedure that produces one.
+- **`/my-claude-skills:project-brain`** — writes the `AGENTS.md` router over a project and scaffolds the four layers beneath it: navigation, vocabulary, decisions, state. On a new project it runs **after** `/my-claude-skills:grill-with-docs`, never before — it routes to `GLOSSARY.md` and the ADRs, so those have to exist for it to point at. It then writes standing rules into the router that keep the layers current through ordinary work, so re-run it only when the repo's *shape* changes: a new top-level directory, a layer moving home. Where `writing-for-agents` is the reference for how such a file should read, this is the procedure that produces one.
 - **`writing-for-agents`** — the reference for writing skills, `AGENTS.md`, and pointed-at docs. Consult it whenever you are editing any of them, including the skills in this map.
 
 ## Precondition

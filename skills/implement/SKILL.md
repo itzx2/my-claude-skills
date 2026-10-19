@@ -6,12 +6,14 @@ disable-model-invocation: true
 
 Implement the work described by the user in the spec or tickets.
 
-Where the work wants isolating from the current checkout, set the workspace up with `using-git-worktrees` before starting.
+If the user passes a ticket reference, fetch it from the issue tracker and state its title before starting. If the reference is ambiguous, ask.
 
-Use /tdd where possible, at pre-agreed seams.
+Where the work wants isolating from the current checkout, call the Skill tool with "my-claude-skills:using-git-worktrees" to set the workspace up before starting.
+
+Call the Skill tool with "my-claude-skills:tdd" where possible, at pre-agreed seams.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
 
-Once done, use /code-review to review the work.
+Once done, call the Skill tool with "my-claude-skills:code-review" to review the work.
 
-Commit your work to the current branch, then hand to `finishing-a-development-branch` to settle where that branch goes.
+Commit your work to the current branch, then call the Skill tool with "my-claude-skills:finishing-a-development-branch" to settle where that branch goes.
