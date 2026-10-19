@@ -52,7 +52,7 @@ All of this happens on invocation. Nothing here is left for the user to remember
    no-op; where both exist, stop and ask.
 2. **Rescue.** If `docs/handoff/` holds a file, read it once — solely to find
    anything still true that lives **nowhere else**. Move each such fact *out* to
-   where it belongs: an ADR, `CONTEXT.md`, the issue it concerns, or a comment
+   where it belongs: an ADR, `GLOSSARY.md`, the issue it concerns, or a comment
    beside the code. Content travels out to a primary source, never into the new
    handoff.
 3. **Archive.** `git mv` every file currently in `docs/handoff/` into

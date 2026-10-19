@@ -117,9 +117,18 @@ already happened. A container's clone can be older than the remote. Run
 bash scripts/test-briefing.sh      # fixture tests for the briefing walk
 bash scripts/test-install-race.sh  # two concurrent installs stay correct
 bash scripts/verify-install.sh     # every skill in skills/ reachable right now
+node scripts/vendor.js check       # vendored skills match the vendor record
 ```
 
-All three exit non-zero on failure.
+All four exit non-zero on failure.
+
+## Vendored skills come from the record
+
+Most of `skills/` is copied from upstreams. Change a vendored skill through
+`vendor/record.json` and the `sync-upstream` skill in `.claude/skills/`, not by
+editing its folder: an edit to a verbatim skill fails `vendor.js check`, and an
+edit to a patched one is lost at the next sync unless it is recorded there as a
+patch.
 
 ## Where the rest is written down
 
@@ -127,9 +136,12 @@ All three exit non-zero on failure.
   hand-maintained skill list. Update that list when you add or remove a skill.
 - **`.claude/PLUGIN-SETUP.md`** — wiring this plugin into another repo, and the
   four `claude plugin` behaviours that each cost a debugging cycle.
-- **`CONTEXT.md`** — the vocabulary, in two clusters: *briefing* (roster,
-  location, tier, hidden, blind spot, invocation, hand-rolled invocation) and
-  *handoff* (live brief, published, archive).
+- **`GLOSSARY.md`** — the vocabulary, in three clusters: *briefing* (roster,
+  location, tier, hidden, blind spot, invocation, hand-rolled invocation),
+  *handoff* (live brief, published, archive) and *vendoring* (upstream, pin,
+  verbatim, patched, forked, absorbed, sync, vendor record, clash).
 - **`docs/adr/`** — decisions worth their reasoning. `0001` records that handoff
-  integrity is instructed rather than enforced, and what that costs.
+  integrity is instructed rather than enforced, and what that costs; `0003`
+  why vendored skills sync from a record; `0004` why the glossary is
+  `GLOSSARY.md`.
 - **`skills/writing-for-agents/`** — the reference for editing any skill here.

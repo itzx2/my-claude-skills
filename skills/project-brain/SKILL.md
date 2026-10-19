@@ -23,7 +23,7 @@ The router is portable by construction: `AGENTS.md` is plain markdown at a conve
 
 **The router holds only what stays true across sessions.** Anything dated belongs to State, and the router points at it. Mixing the two is what makes routers rot.
 
-**One router per context.** A repo with `CONTEXT-MAP.md` at its root holds several bounded contexts, each with its own glossary and decisions. Write a router per context, plus a root router that points at them, and run steps 2–7 once per context. Everything below describes a single context.
+**One router per context.** A repo with `GLOSSARY-MAP.md` at its root holds several bounded contexts, each with its own glossary and decisions. Write a router per context, plus a root router that points at them, and run steps 2–7 once per context. Everything below describes a single context.
 
 ## Steps
 
@@ -32,7 +32,7 @@ The router is portable by construction: `AGENTS.md` is plain markdown at a conve
 Work outside-in, and stop when the picture stops changing:
 
 1. Tree to depth 2, plus every path the manifests name.
-2. The root docs — README, `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, anything sitting at top level.
+2. The root docs — README, `AGENTS.md`, `CLAUDE.md`, `GLOSSARY.md`, anything sitting at top level.
 3. Only the docs those point at. Follow links outward; do not sweep directories.
 4. `git log --oneline -30` where a repo exists.
 
