@@ -1,8 +1,10 @@
 # savvy-progress
 
-A Claude Code mod: a progress bar above the prompt and a live panel of subagents. Made for the [savvy-flow](../savvy-flow) skill, and useful with any subagents.
+A Claude Code mod: a progress bar above the prompt and a live panel of subagents. Made for JohnnyVizz's [savvy-flow](https://github.com/JohnnyVizz/claude-kit/tree/main/plugins/savvy-flow) skill, and useful with any subagents.
 
-- **Progress bar**: the flow's title, phase, accepted tasks out of planned, and a button with the crew size that opens the panel. It appears once something reports progress (savvy-flow does) or a `savvy-*` worker starts.
+> **This copy** is vendored into my-claude-skills with three changes: the panel opens for any subagent (`autoOpen` defaults to `any`); any subagent launch starts a **Subagents** band, so its `×N` button can reopen the panel; and this note. In the Claude desktop app (tested on 2.1.299) the two tools below never reach the model, so there is no planned-task bar and no per-step progress there. The panel and the Subagents band work without them.
+
+- **Progress bar**: the flow's title, phase, accepted tasks out of planned, and a button with the crew size that opens the panel. It appears once something reports progress (savvy-flow does), a `savvy-*` worker starts, or, with `autoOpen: any`, any subagent starts.
 - **Agents panel** (`/agents-info` toggles it; `/agents-info open` opens it or brings it forward without toggling): running, finished and planned subagents with model, effort, task progress, context, estimated cost and time. Working crabs walk, and each savvy tier animates its prop: the astronaut floats, the detective sweeps the magnifier, the engineer turns the wrench, the chef tosses the omelette, the racer runs with a fluttering flag. `prefers-reduced-motion` stops them.
 
 ## Tools it adds
@@ -20,6 +22,6 @@ Cost is a rough estimate from token counts and a built-in per-model price table 
 { "pluginConfigs": { "savvy-progress": { "options": { "language": "ru" } } } }
 ```
 
-`autoOpen`: `savvy` (default) or `any`. With `savvy` the panel opens by itself when a `savvy-*` worker starts or a plan is reported. With `any` it also opens, once per session, when any other subagent starts. `/agents-info` toggles it either way.
+`autoOpen`: `any` (default in this copy) or `savvy`. With `savvy` the panel opens by itself when a `savvy-*` worker starts or a plan is reported. With `any` it also opens, once per session, when any other subagent starts, and any subagent starts the band that reopens it. `/agents-info` toggles it either way.
 
 Install instructions are in the [repository README](../../README.md).

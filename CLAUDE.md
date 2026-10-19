@@ -16,6 +16,13 @@ Two files, one line each, kept identical:
 .claude-plugin/marketplace.json  "version": "1.3.0"
 ```
 
+The marketplace lists a second plugin, `plugins/savvy-progress/`, with the
+same rule: any change under that folder bumps the version in its own
+`.claude-plugin/plugin.json` and in its `marketplace.json` entry. It is a
+vendored copy, so its version is upstream's plus `-mcs.N` (`1.2.1-mcs.1`);
+raise N for a change of ours, and reset it to `-mcs.1` on a new upstream
+version. `node scripts/vendor.js check` fails when the two disagree.
+
 ### Why this is easy to miss
 
 The plugin cache is keyed on the version:

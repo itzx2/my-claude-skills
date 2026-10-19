@@ -391,7 +391,6 @@
           "patches": [
             {
               "purpose": "Open the agents panel whenever any subagent starts, not only savvy-flow workers, since nothing here ships savvy-flow: autoOpen defaults to any.",
-              "file": ".claude-plugin/plugin.json",
               "checks": [
                 {
                   "file": ".claude-plugin/plugin.json",
@@ -414,6 +413,30 @@
                   "file": "hooks/subagents-band.test.ts",
                   "contains": "any subagent starts a Subagents band"
                 }
+              ],
+              "adds": [
+                "hooks/subagents-band.test.ts"
+              ]
+            },
+            {
+              "purpose": "Identify this copy and say what works here: version is upstream plus -mcs.N (bump N on any change to this copy), and plugin.json and README.md say the progress and step tools do not reach the model in the desktop app.",
+              "checks": [
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "contains": "-mcs."
+                },
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "contains": "do not reach the model in the desktop app"
+                },
+                {
+                  "file": "README.md",
+                  "contains": "This copy"
+                },
+                {
+                  "file": "README.md",
+                  "contains": "`any` (default in this copy)"
+                }
               ]
             }
           ]
@@ -421,7 +444,7 @@
         "savvy-flow": {
           "path": "plugins/savvy-flow",
           "status": "skipped",
-          "note": "Its review gate and per-task model/effort were absorbed as patches to chief-of-staff; implement-spec covers ticket orchestration."
+          "note": "Not vendored. Its review gate and per-task model/effort live on as patches to chief-of-staff; implement-spec covers ticket orchestration."
         },
         "session-band": {
           "path": "plugins/session-band",
