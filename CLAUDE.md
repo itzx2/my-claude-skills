@@ -118,9 +118,10 @@ bash scripts/test-briefing.sh      # fixture tests for the briefing walk
 bash scripts/test-install-race.sh  # two concurrent installs stay correct
 bash scripts/verify-install.sh     # every skill in skills/ reachable right now
 node scripts/vendor.js check       # vendored skills match the vendor record
+bash scripts/test-guard.sh         # the subagent git guard blocks and allows the right commands
 ```
 
-All four exit non-zero on failure.
+All five exit non-zero on failure.
 
 ## Vendored skills come from the record
 
@@ -143,5 +144,5 @@ patch.
 - **`docs/adr/`** — decisions worth their reasoning. `0001` records that handoff
   integrity is instructed rather than enforced, and what that costs; `0003`
   why vendored skills sync from a record; `0004` why the glossary is
-  `GLOSSARY.md`.
+  `GLOSSARY.md`; `0005` why the progress mod is a plugin of its own.
 - **`skills/writing-for-agents/`** — the reference for editing any skill here.
