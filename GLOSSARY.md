@@ -86,7 +86,8 @@ patched skill has exactly one.
 _Avoid_: version, baseline, snapshot
 
 **Verbatim**:
-A vendored skill identical to its upstream at the pin.
+A vendored skill identical to its upstream at the pin, apart from the
+namespace rewrite its upstream may ask for.
 _Avoid_: unmodified, stock, vanilla
 
 **Patched**:
@@ -100,8 +101,8 @@ longer synced; upstream changes reach it only by hand.
 _Avoid_: diverged, rewritten, ours
 
 **Absorbed**:
-Upstream content merged into one of this plugin's own skills instead of
-shipping as a skill of its own.
+Upstream content merged into one of this plugin's own skills or hooks
+instead of shipping as a skill of its own.
 _Avoid_: merged, folded in, inlined
 
 **Sync**:
