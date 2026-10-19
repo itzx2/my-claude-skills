@@ -9,6 +9,7 @@ This repo is a Claude Code plugin marketplace. Install it:
 ```sh
 claude plugin marketplace add https://github.com/itzx2/my-claude-skills.git
 claude plugin install my-claude-skills@my-claude-skills
+claude plugin install savvy-progress@my-claude-skills
 ```
 
 That installs at **user scope**, so the skills load in every session in every
@@ -17,6 +18,28 @@ Code afterwards — skills are enumerated once, at session start.
 
 No clone, no symlink, no Administrator shell on Windows. Update later with
 `claude plugin update my-claude-skills`.
+
+The marketplace holds two plugins:
+
+- **`my-claude-skills`** — the skills, the briefing, and the **subagent git
+  guard**: a `PreToolUse` hook that stops *subagents* (never the main session)
+  from running `git push`, `git clean -f`, `git branch -D`, or
+  `git checkout .` / `git restore .`. Claude Code marks a subagent's tool calls
+  with `agent_id`, which is how the hook tells them apart. `reset --hard` stays
+  allowed, because `implement-spec`'s implementers reset their own worktrees.
+- **`savvy-progress`** — a mod: an agents panel showing every subagent's
+  model, effort, context, cost and time, and a **Subagents** band above the
+  prompt whose `×N` button reopens the panel after you close it
+  (`/agents-info` toggles it too). It is a separate plugin because mods use an
+  early-access API that older Claude Code versions reject, and a refusal
+  should cost only the panel — see [`docs/adr/0005`](docs/adr/0005-the-progress-mod-ships-as-its-own-plugin.md).
+
+  The mod also registers two tools, `progress` (a planned-task bar) and
+  `step` (per-step progress on each subagent's row), and `chief-of-staff` and
+  `implement-spec` call them when present. **The desktop app does not hand
+  them to the model** — tested on 2.1.299, both hot-reloaded and loaded at
+  session start — so there those features are absent and the skills skip
+  them silently. The panel and the band do not depend on them.
 
 ### Invocation names are namespaced
 
@@ -275,10 +298,17 @@ Forty-two of them are **vendored** — copied in from another repo rather than i
 
 ## Vendored skills
 
-Three upstreams, vendored on different terms. Matt's engineering set and the
+Four upstreams, vendored on different terms. Matt's engineering set and the
 design-engineering set are copied verbatim apart from recorded patches; the
 branch-lifecycle pair was rewritten on the way in, for the reason recorded under
-its own heading.
+its own heading; and one plugin, `savvy-progress`, comes from
+[JohnnyVizz/claude-kit](https://github.com/JohnnyVizz/claude-kit) at `c871c15`
+with two patches — its agents panel opens whenever any subagent starts, not
+only savvy-flow's workers, and any subagent launch starts the Subagents band
+that carries the panel's reopen button, which upstream draws only once its
+`progress` tool has been called. savvy-flow itself is not taken: its review gate and its
+per-task model and effort are patched into `chief-of-staff` instead, and
+`implement-spec` already covers ticket orchestration.
 
 [`vendor/record.json`](vendor/record.json) is the **vendor record**: each
 upstream's repo and pin, and every entry's status — verbatim, patched, forked,
@@ -305,7 +335,12 @@ verbatim skill differs from upstream only by that rewrite.
 
 **Patched:** `implement` gets the branch lifecycle back —
 `using-git-worktrees` before starting, `finishing-a-development-branch` after
-committing.
+committing. `chief-of-staff` gets savvy-flow's discipline: a five-level ladder
+for picking each subagent's model and effort, a review gate (read the diff,
+accept or return with defects, two returns at most), and progress reporting
+to `savvy-progress`. `implement-spec` gets the progress reporting only; its
+quality comes from `tdd` per ticket and one `code-review` at the end, as
+upstream designed it.
 
 **Forked:** `ask-matt` routes this plugin's whole roster, so his new routes are
 merged into it by hand each sync. `handoff` is the live-brief system and shares
@@ -315,10 +350,14 @@ nothing with upstream's temp-directory handoff.
 `loop-me` and `setup-ts-deep-modules` (experimental upstream), and
 `setup-pre-commit` (frozen upstream).
 
+**Absorbed:** `git-guardrails-claude-code` became the subagent git guard in
+`hooks/subagent-git-guard.js` — rewritten in Node, because upstream's bash
+script needs `jq` and, without it, silently allows everything; narrowed to
+subagents; and always on, so no repo needs setting up.
+
 **Not taken:** `writing-beats`, `writing-fragments`, `writing-shape`,
-`migrate-to-shoehorn`, `scaffold-exercises`, and for now
-`git-guardrails-claude-code`. `resolving-merge-conflicts` and `batch-grill-me`
-were dropped here after upstream removed them.
+`migrate-to-shoehorn` and `scaffold-exercises`. `resolving-merge-conflicts` and
+`batch-grill-me` were dropped here after upstream removed them.
 
 **Following upstream's rename:** the domain glossary is `GLOSSARY.md`, not
 `CONTEXT.md` — see [`docs/adr/0004`](docs/adr/0004-follow-upstream-to-glossary-md.md).

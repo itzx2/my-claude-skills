@@ -16,6 +16,10 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 
 **Implementer subagents** should be run in the background where possible for maximum concurrency.
 
+## Progress panel
+
+When `mcp__savvy-progress__progress` is among your tools (load it with ToolSearch if it is deferred), report the tickets as the plan once you have read them: `title` (the spec, in a few words), `total`, `tasks` (one `{ title, tier: "medium", after }` per ticket, `after` holding its blockers' numbers) and `phase: "delegate"`. Report `done` as each ticket merges and `finished: true` at step 8. Pass each ticket's title verbatim as the Agent tool's `description`, so the panel matches runs to tickets, and add this line to every implementer's brief: "If `mcp__savvy-progress__step` is among your tools (load it with ToolSearch if it is deferred), call it before any other work with `total` (your plan in 3-8 steps) and `done: 0`, then again with `done` and a few-word `note` as each step finishes." Skip all of this silently when the tools are absent.
+
 ## Steps
 
 1. Read the spec and tickets to understand the task graph.

@@ -8,7 +8,8 @@
     }
   },
   "enabledPlugins": {
-    "my-claude-skills@my-claude-skills": true
+    "my-claude-skills@my-claude-skills": true,
+    "savvy-progress@my-claude-skills": true
   },
   "hooks": {
     "SessionStart": [

@@ -1,0 +1,37 @@
+{
+  "name": "savvy-progress",
+  "version": "1.2.1-mcs.1",
+  "description": "Agents panel (/agents-info) showing every subagent with model, context, cost and time, plus a band above the prompt that reopens it. Vendored into my-claude-skills from JohnnyVizz/claude-kit; its progress and step tools do not reach the model in the desktop app.",
+  "author": {
+    "name": "johnnyvizz",
+    "url": "https://github.com/johnnyvizz"
+  },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "language": {
+      "type": "string",
+      "title": "Panel language",
+      "description": "auto follows Claude Code's language setting, then the system locale; en, ru or he (Hebrew, drawn right to left)",
+      "default": "auto",
+      "options": [
+        "auto",
+        "en",
+        "ru",
+        "he"
+      ]
+    },
+    "autoOpen": {
+      "type": "string",
+      "title": "Open the agents panel",
+      "description": "savvy: when a savvy-flow worker starts or a plan is reported; any: also when any other subagent starts",
+      "default": "any",
+      "options": [
+        "savvy",
+        "any"
+      ]
+    }
+  },
+  "homepage": "https://github.com/johnnyvizz/claude-kit/tree/main/plugins/savvy-progress",
+  "repository": "https://github.com/johnnyvizz/claude-kit",
+  "license": "MIT"
+}

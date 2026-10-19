@@ -16,6 +16,13 @@ Two files, one line each, kept identical:
 .claude-plugin/marketplace.json  "version": "1.3.0"
 ```
 
+The marketplace lists a second plugin, `plugins/savvy-progress/`, with the
+same rule: any change under that folder bumps the version in its own
+`.claude-plugin/plugin.json` and in its `marketplace.json` entry. It is a
+vendored copy, so its version is upstream's plus `-mcs.N` (`1.2.1-mcs.1`);
+raise N for a change of ours, and reset it to `-mcs.1` on a new upstream
+version. `node scripts/vendor.js check` fails when the two disagree.
+
 ### Why this is easy to miss
 
 The plugin cache is keyed on the version:
@@ -118,9 +125,10 @@ bash scripts/test-briefing.sh      # fixture tests for the briefing walk
 bash scripts/test-install-race.sh  # two concurrent installs stay correct
 bash scripts/verify-install.sh     # every skill in skills/ reachable right now
 node scripts/vendor.js check       # vendored skills match the vendor record
+bash scripts/test-guard.sh         # the subagent git guard blocks and allows the right commands
 ```
 
-All four exit non-zero on failure.
+All five exit non-zero on failure.
 
 ## Vendored skills come from the record
 
@@ -143,5 +151,5 @@ patch.
 - **`docs/adr/`** — decisions worth their reasoning. `0001` records that handoff
   integrity is instructed rather than enforced, and what that costs; `0003`
   why vendored skills sync from a record; `0004` why the glossary is
-  `GLOSSARY.md`.
+  `GLOSSARY.md`; `0005` why the progress mod is a plugin of its own.
 - **`skills/writing-for-agents/`** — the reference for editing any skill here.
