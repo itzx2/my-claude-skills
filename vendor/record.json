@@ -488,6 +488,27 @@
                   "contains": "record ownership and source as Unverified"
                 }
               ]
+            },
+            {
+              "purpose": "Rewrite optional upstream references to roblox-monetization, roblox-npc-ai in references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
+              "checks": [
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-monetization`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-npc-ai`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-npc-ai/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": " `roblox-monetization`"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": " `roblox-npc-ai`"
+                }
+              ]
             }
           ]
         },
@@ -541,6 +562,67 @@
                   "contains": "end)\n        if shouldStop() then\n            return false, \"shutdown\"\n        end\n        if ok then"
                 }
               ]
+            },
+            {
+              "purpose": "Rewrite optional upstream references to roblox-server-data, roblox-cloud, roblox-analytics, roblox-monetization in SKILL.md and references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
+              "checks": [
+                {
+                  "file": "SKILL.md",
+                  "contains": "[`roblox-server-data`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/references/full.md)"
+                },
+                {
+                  "file": "SKILL.md",
+                  "contains": "[`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md)"
+                },
+                {
+                  "file": "SKILL.md",
+                  "contains": "[`roblox-analytics`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/references/full.md)"
+                },
+                {
+                  "file": "SKILL.md",
+                  "absent": " `roblox-server-data`"
+                },
+                {
+                  "file": "SKILL.md",
+                  "absent": " `roblox-cloud`"
+                },
+                {
+                  "file": "SKILL.md",
+                  "absent": " `roblox-analytics`"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-server-data`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-monetization`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-analytics`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": " `roblox-server-data`"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": " `roblox-cloud`"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": " `roblox-monetization`"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": " `roblox-analytics`"
+                }
+              ]
             }
           ]
         },
@@ -571,6 +653,19 @@
                 }
               ],
               "purpose": "Clarify the curated boundary and point optional upstream references to an immutable source index; the live skill roster determines whether another source supplies a skill."
+            },
+            {
+              "purpose": "Rewrite optional upstream references to roblox-tooling in references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
+              "checks": [
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-tooling`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-tooling/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": "(`roblox-tooling`"
+                }
+              ]
             }
           ]
         },
@@ -662,6 +757,23 @@
               "checks": [
                 {
                   "contains": "follow /my-claude-skills:roblox-architecture; preserve authored hierarchy and geometry when wiring behavior, and treat redesign as separate scope."
+                }
+              ]
+            },
+            {
+              "purpose": "Rewrite optional upstream references to roblox-input in references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
+              "checks": [
+                {
+                  "file": "references/full.md",
+                  "contains": "[`roblox-input`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/references/full.md)"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": "(`roblox-input`"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": " `roblox-input`"
                 }
               ]
             }
