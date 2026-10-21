@@ -516,6 +516,31 @@
                   "contains": "follow /my-claude-skills:roblox-architecture before adding or replacing a persistence owner."
                 }
               ]
+            },
+            {
+              "purpose": "Make the illustrative readPlayer retry example stop between attempts using the existing persistence owner lifecycle predicate, return an explicit shutdown result, and skip the final backoff without adding a BindToClose owner.",
+              "checks": [
+                {
+                  "file": "references/full.md",
+                  "contains": "shouldStop: () -> boolean"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "return false, \"shutdown\""
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "if attempt < 4 then"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "GetAsync` already in flight cannot be cancelled"
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "end)\n        if shouldStop() then\n            return false, \"shutdown\"\n        end\n        if ok then"
+                }
+              ]
             }
           ]
         },

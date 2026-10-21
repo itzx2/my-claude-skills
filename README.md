@@ -374,7 +374,7 @@ Six complete skill folders are pinned to [v2.3.1 at `ceee4aa`](https://github.co
 
 The upstream is MIT licensed. Its tracked root license is preserved byte-for-byte at [`vendor/licenses/roblox-brain-LICENSE`](vendor/licenses/roblox-brain-LICENSE); the vendor record records the repository, release, commit, and license provenance.
 
-**Patched:** the six entry points describe the partial-library boundary. Architecture requires repository and target Studio source discovery before adding or replacing persistence or authored UI owners, with an explicit Unverified state when readback is unavailable. Studio MCP points to that check and distinguishes a missing live Studio connection from repository review.
+**Patched:** the six entry points describe the partial-library boundary. Architecture requires repository and target Studio source discovery before adding or replacing persistence or authored UI owners, with an explicit Unverified state when readback is unavailable. Studio MCP points to that check and distinguishes a missing live Studio connection from repository review. The Data persistence example accepts the existing owner’s shutdown predicate and skips backoff after its final retry.
 
 **Requirements:** these skills include no executable resources or additional runtime dependencies. A connected Studio is needed for live verification; no connection blocks that evidence only and does not prevent offline source review.
 

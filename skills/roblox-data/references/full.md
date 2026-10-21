@@ -92,32 +92,45 @@ Every nested table must be rebuilt per call so no two profiles share a subtable.
 
 ## 3. Read with bounded retries
 
-Retries must be finite and observable. Use exponential backoff with jitter and stop when the server is shutting down.
+Retries must be finite and observable. Use exponential backoff with jitter. The caller supplies `shouldStop` from the existing persistence owner’s lifecycle state; do not add a second shutdown owner.
 
 ```luau
 local DataStoreService = game:GetService("DataStoreService")
 local store = DataStoreService:GetDataStore("PlayerData_v3")
 
-local function readPlayer(userId: number): (boolean, any)
+local function readPlayer(userId: number, shouldStop: () -> boolean): (boolean, any)
     local key = "player_" .. tostring(userId)
     local delaySeconds = 1
 
     for attempt = 1, 4 do
+        if shouldStop() then
+            return false, "shutdown"
+        end
+
         local ok, value = pcall(function()
             return store:GetAsync(key)
         end)
+        if shouldStop() then
+            return false, "shutdown"
+        end
         if ok then
             return true, value
         end
-        task.wait(delaySeconds + math.random() * 0.25)
-        delaySeconds *= 2
+
+        if attempt < 4 then
+            if shouldStop() then
+                return false, "shutdown"
+            end
+            task.wait(delaySeconds + math.random() * 0.25)
+            delaySeconds *= 2
+        end
     end
 
     return false, nil
 end
 ```
 
-A failed read is not an empty profile. Keep the player in a safe loading state or fail the join rather than overwriting an existing record with defaults.
+A failed read is not an empty profile. Keep the player in a safe loading state or fail the join rather than overwriting an existing record with defaults. `GetAsync` already in flight cannot be cancelled; the caller passes the existing owner’s shutdown predicate, and this helper creates no `BindToClose` owner.
 
 ### The 4-second read cache (`DataStoreGetOptions.UseCache`)
 
