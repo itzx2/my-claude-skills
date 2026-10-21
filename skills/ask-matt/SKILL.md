@@ -118,6 +118,17 @@ Two model-invoked references running *beneath* the other skills, each the single
 - **`domain-modeling`** — the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. The discipline `/my-claude-skills:grill-with-docs` drives to keep `GLOSSARY.md` a clean glossary.
 - **`codebase-design`** — the deep-module vocabulary (module, interface, depth, seam, adapter, leverage, locality) for designing a module's *shape*. `tdd` and `/my-claude-skills:improve-codebase-architecture` both speak it.
 
+## Roblox development
+
+These six model-invoked routes cover the plugin-bundled Roblox subset. References to other Roblox Brain skills are optional upstream reading unless independently present in the live skill roster; use that roster to check whether another source supplies one.
+
+- **`my-claude-skills:roblox-architecture`** — choose ownership, module boundaries, startup, and integration. Inspect the repository and target Studio source before proposing replacements.
+- **`my-claude-skills:roblox-data`** — implement or debug player saves, migrations, session ownership, and shutdown behavior.
+- **`my-claude-skills:roblox-gui`** — build or fix responsive Roblox UI across screen sizes, states, and input methods.
+- **`my-claude-skills:roblox-networking`** — design and validate remotes, server authority, rate limits, and untrusted input.
+- **`my-claude-skills:roblox-security`** — audit exploit surfaces across authority, movement, economy, remotes, and data.
+- **`my-claude-skills:roblox-studio-mcp`** — inspect or change a connected Studio, create assets, or run playtests. A missing Studio connection blocks live verification; use offline project evidence and state what remains Unverified.
+
 ## Phase boundaries
 
 A **phase** is a chunk of work inside a session — the grilling, the implementation, the QA. At the **boundary** between two, you have five options, and picking between them is the fuzziest decision in this map:

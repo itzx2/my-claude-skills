@@ -244,11 +244,11 @@ which is why `ask-matt` reads both.
 
 ## Skills
 
-45 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+51 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
 The leading `/` below is a **marker for that distinction, not the invocation**. Installed as a plugin, every name here is prefixed: `/my-claude-skills:to-spec`, `my-claude-skills:grilling`, and so on. Only the legacy symlink install leaves them bare.
 
-Forty-two of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: thirty-two engineering and productivity skills from [mattpocock/skills](https://github.com/mattpocock/skills), eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), and two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers). [`vendor/record.json`](vendor/record.json) says which upstream, pin and status each one has; see [Vendored skills](#vendored-skills) for what changed on the way in.
+Forty-eight of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: thirty-two engineering and productivity skills from [mattpocock/skills](https://github.com/mattpocock/skills), eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers), and six focused Roblox skills from [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain). [`vendor/record.json`](vendor/record.json) says which upstream, pin and status each one has; see [Vendored skills](#vendored-skills) for what changed on the way in.
 
 - **animate** ⬇ — build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits.
 - **animation-vocabulary** ⬇ — reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in).
@@ -278,6 +278,12 @@ Forty-two of them are **vendored** — copied in from another repo rather than i
 - **/project-brain** — scaffold a project's `AGENTS.md` router and domain model so any agent can orient cold.
 - **prototype** ⬇ — build a throwaway prototype to answer a design question.
 - **research** ⬇ — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
+- **roblox-architecture** ⬇ — map feature ownership, code layout, dependencies, startup, and client/server boundaries in a Roblox project.
+- **roblox-data** ⬇ — design and debug Roblox player persistence, schemas, migrations, session ownership, retries, and budgets.
+- **roblox-gui** ⬇ — build and verify Roblox screen, surface, and world UI across devices, input methods, and states.
+- **roblox-networking** ⬇ — validate server-authoritative Roblox remotes, rate limits, ownership, and failure behavior.
+- **roblox-security** ⬇ — audit Roblox authority, remotes, movement, economy, and data flows for exploit resistance.
+- **roblox-studio-mcp** ⬇ — use Studio MCP for inspection, edits, assets, playtests, and evidence.
 - **/retro** ⬇ — look back over a coding session and suggest changes to the agent's environment: checks, coding standards, steering files.
 - **/review-animations** ⬇ — review animation and motion code against a high craft bar; default to flagging, approval is earned.
 - **scrutinize** — outsider-perspective end-to-end review of a plan, PR, or code change.
@@ -298,7 +304,7 @@ Forty-two of them are **vendored** — copied in from another repo rather than i
 
 ## Vendored skills
 
-Four upstreams, vendored on different terms. Matt's engineering set and the
+Five upstreams, vendored on different terms. Matt's engineering set and the
 design-engineering set are copied verbatim apart from recorded patches; the
 branch-lifecycle pair was rewritten on the way in, for the reason recorded under
 its own heading; and one plugin, `savvy-progress`, comes from
@@ -361,6 +367,16 @@ subagents; and always on, so no repo needs setting up.
 
 **Following upstream's rename:** the domain glossary is `GLOSSARY.md`, not
 `CONTEXT.md` — see [`docs/adr/0004`](docs/adr/0004-follow-upstream-to-glossary-md.md).
+
+### From TabooHarmony/roblox-brain
+
+Six complete skill folders are pinned to [v2.3.1 at `ceee4aa`](https://github.com/TabooHarmony/roblox-brain/tree/ceee4aaa5004502e2a51d78b3c33bba44d84742b): architecture, security, networking, player data, GUI, and Studio MCP. The vendor record marks these six as patched for the curated subset. Other offered skills are recorded as skipped for this phase, and optional references use the pinned upstream index.
+
+The upstream is MIT licensed. Its tracked root license is preserved byte-for-byte at [`vendor/licenses/roblox-brain-LICENSE`](vendor/licenses/roblox-brain-LICENSE); the vendor record records the repository, release, commit, and license provenance.
+
+**Patched:** the six entry points describe the partial-library boundary. Architecture requires repository and target Studio source discovery before adding or replacing persistence or authored UI owners, with an explicit Unverified state when readback is unavailable. Studio MCP points to that check and distinguishes a missing live Studio connection from repository review.
+
+**Requirements:** these skills include no executable resources or additional runtime dependencies. A connected Studio is needed for live verification; no connection blocks that evidence only and does not prevent offline source review.
 
 ### From emilkowalski/skills
 
