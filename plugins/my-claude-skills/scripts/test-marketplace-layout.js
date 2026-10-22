@@ -26,7 +26,7 @@ for (const entry of marketplace.plugins) {
   assert.equal(manifest.version, entry.version);
   assert.equal(Object.hasOwn(manifest, 'types'), false, `${entry.name}: unsupported top-level types field`);
   if (entry.name === 'my-claude-skills') {
-    assert.equal(fs.readdirSync(path.join(source, 'skills')).filter(name => fs.existsSync(path.join(source, 'skills', name, 'SKILL.md'))).length, 74);
+    assert.equal(fs.readdirSync(path.join(source, 'skills')).filter(name => fs.existsSync(path.join(source, 'skills', name, 'SKILL.md'))).length, 75);
   }
 }
 console.log('✔ both marketplace sources have one correctly placed manifest and matching metadata');
