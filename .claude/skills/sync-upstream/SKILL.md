@@ -42,6 +42,17 @@ Use the report's commits as the list. `ask-matt` always needs this: every user-r
 
 ## 6. Check, then release
 
+After updating the record, skill roster, README, and matching manifest versions,
+refresh the source-linked README catalog and isolated marketplace payload:
+
+```sh
+node scripts/vendor-catalog.js generate
+node scripts/marketplace-payload.js generate
+```
+
+Commit generated files with the source changes. Root sources remain authoritative;
+do not edit their copies in `plugins/my-claude-skills/`.
+
 ```sh
 node scripts/vendor.js check
 ```

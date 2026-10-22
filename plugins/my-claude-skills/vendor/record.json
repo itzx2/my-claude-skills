@@ -1,0 +1,626 @@
+{
+  "$about": "The vendor record: every upstream this plugin takes skills from, its pin, and the status of each entry. Read by scripts/vendor.js and by the sync-upstream skill. Statuses: verbatim (identical to upstream at the pin, after the namespace rewrite where the upstream asks for it), patched (upstream plus recorded edits re-applied on every sync), forked (maintained here, no longer synced), absorbed (its content lives in another file here), skipped (deliberately not shipped).",
+  "namespace": "my-claude-skills",
+  "own": [
+    "karpathy-guidelines",
+    "project-brain",
+    "scrutinize"
+  ],
+  "upstreams": {
+    "mattpocock": {
+      "repo": "https://github.com/mattpocock/skills.git",
+      "pin": "49dd158d1076134a641b33efb035946536778336",
+      "rewrite": "namespace",
+      "skills": {
+        "code-review": {
+          "path": "skills/engineering/code-review",
+          "status": "verbatim"
+        },
+        "codebase-design": {
+          "path": "skills/engineering/codebase-design",
+          "status": "verbatim"
+        },
+        "diagnosing-bugs": {
+          "path": "skills/engineering/diagnosing-bugs",
+          "status": "verbatim"
+        },
+        "domain-modeling": {
+          "path": "skills/engineering/domain-modeling",
+          "status": "verbatim"
+        },
+        "grill-with-docs": {
+          "path": "skills/engineering/grill-with-docs",
+          "status": "verbatim"
+        },
+        "implement-spec": {
+          "path": "skills/engineering/implement-spec",
+          "status": "patched",
+          "patches": [
+            {
+              "purpose": "Drive the savvy-progress mod when it is loaded: report the tickets as the plan and each merge as done, match runs to tickets by title, and tell each implementer to report its steps. No review gate: tdd per ticket and the final code-review stay upstream's design.",
+              "checks": [
+                {
+                  "contains": "mcp__savvy-progress__progress"
+                },
+                {
+                  "contains": "mcp__savvy-progress__step"
+                }
+              ]
+            }
+          ]
+        },
+        "improve-codebase-architecture": {
+          "path": "skills/engineering/improve-codebase-architecture",
+          "status": "verbatim"
+        },
+        "pr": {
+          "path": "skills/engineering/pr",
+          "status": "verbatim"
+        },
+        "prototype": {
+          "path": "skills/engineering/prototype",
+          "status": "verbatim"
+        },
+        "research": {
+          "path": "skills/engineering/research",
+          "status": "verbatim"
+        },
+        "retro": {
+          "path": "skills/engineering/retro",
+          "status": "verbatim"
+        },
+        "setup-matt-pocock-skills": {
+          "path": "skills/engineering/setup-matt-pocock-skills",
+          "status": "verbatim"
+        },
+        "tdd": {
+          "path": "skills/engineering/tdd",
+          "status": "verbatim"
+        },
+        "to-spec": {
+          "path": "skills/engineering/to-spec",
+          "status": "verbatim"
+        },
+        "to-tickets": {
+          "path": "skills/engineering/to-tickets",
+          "status": "verbatim"
+        },
+        "triage": {
+          "path": "skills/engineering/triage",
+          "status": "verbatim"
+        },
+        "wayfinder": {
+          "path": "skills/engineering/wayfinder",
+          "status": "verbatim"
+        },
+        "wizard": {
+          "path": "skills/engineering/wizard",
+          "status": "verbatim"
+        },
+        "grill-me": {
+          "path": "skills/productivity/grill-me",
+          "status": "verbatim"
+        },
+        "grilling": {
+          "path": "skills/productivity/grilling",
+          "status": "verbatim"
+        },
+        "teach": {
+          "path": "skills/productivity/teach",
+          "status": "verbatim"
+        },
+        "to-questionnaire": {
+          "path": "skills/productivity/to-questionnaire",
+          "status": "verbatim"
+        },
+        "wait-what": {
+          "path": "skills/productivity/wait-what",
+          "status": "verbatim"
+        },
+        "writing-for-agents": {
+          "path": "skills/productivity/writing-for-agents",
+          "status": "verbatim"
+        },
+        "chief-of-staff": {
+          "path": "skills/in-progress/chief-of-staff",
+          "status": "patched",
+          "note": "Experimental upstream and changing fast; re-take on every sync. The patches carry savvy-flow's discipline (JohnnyVizz/claude-kit) into it, in place of vendoring savvy-flow itself.",
+          "patches": [
+            {
+              "purpose": "Pick each subagent model and effort per task from a five-level ladder (light, medium, careful, heavy, fable): the cheapest that gets it right first time, one level up on a return.",
+              "checks": [
+                {
+                  "contains": "| light | opus / low |"
+                },
+                {
+                  "contains": "| fable | fable / high |"
+                }
+              ]
+            },
+            {
+              "purpose": "Review gate: treat every subagent report as a claim, read the diff before accepting, then accept, return with a defect list (two returns at most), or make a one-line correction directly.",
+              "checks": [
+                {
+                  "contains": "Treat every report as a claim."
+                },
+                {
+                  "contains": "Cap returns at two per task"
+                }
+              ]
+            },
+            {
+              "purpose": "Drive the savvy-progress mod when it is loaded: report the plan and accepted tasks to its progress tool, match runs to tasks by title, and tell each subagent to report its steps.",
+              "checks": [
+                {
+                  "contains": "mcp__savvy-progress__progress"
+                },
+                {
+                  "contains": "mcp__savvy-progress__step"
+                }
+              ]
+            }
+          ]
+        },
+        "claude-handoff": {
+          "path": "skills/in-progress/claude-handoff",
+          "status": "verbatim"
+        },
+        "loop-me": {
+          "path": "skills/in-progress/loop-me",
+          "status": "verbatim"
+        },
+        "setup-ts-deep-modules": {
+          "path": "skills/in-progress/setup-ts-deep-modules",
+          "status": "verbatim"
+        },
+        "setup-pre-commit": {
+          "path": "skills/misc/setup-pre-commit",
+          "status": "verbatim",
+          "note": "Frozen upstream."
+        },
+        "implement": {
+          "path": "skills/engineering/implement",
+          "status": "patched",
+          "patches": [
+            {
+              "purpose": "Open the branch lifecycle: set up an isolated workspace with using-git-worktrees before starting, when the work wants isolating from the current checkout.",
+              "checks": [
+                {
+                  "contains": "my-claude-skills:using-git-worktrees"
+                }
+              ]
+            },
+            {
+              "purpose": "Close the branch lifecycle: after committing, hand to finishing-a-development-branch to settle where the branch goes.",
+              "checks": [
+                {
+                  "contains": "my-claude-skills:finishing-a-development-branch"
+                }
+              ]
+            }
+          ]
+        },
+        "ask-matt": {
+          "path": "skills/engineering/ask-matt",
+          "status": "forked",
+          "note": "Routes this plugin's whole roster, not just Matt's. On each sync, merge his new routes by hand."
+        },
+        "handoff": {
+          "path": "skills/productivity/handoff",
+          "status": "forked",
+          "note": "Rewritten as the live-brief system (docs/handoff/, one live brief, published is frozen). Shares nothing with upstream's temp-dir handoff."
+        },
+        "git-guardrails-claude-code": {
+          "path": "skills/misc/git-guardrails-claude-code",
+          "status": "absorbed",
+          "into": [
+            "hooks/subagent-git-guard.js",
+            "hooks/hooks.json"
+          ],
+          "note": "Rewritten in Node (upstream's script needs jq, which Windows machines usually lack, and without it allows everything) and shipped as an always-on PreToolUse hook that blocks only subagents. Upstream's list minus reset --hard, which implement-spec's implementers use on their own worktrees. Frozen upstream."
+        },
+        "migrate-to-shoehorn": {
+          "path": "skills/misc/migrate-to-shoehorn",
+          "status": "skipped"
+        },
+        "scaffold-exercises": {
+          "path": "skills/misc/scaffold-exercises",
+          "status": "skipped"
+        },
+        "writing-beats": {
+          "path": "skills/in-progress/writing-beats",
+          "status": "skipped"
+        },
+        "writing-fragments": {
+          "path": "skills/in-progress/writing-fragments",
+          "status": "skipped"
+        },
+        "writing-shape": {
+          "path": "skills/in-progress/writing-shape",
+          "status": "skipped"
+        },
+        "resolving-merge-conflicts": {
+          "status": "skipped",
+          "note": "Removed upstream 2026-09-24; dropped here too."
+        },
+        "batch-grill-me": {
+          "status": "skipped",
+          "note": "Removed upstream 2026-07-16 when grilling began asking a whole round at once; dropped here too."
+        }
+      }
+    },
+    "emilkowalski": {
+      "repo": "https://github.com/emilkowalski/skills.git",
+      "pin": "78761e1b57f97dce65b983d640c70a68f39e8163",
+      "skills": {
+        "animate": {
+          "path": "skills/animate",
+          "status": "verbatim"
+        },
+        "animation-vocabulary": {
+          "path": "skills/animation-vocabulary",
+          "status": "verbatim"
+        },
+        "apple-design": {
+          "path": "skills/apple-design",
+          "status": "verbatim"
+        },
+        "emil-design-eng": {
+          "path": "skills/emil-design-eng",
+          "status": "verbatim"
+        },
+        "find-animation-opportunities": {
+          "path": "skills/find-animation-opportunities",
+          "status": "verbatim"
+        },
+        "improve-animations": {
+          "path": "skills/improve-animations",
+          "status": "verbatim"
+        },
+        "review-animations": {
+          "path": "skills/review-animations",
+          "status": "verbatim"
+        },
+        "pick-ui-library": {
+          "path": "skills/pick-ui-library",
+          "status": "patched",
+          "patches": [
+            {
+              "purpose": "Make it model-invocable, so animate's 'stop and invoke pick-ui-library' resolves: drop disable-model-invocation and replace the description's 'only runs when explicitly invoked' with real trigger conditions.",
+              "checks": [
+                {
+                  "absent": "disable-model-invocation"
+                },
+                {
+                  "contains": "Use before adding a frontend dependency"
+                }
+              ]
+            }
+          ]
+        },
+        "prototype": {
+          "path": "skills/prototype",
+          "status": "skipped",
+          "note": "Would collide with Matt's prototype."
+        },
+        "ask-sonner": {
+          "path": "skills/ask-sonner",
+          "status": "skipped"
+        }
+      }
+    },
+    "superpowers": {
+      "repo": "https://github.com/obra/superpowers.git",
+      "pin": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "skills": {
+        "using-git-worktrees": {
+          "path": "skills/using-git-worktrees",
+          "status": "forked",
+          "note": "Rewritten from v6.3.0 without the prohibition tables writing-for-agents warns against."
+        },
+        "finishing-a-development-branch": {
+          "path": "skills/finishing-a-development-branch",
+          "status": "forked",
+          "note": "Rewritten from v6.3.0, like using-git-worktrees."
+        },
+        "verification-before-completion": {
+          "path": "skills/verification-before-completion",
+          "status": "absorbed",
+          "into": "skills/karpathy-guidelines/SKILL.md",
+          "note": "Became the 'Claim on evidence' subsection."
+        },
+        "dispatching-parallel-agents": {
+          "path": "skills/dispatching-parallel-agents",
+          "status": "absorbed",
+          "into": "skills/ask-matt/PHASE-BOUNDARIES.md",
+          "note": "Became the subagent guidance under option 4."
+        },
+        "receiving-code-review": {
+          "path": "skills/receiving-code-review",
+          "status": "skipped",
+          "note": "Mostly style prohibition; its two load-bearing rules are worth a short skill written here."
+        },
+        "brainstorming": {
+          "path": "skills/brainstorming",
+          "status": "skipped"
+        },
+        "executing-plans": {
+          "path": "skills/executing-plans",
+          "status": "skipped"
+        },
+        "requesting-code-review": {
+          "path": "skills/requesting-code-review",
+          "status": "skipped"
+        },
+        "subagent-driven-development": {
+          "path": "skills/subagent-driven-development",
+          "status": "skipped"
+        },
+        "systematic-debugging": {
+          "path": "skills/systematic-debugging",
+          "status": "skipped"
+        },
+        "test-driven-development": {
+          "path": "skills/test-driven-development",
+          "status": "skipped"
+        },
+        "using-superpowers": {
+          "path": "skills/using-superpowers",
+          "status": "skipped"
+        },
+        "writing-plans": {
+          "path": "skills/writing-plans",
+          "status": "skipped"
+        },
+        "writing-skills": {
+          "path": "skills/writing-skills",
+          "status": "skipped"
+        }
+      }
+    },
+    "claude-kit": {
+      "repo": "https://github.com/JohnnyVizz/claude-kit.git",
+      "pin": "c871c153ead54ad9547cc717d0f3e5a676c73986",
+      "discover": ".claude-plugin/plugin.json",
+      "skills": {
+        "savvy-progress": {
+          "path": "plugins/savvy-progress",
+          "dest": "plugins/savvy-progress",
+          "status": "patched",
+          "note": "A mod (function hooks, early-access API), shipped as its own plugin in this marketplace so an older Claude Code that rejects it loses only the mod. See docs/adr/0005. In the desktop app (2.1.299) the mod's progress and step tools never reach the model, so only the agents panel and the band from the second patch work there.",
+          "patches": [
+            {
+              "purpose": "Open the agents panel whenever any subagent starts, not only savvy-flow workers, since nothing here ships savvy-flow: autoOpen defaults to any.",
+              "checks": [
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "contains": "\"default\": \"any\""
+                }
+              ]
+            },
+            {
+              "purpose": "Subagents band: with autoOpen any, every subagent launch starts a flow titled Subagents, so the band and its reopen button draw even where the progress tool never reaches the model. Tested in hooks/subagents-band.test.ts.",
+              "checks": [
+                {
+                  "file": "hooks/register.tsx",
+                  "contains": "options.autoOpen !== 'any'"
+                },
+                {
+                  "file": "hooks/register.tsx",
+                  "contains": "title: 'Subagents'"
+                },
+                {
+                  "file": "hooks/subagents-band.test.ts",
+                  "contains": "any subagent starts a Subagents band"
+                }
+              ],
+              "adds": [
+                "hooks/subagents-band.test.ts"
+              ]
+            },
+            {
+              "purpose": "Identify this copy and say what works here: version is upstream plus -mcs.N (bump N on any change to this copy), and plugin.json and README.md say the progress and step tools do not reach the model in the desktop app.",
+              "checks": [
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "contains": "-mcs."
+                },
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "contains": "do not reach the model in the desktop app"
+                },
+                {
+                  "file": "README.md",
+                  "contains": "This copy"
+                },
+                {
+                  "file": "README.md",
+                  "contains": "`any` (default in this copy)"
+                }
+              ]
+            },
+            {
+              "purpose": "Remove the unsupported top-level types manifest field to avoid Claude importer warnings; retain types/index.d.ts, which the hooks import directly.",
+              "checks": [
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "absent": "\"types\":"
+                }
+              ]
+            }
+          ]
+        },
+        "savvy-flow": {
+          "path": "plugins/savvy-flow",
+          "status": "skipped",
+          "note": "Not vendored. Its review gate and per-task model/effort live on as patches to chief-of-staff; implement-spec covers ticket orchestration."
+        },
+        "session-band": {
+          "path": "plugins/session-band",
+          "status": "skipped",
+          "note": "Its cache-expiry notifier is a macOS app."
+        }
+      }
+    },
+    "roblox-brain": {
+      "repo": "https://github.com/TabooHarmony/roblox-brain.git",
+      "pin": "ceee4aaa5004502e2a51d78b3c33bba44d84742b",
+      "discover": "SKILL.md",
+      "note": "Full user-directed adoption of all 29 skills from TabooHarmony/roblox-brain v2.3.1. Complete folders are preserved unchanged at the pin, with no local content patches or namespace rewriting.",
+      "skills": {
+        "roblox-architecture": {
+          "path": "skills/core/roblox-architecture",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-collaboration-mode": {
+          "path": "skills/core/roblox-collaboration-mode",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-data": {
+          "path": "skills/core/roblox-data",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-luau-core": {
+          "path": "skills/core/roblox-luau-core",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-luau-patterns": {
+          "path": "skills/core/roblox-luau-patterns",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-luau-types": {
+          "path": "skills/core/roblox-luau-types",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-networking": {
+          "path": "skills/core/roblox-networking",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-performance": {
+          "path": "skills/core/roblox-performance",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-security": {
+          "path": "skills/core/roblox-security",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-server-data": {
+          "path": "skills/core/roblox-server-data",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-analytics": {
+          "path": "skills/design/roblox-analytics",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-game-design": {
+          "path": "skills/design/roblox-game-design",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-growth-design": {
+          "path": "skills/design/roblox-growth-design",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-monetization": {
+          "path": "skills/design/roblox-monetization",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-player-psychology": {
+          "path": "skills/design/roblox-player-psychology",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-animation-vfx": {
+          "path": "skills/gameplay/roblox-animation-vfx",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-audio": {
+          "path": "skills/gameplay/roblox-audio",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-building": {
+          "path": "skills/gameplay/roblox-building",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-camera": {
+          "path": "skills/gameplay/roblox-camera",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-gui": {
+          "path": "skills/gameplay/roblox-gui",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-input": {
+          "path": "skills/gameplay/roblox-input",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-lighting": {
+          "path": "skills/gameplay/roblox-lighting",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-localization": {
+          "path": "skills/gameplay/roblox-localization",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-npc-ai": {
+          "path": "skills/gameplay/roblox-npc-ai",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-physics": {
+          "path": "skills/gameplay/roblox-physics",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-cloud": {
+          "path": "skills/tools/roblox-cloud",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-publish-checklist": {
+          "path": "skills/tools/roblox-publish-checklist",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-studio-mcp": {
+          "path": "skills/tools/roblox-studio-mcp",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-tooling": {
+          "path": "skills/tools/roblox-tooling",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        }
+      },
+      "release": "v2.3.1",
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE",
+        "copyright": "Copyright (c) 2026 TabooHarmony",
+        "preservedAs": "vendor/licenses/roblox-brain-LICENSE"
+      }
+    }
+  }
+}

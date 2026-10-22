@@ -438,6 +438,15 @@
                   "contains": "`any` (default in this copy)"
                 }
               ]
+            },
+            {
+              "purpose": "Remove the unsupported top-level types manifest field to avoid Claude importer warnings; retain types/index.d.ts, which the hooks import directly.",
+              "checks": [
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "absent": "\"types\":"
+                }
+              ]
             }
           ]
         },
@@ -451,6 +460,166 @@
           "status": "skipped",
           "note": "Its cache-expiry notifier is a macOS app."
         }
+      }
+    },
+    "roblox-brain": {
+      "repo": "https://github.com/TabooHarmony/roblox-brain.git",
+      "pin": "ceee4aaa5004502e2a51d78b3c33bba44d84742b",
+      "discover": "SKILL.md",
+      "note": "Full user-directed adoption of all 29 skills from TabooHarmony/roblox-brain v2.3.1. Complete folders are preserved unchanged at the pin, with no local content patches or namespace rewriting.",
+      "skills": {
+        "roblox-architecture": {
+          "path": "skills/core/roblox-architecture",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-collaboration-mode": {
+          "path": "skills/core/roblox-collaboration-mode",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-data": {
+          "path": "skills/core/roblox-data",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-luau-core": {
+          "path": "skills/core/roblox-luau-core",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-luau-patterns": {
+          "path": "skills/core/roblox-luau-patterns",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-luau-types": {
+          "path": "skills/core/roblox-luau-types",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-networking": {
+          "path": "skills/core/roblox-networking",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-performance": {
+          "path": "skills/core/roblox-performance",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-security": {
+          "path": "skills/core/roblox-security",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-server-data": {
+          "path": "skills/core/roblox-server-data",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-analytics": {
+          "path": "skills/design/roblox-analytics",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-game-design": {
+          "path": "skills/design/roblox-game-design",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-growth-design": {
+          "path": "skills/design/roblox-growth-design",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-monetization": {
+          "path": "skills/design/roblox-monetization",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-player-psychology": {
+          "path": "skills/design/roblox-player-psychology",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-animation-vfx": {
+          "path": "skills/gameplay/roblox-animation-vfx",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-audio": {
+          "path": "skills/gameplay/roblox-audio",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-building": {
+          "path": "skills/gameplay/roblox-building",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-camera": {
+          "path": "skills/gameplay/roblox-camera",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-gui": {
+          "path": "skills/gameplay/roblox-gui",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-input": {
+          "path": "skills/gameplay/roblox-input",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-lighting": {
+          "path": "skills/gameplay/roblox-lighting",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-localization": {
+          "path": "skills/gameplay/roblox-localization",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-npc-ai": {
+          "path": "skills/gameplay/roblox-npc-ai",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-physics": {
+          "path": "skills/gameplay/roblox-physics",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-cloud": {
+          "path": "skills/tools/roblox-cloud",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-publish-checklist": {
+          "path": "skills/tools/roblox-publish-checklist",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-studio-mcp": {
+          "path": "skills/tools/roblox-studio-mcp",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        },
+        "roblox-tooling": {
+          "path": "skills/tools/roblox-tooling",
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
+        }
+      },
+      "release": "v2.3.1",
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE",
+        "copyright": "Copyright (c) 2026 TabooHarmony",
+        "preservedAs": "vendor/licenses/roblox-brain-LICENSE"
       }
     }
   }

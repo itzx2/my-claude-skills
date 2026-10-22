@@ -120,15 +120,30 @@ already happened. A container's clone can be older than the remote. Run
 
 ## Before pushing any change
 
+The root `skills/`, `hooks/`, and main manifest are development sources. The
+marketplace serves the generated `plugins/my-claude-skills/` folder so its source
+does not contain the sibling mod. After source/documentation/vendor changes:
+
+```sh
+node scripts/vendor-catalog.js generate
+node scripts/marketplace-payload.js generate
+```
+
+Commit the generated payload with its source changes. Edit the root main
+manifest, never its generated copy. The vendor check verifies both the catalog
+and the complete payload, including each marketplace source's sole root manifest.
+
 ```sh
 bash scripts/test-briefing.sh      # fixture tests for the briefing walk
 bash scripts/test-install-race.sh  # two concurrent installs stay correct
 bash scripts/verify-install.sh     # every skill in skills/ reachable right now
 node scripts/vendor.js check       # vendored skills match the vendor record
+node scripts/test-marketplace-layout.js # each source has one root manifest
+node scripts/test-marketplace-payload.js # stale/extra release content is rejected
 bash scripts/test-guard.sh         # the subagent git guard blocks and allows the right commands
 ```
 
-All five exit non-zero on failure.
+All checks exit non-zero on failure.
 
 ## Vendored skills come from the record
 

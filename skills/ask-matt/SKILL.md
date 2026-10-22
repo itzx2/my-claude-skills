@@ -34,6 +34,8 @@ The map writes each skill the way you will reach it:
 
 ## 2. Match the situation against the whole roster
 
+For **any Roblox-related task**, first read the [Roblox Brain routing map](references/roblox-brain.md). It contains all 29 domain routes, their overlaps, and combinations; use it alongside the main flow below.
+
 Weigh **every** entry in the roster against what the user described. The map below carries relationships no description states — which skill precedes which, and which of two overlapping skills wins — so use it for the skills it covers, and match the rest on their descriptions alone.
 
 The completion criterion is coverage: **every roster entry considered**. A skill from outside this map is as good an answer as one inside it — recommend by fit, and say plainly when the best fit is a skill this map never mentions.
