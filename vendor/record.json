@@ -837,6 +837,39 @@
                   "contains": "No connected Studio blocks live verification only"
                 }
               ]
+            },
+            {
+              "purpose": "Treat subagent as an optional bridge-provided capability gated by the live tool inventory and its advertised task-compatible modes; default structured playtest setup to a temporary edit-time script and do not assume a playtest mode.",
+              "checks": [
+                {
+                  "file": "SKILL.md",
+                  "contains": "Subagent is an optional bridge-provided capability; use it only when exposed with an advertised mode compatible with the task."
+                },
+                {
+                  "file": "SKILL.md",
+                  "contains": "Otherwise use the temporary edit-time script workflow in full.md."
+                },
+                {
+                  "file": "SKILL.md",
+                  "absent": "screen_capture`, `subagent`."
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "Supported modes vary."
+                },
+                {
+                  "file": "references/full.md",
+                  "contains": "This temporary script is the default path."
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": "`subagent` with type `playtest`"
+                },
+                {
+                  "file": "references/full.md",
+                  "absent": "Launch a specialized exploration or playtest subagent."
+                }
+              ]
             }
           ]
         },

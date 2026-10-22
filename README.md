@@ -376,7 +376,7 @@ The upstream is MIT licensed. Its tracked root license is preserved byte-for-byt
 
 **Patched:** the six entry points describe the partial-library boundary. Architecture requires repository and target Studio source discovery before adding or replacing persistence or authored UI owners, with an explicit Unverified state when readback is unavailable. Studio MCP points to that check and distinguishes a missing live Studio connection from repository review. The Data persistence example accepts the existing owner’s shutdown predicate and skips backoff after its final retry.
 
-**Requirements:** these skills include no executable resources or additional runtime dependencies. A connected Studio is needed for live verification; no connection blocks that evidence only and does not prevent offline source review.
+**Requirements:** Reading and loading these Markdown skills adds no packages. Live Studio work requires Roblox Studio and a configured, connected MCP bridge; this plugin does not install or configure the bridge. Project libraries such as ProfileStore or UI frameworks are conditional choices only when a project uses them. The upstream Python, PyYAML, and Luau compiler dependencies are for its CI, not user skill loading.
 
 ### From emilkowalski/skills
 

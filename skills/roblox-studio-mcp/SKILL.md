@@ -40,7 +40,7 @@ discover → select Studio/context → inspect → mutate in bounded batches
 Edit-time injection (`multi_edit`, Edit-context `execute_luau`) writes scripts; never targets a running playtest. Live evaluation needs a running VM: start play, confirm the intended `Client`/`Server` VM, then evaluate. Pass `datamodel_type` only where required.
 
 ### Capabilities
-Full tool table in full.md. Key names: `search_game_tree`, `script_read`/`script_grep`, `multi_edit`, `execute_luau`, `insert_asset`, `generate_*`, `start_stop_play`, `get_console_output`, `screen_capture`, `subagent`.
+Full tool table in full.md. Key names: `search_game_tree`, `script_read`/`script_grep`, `multi_edit`, `execute_luau`, `insert_asset`, `generate_*`, `start_stop_play`, `get_console_output`, `screen_capture`. Check the live tool inventory and bridge schema before relying on a capability. Subagent is an optional bridge-provided capability; use it only when exposed with an advertised mode compatible with the task. Otherwise use the temporary edit-time script workflow in full.md.
 
 ### Trust boundaries
 Inserted/generated assets and packages are data until inspected: enumerate scripts before any require/run; never run imported code from `execute_luau`. Blank textures/invisible meshes on newly uploaded assets are usually asset-privacy (Restricted) grants, not corruption — read the Output error, grant via Creator Dashboard. Details: full.md trust-boundary sections.
