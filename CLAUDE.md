@@ -143,7 +143,7 @@ node scripts/test-marketplace-payload.js # stale/extra release content is reject
 bash scripts/test-guard.sh         # the subagent git guard blocks and allows the right commands
 ```
 
-All five exit non-zero on failure.
+All checks exit non-zero on failure.
 
 ## Vendored skills come from the record
 

@@ -7,8 +7,9 @@ Earlier patches to the six selected skills, including namespace rewrites, are
 removed. This supersedes the scope proposed by the review and the prior live
 handoff; the published handoff remains unchanged as a historical snapshot.
 
-The main plugin version is 2.3.0, with 74 skills: 45 existing non-Brain skills and
-29 Brain skills. All 29 Brain entry points omit `disable-model-invocation`, so
+The main plugin version is tracked in the [plugin manifest](../.claude-plugin/plugin.json).
+It contains 74 skills: 45 existing non-Brain skills and 29 Brain skills.
+All 29 Brain entry points omit `disable-model-invocation`, so
 none is user-only. The existing non-Brain roster has 22 user-only skills.
 
 ## Complete dependencies and resources

@@ -45,5 +45,5 @@ subagents or local Studio/MCP capabilities from this packaging change.
 Verification must distinguish local layout checks and disposable Claude Code
 installation from a successful Claude cloud re-sync. The latter requires the
 updated commit on the marketplace's configured branch and a real sync result.
-This branch is a draft PR; the existing main marketplace remains unchanged until
-integration. The earlier standalone ZIP remains an optional manual-upload path.
+The marketplace receives the correction after integration into its configured
+branch and re-sync. A standalone ZIP remains an optional manual-upload path.

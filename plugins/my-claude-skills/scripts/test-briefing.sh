@@ -18,6 +18,10 @@ pass=0; fail=0
 ok()  { printf '  \033[32mok\033[0m    %s\n' "$1"; pass=$((pass + 1)); }
 bad() { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; fail=$((fail + 1)); }
 
+# Registry paths are read by Node, which uses native Windows paths under Git
+# Bash. Keep shell paths for shell operations and convert JSON path values.
+native_path() { cygpath -m "$1" 2>/dev/null || printf '%s\n' "$1"; }
+
 skill() { # <dir> <name> [disable]
   mkdir -p "$1/$2"
   { echo "---"; echo "name: $2"; echo "description: Test skill $2."
@@ -53,10 +57,12 @@ skill "$TMP/proj/.claude/skills" project-skill
 # Collision: the same bare name loose and in the plugin.
 skill "$TMP/cfg/skills" plug-skill
 
+plug_for_node="$(native_path "$TMP/plug")"
+off_for_node="$(native_path "$TMP/off")"
 cat > "$TMP/cfg/plugins/installed_plugins.json" <<JSON
 {"plugins":{
-  "demo@market":[{"installPath":"$TMP/plug"}],
-  "offplug@market":[{"installPath":"$TMP/off"}]
+  "demo@market":[{"installPath":"$plug_for_node"}],
+  "offplug@market":[{"installPath":"$off_for_node"}]
 }}
 JSON
 echo '{"enabledPlugins":{"offplug@market":false}}' > "$TMP/cfg/settings.json"
@@ -119,7 +125,7 @@ budget() { # <label> <config-dir> <hidden-name>...
 # The real roster: this repo's own skills, installed as the plugin.
 mkdir -p "$TMP/real/plugins"
 # node reads this path, so on Git Bash it must be a drive path, not /d/...
-root_for_node=$(cygpath -m "$ROOT" 2>/dev/null || echo "$ROOT")
+root_for_node="$(native_path "$ROOT")"
 echo "{\"plugins\":{\"my-claude-skills@my-claude-skills\":[{\"installPath\":\"$root_for_node\"}]}}" > "$TMP/real/plugins/installed_plugins.json"
 echo '{}' > "$TMP/real/settings.json"
 real_hidden=$(grep -l '^disable-model-invocation: true' "$ROOT"/skills/*/SKILL.md | sed 's|.*/skills/||;s|/SKILL.md||;s|^|my-claude-skills:|')
@@ -138,7 +144,8 @@ for i in $(seq 1 30); do
   printf -- '---\nname: hidden-%s\ndescription: %s\ndisable-model-invocation: true\n---\n' "$i" "$long" > "$d/SKILL.md"
   stress_hidden="$stress_hidden big:hidden-$i"
 done
-echo "{\"plugins\":{\"big@market\":[{\"installPath\":\"$TMP/bigplug\"}]}}" > "$TMP/big/plugins/installed_plugins.json"
+bigplug_for_node="$(native_path "$TMP/bigplug")"
+echo "{\"plugins\":{\"big@market\":[{\"installPath\":\"$bigplug_for_node\"}]}}" > "$TMP/big/plugins/installed_plugins.json"
 echo '{}' > "$TMP/big/settings.json"
 msg=$(budget stress "$TMP/big" $stress_hidden) && ok "100-skill roster still fits, no hidden skill dropped" || bad "stress roster: $msg"
 echo
