@@ -438,6 +438,15 @@
                   "contains": "`any` (default in this copy)"
                 }
               ]
+            },
+            {
+              "purpose": "Remove the unsupported top-level types manifest field to avoid Claude importer warnings; retain types/index.d.ts, which the hooks import directly.",
+              "checks": [
+                {
+                  "file": ".claude-plugin/plugin.json",
+                  "absent": "\"types\":"
+                }
+              ]
             }
           ]
         },

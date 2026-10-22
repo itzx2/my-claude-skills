@@ -303,6 +303,13 @@ function check(only) {
       const version = fs.existsSync(manifest) ? JSON.parse(fs.readFileSync(manifest, 'utf8')).version : undefined;
       if (entry.version !== version) fail(`marketplace.json lists ${entry.name} at ${entry.version}, its plugin.json says ${version}`);
     }
+    try {
+      execFileSync(process.execPath, [path.join(ROOT, 'scripts/vendor-catalog.js'), 'check'], { stdio: 'pipe' });
+      require('./marketplace-payload').check();
+      execFileSync(process.execPath, [path.join(ROOT, 'scripts/test-marketplace-layout.js')], { stdio: 'pipe' });
+    } catch (error) {
+      fail(error.stderr?.toString().trim() || error.message);
+    }
   }
 
   if (fails.length) {

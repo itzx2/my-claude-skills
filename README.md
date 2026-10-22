@@ -21,6 +21,12 @@ No clone, no symlink, no Administrator shell on Windows. Update later with
 
 The marketplace holds two plugins:
 
+Each marketplace entry points to its own folder under `plugins/`. The main
+plugin's release folder is generated from the development sources; it contains
+one root manifest and excludes the sibling mod. This avoids the nested-manifest
+ambiguity seen in Claude's marketplace importer. See
+[marketplace packaging](docs/marketplace-packaging.md) for regeneration and checks.
+
 - **`my-claude-skills`** — the skills, the briefing, and the **subagent git
   guard**: a `PreToolUse` hook that stops *subagents* (never the main session)
   from running `git push`, `git clean -f`, `git branch -D`, or
@@ -326,6 +332,140 @@ Seventy-one of them are **vendored** — copied in from another repo rather than
 - **writing-for-agents** ⬇ — writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.
 
 ## Vendored skills
+
+### Skill sources
+
+This catalog lists every shipped vendored skill and plugin, with its local
+status and an immutable link to its upstream source. Local forks may differ
+substantially from that source. Skipped entries are not shipped; absorbed
+material is listed separately below. The three original skills are
+`karpathy-guidelines`, `project-brain`, and `scrutinize`.
+
+The catalog is generated from `vendor/record.json` with
+`node scripts/vendor-catalog.js generate` and checked before publishing.
+
+<!-- vendor-catalog:start -->
+
+#### [mattpocock/skills](https://github.com/mattpocock/skills) — 32 entries
+
+Pin: [`49dd158`](https://github.com/mattpocock/skills/commit/49dd158d1076134a641b33efb035946536778336). Links point to the pinned source, including the original source of locally maintained forks.
+
+| Skill or plugin | Local status | Skill source |
+| --- | --- | --- |
+| [ask-matt](skills/ask-matt) | forked | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/ask-matt/SKILL.md) |
+| [chief-of-staff](skills/chief-of-staff) | patched | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/in-progress/chief-of-staff/SKILL.md) |
+| [claude-handoff](skills/claude-handoff) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/in-progress/claude-handoff/SKILL.md) |
+| [code-review](skills/code-review) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/code-review/SKILL.md) |
+| [codebase-design](skills/codebase-design) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/codebase-design/SKILL.md) |
+| [diagnosing-bugs](skills/diagnosing-bugs) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/diagnosing-bugs/SKILL.md) |
+| [domain-modeling](skills/domain-modeling) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/domain-modeling/SKILL.md) |
+| [grill-me](skills/grill-me) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/grill-me/SKILL.md) |
+| [grill-with-docs](skills/grill-with-docs) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/grill-with-docs/SKILL.md) |
+| [grilling](skills/grilling) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/grilling/SKILL.md) |
+| [handoff](skills/handoff) | forked | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/handoff/SKILL.md) |
+| [implement](skills/implement) | patched | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/implement/SKILL.md) |
+| [implement-spec](skills/implement-spec) | patched | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/implement-spec/SKILL.md) |
+| [improve-codebase-architecture](skills/improve-codebase-architecture) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/improve-codebase-architecture/SKILL.md) |
+| [loop-me](skills/loop-me) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/in-progress/loop-me/SKILL.md) |
+| [pr](skills/pr) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/pr/SKILL.md) |
+| [prototype](skills/prototype) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/prototype/SKILL.md) |
+| [research](skills/research) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/research/SKILL.md) |
+| [retro](skills/retro) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/retro/SKILL.md) |
+| [setup-matt-pocock-skills](skills/setup-matt-pocock-skills) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/setup-matt-pocock-skills/SKILL.md) |
+| [setup-pre-commit](skills/setup-pre-commit) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/misc/setup-pre-commit/SKILL.md) |
+| [setup-ts-deep-modules](skills/setup-ts-deep-modules) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/in-progress/setup-ts-deep-modules/SKILL.md) |
+| [tdd](skills/tdd) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/tdd/SKILL.md) |
+| [teach](skills/teach) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/teach/SKILL.md) |
+| [to-questionnaire](skills/to-questionnaire) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/to-questionnaire/SKILL.md) |
+| [to-spec](skills/to-spec) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/to-spec/SKILL.md) |
+| [to-tickets](skills/to-tickets) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/to-tickets/SKILL.md) |
+| [triage](skills/triage) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/triage/SKILL.md) |
+| [wait-what](skills/wait-what) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/wait-what/SKILL.md) |
+| [wayfinder](skills/wayfinder) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/wayfinder/SKILL.md) |
+| [wizard](skills/wizard) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/wizard/SKILL.md) |
+| [writing-for-agents](skills/writing-for-agents) | verbatim | [SKILL.md](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/productivity/writing-for-agents/SKILL.md) |
+
+#### [emilkowalski/skills](https://github.com/emilkowalski/skills) — 8 entries
+
+Pin: [`78761e1`](https://github.com/emilkowalski/skills/commit/78761e1b57f97dce65b983d640c70a68f39e8163). Links point to the pinned source, including the original source of locally maintained forks.
+
+| Skill or plugin | Local status | Skill source |
+| --- | --- | --- |
+| [animate](skills/animate) | verbatim | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/animate/SKILL.md) |
+| [animation-vocabulary](skills/animation-vocabulary) | verbatim | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/animation-vocabulary/SKILL.md) |
+| [apple-design](skills/apple-design) | verbatim | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/apple-design/SKILL.md) |
+| [emil-design-eng](skills/emil-design-eng) | verbatim | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/emil-design-eng/SKILL.md) |
+| [find-animation-opportunities](skills/find-animation-opportunities) | verbatim | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/find-animation-opportunities/SKILL.md) |
+| [improve-animations](skills/improve-animations) | verbatim | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/improve-animations/SKILL.md) |
+| [pick-ui-library](skills/pick-ui-library) | patched | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/pick-ui-library/SKILL.md) |
+| [review-animations](skills/review-animations) | verbatim | [SKILL.md](https://github.com/emilkowalski/skills/blob/78761e1b57f97dce65b983d640c70a68f39e8163/skills/review-animations/SKILL.md) |
+
+#### [obra/superpowers](https://github.com/obra/superpowers) — 2 entries
+
+Pin: [`b36e082`](https://github.com/obra/superpowers/commit/b36e0829c6d0140e93cfef2ca599b1b07d4a7797). Links point to the pinned source, including the original source of locally maintained forks.
+
+| Skill or plugin | Local status | Skill source |
+| --- | --- | --- |
+| [finishing-a-development-branch](skills/finishing-a-development-branch) | forked | [SKILL.md](https://github.com/obra/superpowers/blob/b36e0829c6d0140e93cfef2ca599b1b07d4a7797/skills/finishing-a-development-branch/SKILL.md) |
+| [using-git-worktrees](skills/using-git-worktrees) | forked | [SKILL.md](https://github.com/obra/superpowers/blob/b36e0829c6d0140e93cfef2ca599b1b07d4a7797/skills/using-git-worktrees/SKILL.md) |
+
+#### [JohnnyVizz/claude-kit](https://github.com/JohnnyVizz/claude-kit) — 1 entries
+
+Pin: [`c871c15`](https://github.com/JohnnyVizz/claude-kit/commit/c871c153ead54ad9547cc717d0f3e5a676c73986). Links point to the pinned source, including the original source of locally maintained forks.
+
+| Skill or plugin | Local status | Skill source |
+| --- | --- | --- |
+| [savvy-progress](plugins/savvy-progress) | patched | [plugin folder](https://github.com/JohnnyVizz/claude-kit/tree/c871c153ead54ad9547cc717d0f3e5a676c73986/plugins/savvy-progress) |
+
+#### [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain) — 29 entries
+
+Pin: [`ceee4aa`](https://github.com/TabooHarmony/roblox-brain/commit/ceee4aaa5004502e2a51d78b3c33bba44d84742b). Links point to the pinned source, including the original source of locally maintained forks.
+
+| Skill or plugin | Local status | Skill source |
+| --- | --- | --- |
+| [roblox-analytics](skills/roblox-analytics) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/SKILL.md) |
+| [roblox-animation-vfx](skills/roblox-animation-vfx) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-animation-vfx/SKILL.md) |
+| [roblox-architecture](skills/roblox-architecture) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-architecture/SKILL.md) |
+| [roblox-audio](skills/roblox-audio) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-audio/SKILL.md) |
+| [roblox-building](skills/roblox-building) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-building/SKILL.md) |
+| [roblox-camera](skills/roblox-camera) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-camera/SKILL.md) |
+| [roblox-cloud](skills/roblox-cloud) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/SKILL.md) |
+| [roblox-collaboration-mode](skills/roblox-collaboration-mode) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-collaboration-mode/SKILL.md) |
+| [roblox-data](skills/roblox-data) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-data/SKILL.md) |
+| [roblox-game-design](skills/roblox-game-design) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-game-design/SKILL.md) |
+| [roblox-growth-design](skills/roblox-growth-design) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-growth-design/SKILL.md) |
+| [roblox-gui](skills/roblox-gui) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-gui/SKILL.md) |
+| [roblox-input](skills/roblox-input) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/SKILL.md) |
+| [roblox-lighting](skills/roblox-lighting) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-lighting/SKILL.md) |
+| [roblox-localization](skills/roblox-localization) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-localization/SKILL.md) |
+| [roblox-luau-core](skills/roblox-luau-core) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-core/SKILL.md) |
+| [roblox-luau-patterns](skills/roblox-luau-patterns) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-patterns/SKILL.md) |
+| [roblox-luau-types](skills/roblox-luau-types) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-types/SKILL.md) |
+| [roblox-monetization](skills/roblox-monetization) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/SKILL.md) |
+| [roblox-networking](skills/roblox-networking) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-networking/SKILL.md) |
+| [roblox-npc-ai](skills/roblox-npc-ai) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-npc-ai/SKILL.md) |
+| [roblox-performance](skills/roblox-performance) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-performance/SKILL.md) |
+| [roblox-physics](skills/roblox-physics) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-physics/SKILL.md) |
+| [roblox-player-psychology](skills/roblox-player-psychology) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-player-psychology/SKILL.md) |
+| [roblox-publish-checklist](skills/roblox-publish-checklist) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-publish-checklist/SKILL.md) |
+| [roblox-security](skills/roblox-security) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-security/SKILL.md) |
+| [roblox-server-data](skills/roblox-server-data) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/SKILL.md) |
+| [roblox-studio-mcp](skills/roblox-studio-mcp) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-studio-mcp/SKILL.md) |
+| [roblox-tooling](skills/roblox-tooling) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-tooling/SKILL.md) |
+
+#### Absorbed upstream material
+
+These are not separately installed skills.
+
+| Upstream entry | Local home | Source |
+| --- | --- | --- |
+| git-guardrails-claude-code | [hooks/subagent-git-guard.js](hooks/subagent-git-guard.js), [hooks/hooks.json](hooks/hooks.json) | [upstream source](https://github.com/mattpocock/skills/tree/49dd158d1076134a641b33efb035946536778336/skills/misc/git-guardrails-claude-code) |
+| verification-before-completion | [skills/karpathy-guidelines/SKILL.md](skills/karpathy-guidelines/SKILL.md) | [upstream source](https://github.com/obra/superpowers/tree/b36e0829c6d0140e93cfef2ca599b1b07d4a7797/skills/verification-before-completion) |
+| dispatching-parallel-agents | [skills/ask-matt/PHASE-BOUNDARIES.md](skills/ask-matt/PHASE-BOUNDARIES.md) | [upstream source](https://github.com/obra/superpowers/tree/b36e0829c6d0140e93cfef2ca599b1b07d4a7797/skills/dispatching-parallel-agents) |
+
+<!-- vendor-catalog:end -->
+
+### Vendoring approach
 
 Five upstreams, vendored on different terms. Matt's engineering set and the
 design-engineering set are copied verbatim apart from recorded patches; the
