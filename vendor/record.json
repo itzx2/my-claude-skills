@@ -457,7 +457,7 @@
       "repo": "https://github.com/TabooHarmony/roblox-brain.git",
       "pin": "ceee4aaa5004502e2a51d78b3c33bba44d84742b",
       "discover": "SKILL.md",
-      "note": "Curated adoption from TabooHarmony/roblox-brain v2.3.1. Namespace rewrite is omitted because upstream cross-links are descriptive labels, not Skill tool invocations; the one local invocation is explicitly namespaced in its patch.",
+      "note": "Full user-directed adoption of all 29 skills from TabooHarmony/roblox-brain v2.3.1. Complete folders are preserved unchanged at the pin, with no local content patches or namespace rewriting.",
       "skills": {
         "roblox-architecture": {
           "path": "skills/core/roblox-architecture",
