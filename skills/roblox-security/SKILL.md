@@ -22,8 +22,6 @@ sources:
 
 Load for authority, remote abuse, economy, saves, bans, or sandboxing audits. Remote validation/rate limits: `roblox-networking`.
 
-This plugin bundles six Roblox Brain skills. References to other Brain skills are optional upstream reading unless independently present in the live skill roster. Use the live roster to check whether another source supplies one; see the [pinned upstream skill index](../roblox-architecture/references/optional-upstream-skills.md).
-
 ## Quick Reference
 
 **Core:** Client is always compromised. The server remains the source of truth, but the implementation depends on the authority model.

@@ -23,11 +23,7 @@ sources:
 
 ## When to Load
 
-Load for player saves, migrations, retries, shutdowns, or session ownership. Leaderboards/messaging/world data: [`roblox-server-data`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/references/full.md); Open Cloud: [`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md).
-
-This plugin bundles six Roblox Brain skills. References to other Brain skills are optional upstream reading unless independently present in the live skill roster. Use the live roster to check whether another source supplies one; see the [pinned upstream skill index](../roblox-architecture/references/optional-upstream-skills.md).
-
-For existing-project integration, follow /my-claude-skills:roblox-architecture before adding or replacing a persistence owner.
+Load for player saves, migrations, retries, shutdowns, or session ownership. Leaderboards/messaging/world data: `roblox-server-data`; Open Cloud: `roblox-cloud`.
 
 ## Quick Reference
 
@@ -41,6 +37,6 @@ For existing-project integration, follow /my-claude-skills:roblox-architecture b
 - `GetAsync` serves a 4-second local cache (`DataStoreGetOptions.UseCache`, default `true`); verify writes with `UseCache = false`.
 - Poll `DataStoreService:GetRequestBudgetForRequestType` for live headroom; quotas scale with concurrent users (experience reads: 300 + CCU x 40/min).
 - New code identifies users with `player.User` (`User.Id`, `DomainType`, `DomainId`); `UserId` remains valid, but never mix the two IDs in one key scheme.
-- First-session traces: [`roblox-analytics`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/references/full.md) §8.
+- First-session traces: `roblox-analytics` §8.
 
 > Persistence workflows: [references/full.md](references/full.md)

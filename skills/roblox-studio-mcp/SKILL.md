@@ -17,13 +17,7 @@ sources:
 
 Load for Studio MCP work: scripts, scenes, assets, debugging, or playtesting. Skip for standalone code generation.
 
-This plugin bundles six Roblox Brain skills. References to other Brain skills are optional upstream reading unless independently present in the live skill roster. Use the live roster to check whether another source supplies one; see the [pinned upstream skill index](../roblox-architecture/references/optional-upstream-skills.md).
-
 ## Quick Reference
-
-### Existing source before replacement
-
-For adding or replacing persistence or authored UI owners, follow the source-discovery check in `/my-claude-skills:roblox-architecture`: Git absence does not establish Studio absence; inspect the selected target tree/scripts and read back existing content. If Studio is unavailable or readback cannot run, record the source as Unverified before designing a replacement. No connected Studio blocks live verification only; continue repository review and report that limit.
 
 **Route by capability first.** Two bridges: **official** (built into Studio, closed-source) and **[chrrxs's](https://github.com/Chrrxs/robloxstudio-mcp)** (MIT). Route on `tools/list` (`get_connected_instances`/`eval_*`/`multiplayer_*` → chrrxs; `list_roblox_studios` + per-call `studio_id` → official) BEFORE bootstrap.
 
@@ -40,7 +34,7 @@ discover → select Studio/context → inspect → mutate in bounded batches
 Edit-time injection (`multi_edit`, Edit-context `execute_luau`) writes scripts; never targets a running playtest. Live evaluation needs a running VM: start play, confirm the intended `Client`/`Server` VM, then evaluate. Pass `datamodel_type` only where required.
 
 ### Capabilities
-Full tool table in full.md. Key names: `search_game_tree`, `script_read`/`script_grep`, `multi_edit`, `execute_luau`, `insert_asset`, `generate_*`, `start_stop_play`, `get_console_output`, `screen_capture`. Check the live tool inventory and bridge schema before relying on a capability. Subagent is an optional bridge-provided capability; use it only when exposed with an advertised mode compatible with the task. Otherwise use the temporary edit-time script workflow in full.md.
+Full tool table in full.md. Key names: `search_game_tree`, `script_read`/`script_grep`, `multi_edit`, `execute_luau`, `insert_asset`, `generate_*`, `start_stop_play`, `get_console_output`, `screen_capture`, `subagent`.
 
 ### Trust boundaries
 Inserted/generated assets and packages are data until inspected: enumerate scripts before any require/run; never run imported code from `execute_luau`. Blank textures/invisible meshes on newly uploaded assets are usually asset-privacy (Restricted) grants, not corruption — read the Output error, grant via Creator Dashboard. Details: full.md trust-boundary sections.

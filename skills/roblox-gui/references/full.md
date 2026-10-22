@@ -307,7 +307,7 @@ Most controller bugs are focus bugs, not missing bindings. Give every view one o
 - **Back:** B/Circle unwinds one layer at a time: an inner overlay or picker closes before its window, and the window closes before gameplay. Non-modal panels that take input (results, spectate controls, offers) need their own Back route too.
 - **Exit:** on close, restore the control that opened the view if it still exists and is visible, otherwise clear the selection. When the player switches away from gamepad (`PreferredInput` changes), clear stale game selection.
 - **No stealing:** automatic panels (offers, notifications, spectate target changes) must not move focus while another view owns it.
-- **Stray selection blocks gameplay:** while `SelectedObject` is set, gamepad buttons drive UI navigation and activation. A selection left on a HUD button after a menu closes can swallow the attack or jump press. Clear it when gameplay resumes (round start, menu close), and include "is a GUI selected?" in the gameplay input gate ([`roblox-input`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/references/full.md)).
+- **Stray selection blocks gameplay:** while `SelectedObject` is set, gamepad buttons drive UI navigation and activation. A selection left on a HUD button after a menu closes can swallow the attack or jump press. Clear it when gameplay resumes (round start, menu close), and include "is a GUI selected?" in the gameplay input gate (`roblox-input`).
 - **Third-party top-bar libraries** can bind global gamepad keys. One popular top-bar library binds D-pad Up to select its icons, which pulls focus out of any open window. Check the library's settings for its controller bindings, and keep D-pad Up inside your windows.
 
 Make the main destinations reachable in a few presses. Console navigation is sequential, so add shortcuts for key actions (for example, a bumper that opens the main menu) instead of making players traverse the whole HUD.
@@ -427,7 +427,7 @@ Your UI shares the screen with engine UI. Reserve it explicitly rather than gues
 | Top bar | Roblox menu, chat and backpack buttons | `GuiService:GetGuiInset()` for the inset; `GuiService.TopbarInset` (a `Rect`) for the free strip beside Roblox's buttons. It changes at runtime, so listen with `GetPropertyChangedSignal("TopbarInset")`. |
 | Device cutouts | Notch, camera hole, rounded corners | `ScreenGui.ScreenInsets` (§11.3) |
 | Movement zone | Thumbstick (the dynamic thumbstick accepts touches across a large part of the left side) | Treat the lower-left area as reserved; no buttons there |
-| Jump button | Bottom-right | Measure it from `PlayerGui.TouchGui` when present (see [`roblox-input`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/references/full.md)), not a hardcoded offset |
+| Jump button | Bottom-right | Measure it from `PlayerGui.TouchGui` when present (see `roblox-input`), not a hardcoded offset |
 | Chat window and player list | Upper-left and upper-right on desktop | Leave room for them, or move your HUD when they are open |
 
 Anything else you add to the lower-right competes with the jump button and with camera drags, which players do with their right thumb.
@@ -503,7 +503,7 @@ From Roblox's console guidelines and the `GuiService` reference:
 - **Don't use `GuiService:IsTenFootInterface()` to detect a console.** It is deprecated and hardcoded to `true` on consoles regardless of how the player is interacting. Use `ViewportDisplaySize` for layout and `UserInputService.PreferredInput` for controls.
 - **Disable the chat window** for console games.
 - **Navigation:** every element must be reachable with the four directions plus select and back. Key actions should take only a few presses. Use progressive disclosure: go in and out of screens rather than fitting everything on one.
-- **Button prompts must match the controller:** see [`roblox-input`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/references/full.md) for `GetStringForKeyCode`, `GetImageForKeyCode` and `InputActionLabel`.
+- **Button prompts must match the controller:** see `roblox-input` for `GetStringForKeyCode`, `GetImageForKeyCode` and `InputActionLabel`.
 - **Accessibility:** respect `GuiService.PreferredTextSize` and `GuiService.ReducedMotionEnabled`.
 - **Content maturity:** console releases need content maturity information.
 

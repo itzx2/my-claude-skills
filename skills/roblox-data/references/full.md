@@ -92,45 +92,32 @@ Every nested table must be rebuilt per call so no two profiles share a subtable.
 
 ## 3. Read with bounded retries
 
-Retries must be finite and observable. Use exponential backoff with jitter. The caller supplies `shouldStop` from the existing persistence owner’s lifecycle state; do not add a second shutdown owner.
+Retries must be finite and observable. Use exponential backoff with jitter and stop when the server is shutting down.
 
 ```luau
 local DataStoreService = game:GetService("DataStoreService")
 local store = DataStoreService:GetDataStore("PlayerData_v3")
 
-local function readPlayer(userId: number, shouldStop: () -> boolean): (boolean, any)
+local function readPlayer(userId: number): (boolean, any)
     local key = "player_" .. tostring(userId)
     local delaySeconds = 1
 
     for attempt = 1, 4 do
-        if shouldStop() then
-            return false, "shutdown"
-        end
-
         local ok, value = pcall(function()
             return store:GetAsync(key)
         end)
-        if shouldStop() then
-            return false, "shutdown"
-        end
         if ok then
             return true, value
         end
-
-        if attempt < 4 then
-            if shouldStop() then
-                return false, "shutdown"
-            end
-            task.wait(delaySeconds + math.random() * 0.25)
-            delaySeconds *= 2
-        end
+        task.wait(delaySeconds + math.random() * 0.25)
+        delaySeconds *= 2
     end
 
     return false, nil
 end
 ```
 
-A failed read is not an empty profile. Keep the player in a safe loading state or fail the join rather than overwriting an existing record with defaults. `GetAsync` already in flight cannot be cancelled; the caller passes the existing owner’s shutdown predicate, and this helper creates no `BindToClose` owner.
+A failed read is not an empty profile. Keep the player in a safe loading state or fail the join rather than overwriting an existing record with defaults.
 
 ### The 4-second read cache (`DataStoreGetOptions.UseCache`)
 
@@ -226,10 +213,10 @@ Do not perform network calls, yield, or mutate external state inside the transfo
 
 The guarantees above are per profile. One `UpdateAsync` either commits its whole transform or none of it, and one session owner serializes writes to one key. None of that extends across profiles, across keys, or across services. Name the boundary in any design that crosses it:
 
-- **Atomic receipt recording for one profile is not an atomic exchange between two profiles.** A receipt ID and its grant can be one durable write for one key. There is no DataStore primitive that debits one profile and credits another in a single commit, so any transfer is two or more independent writes with a crash window between them. The same limit applies to a profile paired with any other durable record, such as a shared guild store or global counter (see [`roblox-server-data`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/references/full.md)).
+- **Atomic receipt recording for one profile is not an atomic exchange between two profiles.** A receipt ID and its grant can be one durable write for one key. There is no DataStore primitive that debits one profile and credits another in a single commit, so any transfer is two or more independent writes with a crash window between them. The same limit applies to a profile paired with any other durable record, such as a shared guild store or global counter (see `roblox-server-data`).
 - **A proposed multi-owner transfer must either explicitly exclude the guarantee or show a durable operation identity plus recovery state.** Excluding it means the design states that a crash between the two writes loses or duplicates value. Supporting it means writing a transfer record with a stable operation ID, both owners, the amount, and a state field before the first mutation, so recovery can find half-completed transfers and finish or reverse them. A small idempotent operation record like this is enough; no generic transaction framework is required or assumed.
-- **Administrative or external mutation must coordinate with the active owner.** An Open Cloud write, backend script, or manual editor fix applied while a live server still owns the session will be overwritten by that owner's next save. Either route the change through the active owner, or use a documented quiescence protocol: confirm the session is released and cannot be re-acquired mid-repair, mutate, then let the next owner load the repaired data (see [`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md) for the API-key side).
-- **Webhook acceptance is not completion.** For Roblox webhooks received off-platform, durable acceptance and deduplication must not acknowledge away an event before its work is recoverable. If the dedup marker is durable but the grant or enqueue behind it is not, the success response converts a retryable delivery into silent loss (see [`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md)).
+- **Administrative or external mutation must coordinate with the active owner.** An Open Cloud write, backend script, or manual editor fix applied while a live server still owns the session will be overwritten by that owner's next save. Either route the change through the active owner, or use a documented quiescence protocol: confirm the session is released and cannot be re-acquired mid-repair, mutate, then let the next owner load the repaired data (see `roblox-cloud` for the API-key side).
+- **Webhook acceptance is not completion.** For Roblox webhooks received off-platform, durable acceptance and deduplication must not acknowledge away an event before its work is recoverable. If the dedup marker is durable but the grant or enqueue behind it is not, the success response converts a retryable delivery into silent loss (see `roblox-cloud`).
 
 ### Worked failure sequence
 
@@ -261,7 +248,7 @@ local transfer = {
 
 Operations whose caller is told "done" — a purchase, a quest completion, a reward — follow one ordering rule: **acknowledge only after persistence**, and replay the *same* operation on unknown outcomes.
 
-- **Unresolved ≠ failed.** A write timeout or transport failure can leave the commit outcome unknown. A library's `false` result may instead mean refusal or another documented state; interpret that library's contract, not the boolean alone. The correct response is to retry the same idempotent operation, never to re-grant value on the ambiguous result (double-grant failure mode). The same reasoning drives `ProcessReceipt`'s retry semantics in [`roblox-monetization`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/references/full.md) §3: return the not-processed answer until persistence is confirmed, so the platform retries instead of the game losing or duplicating a paid grant.
+- **Unresolved ≠ failed.** A write timeout or transport failure can leave the commit outcome unknown. A library's `false` result may instead mean refusal or another documented state; interpret that library's contract, not the boolean alone. The correct response is to retry the same idempotent operation, never to re-grant value on the ambiguous result (double-grant failure mode). The same reasoning drives `ProcessReceipt`'s retry semantics in `roblox-monetization` §3: return the not-processed answer until persistence is confirmed, so the platform retries instead of the game losing or duplicating a paid grant.
 - **Idempotency key per intent.** Key the durable record to the player's *intent* (transaction id, request id) so replays of the same operation collapse: the write is "record grant X if and only if X is not already recorded", and the ack follows that record's success.
 - **Distinguish refusals from retries.** A framework or validation refusal (bad amount, unsupported schema) is terminal and must not be retried; an unknown outcome is retryable. Conflating them either drops entitled grants or hammers a failing store.
 
@@ -386,7 +373,7 @@ end)
 -- end
 ```
 
-Treat the restart hop as any other teleport: opaque ticket, `pcall`, and the durable-session flush order from [`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md) §8.6 apply unchanged.
+Treat the restart hop as any other teleport: opaque ticket, `pcall`, and the durable-session flush order from `roblox-cloud` §8.6 apply unchanged.
 
 ## 8. ProfileStore integration (optional)
 
@@ -547,7 +534,7 @@ Top-sorted DevForum canon for datastore libraries. Verify current status in-thre
 - Lineage: [DataStore2](https://devforum.roblox.com/t/how-to-use-datastore2-data-store-caching-and-data-loss-prevention/136317) (2018, historical) → [ProfileService](https://devforum.roblox.com/t/save-your-player-data-with-profileservice-datastore-module/667805) (2020) → [ProfileStore](https://devforum.roblox.com/t/profilestore-save-your-player-data-easy-datastore-module/3190543) (2024, current standard; already integrated above).
 - [Stop using SetAsync()](https://devforum.roblox.com/t/stop-using-setasync-to-save-player-data/276457): the canonical anti-pattern post; session-locking rationale.
 - [Suphi's DataStore Module](https://devforum.roblox.com/t/suphis-datastore-module/2425597): lighter alternative; [DataDelve](https://devforum.roblox.com/t/datadelve-%E2%80%94-easy-free-datastore-editor/3067950): free datastore editor for debugging live data.
-- [DataPredict](https://devforum.roblox.com/t/datapredict%E2%84%A2-3-years-release-242-revenue-game-optimization-using-machine-learning-deep-learning-and-reinforcement-learning-100-models/2196446): ML toolkit on datastore analytics, relevant to [`roblox-analytics`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/references/full.md)/growth work.
+- [DataPredict](https://devforum.roblox.com/t/datapredict%E2%84%A2-3-years-release-242-revenue-game-optimization-using-machine-learning-deep-learning-and-reinforcement-learning-100-models/2196446): ML toolkit on datastore analytics, relevant to `roblox-analytics`/growth work.
 
 ## Grant provenance and recovery-record compatibility
 

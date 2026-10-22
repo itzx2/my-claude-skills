@@ -244,11 +244,11 @@ which is why `ask-matt` reads both.
 
 ## Skills
 
-51 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+74 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
 The leading `/` below is a **marker for that distinction, not the invocation**. Installed as a plugin, every name here is prefixed: `/my-claude-skills:to-spec`, `my-claude-skills:grilling`, and so on. Only the legacy symlink install leaves them bare.
 
-Forty-eight of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: thirty-two engineering and productivity skills from [mattpocock/skills](https://github.com/mattpocock/skills), eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers), and six focused Roblox skills from [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain). [`vendor/record.json`](vendor/record.json) says which upstream, pin and status each one has; see [Vendored skills](#vendored-skills) for what changed on the way in.
+Seventy-one of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: thirty-two engineering and productivity skills from [mattpocock/skills](https://github.com/mattpocock/skills), eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers), and all twenty-nine Roblox skills from [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain). [`vendor/record.json`](vendor/record.json) says which upstream, pin and status each one has; see [Vendored skills](#vendored-skills) for what changed on the way in.
 
 - **animate** ⬇ — build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits.
 - **animation-vocabulary** ⬇ — reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in).
@@ -278,12 +278,35 @@ Forty-eight of them are **vendored** — copied in from another repo rather than
 - **/project-brain** — scaffold a project's `AGENTS.md` router and domain model so any agent can orient cold.
 - **prototype** ⬇ — build a throwaway prototype to answer a design question.
 - **research** ⬇ — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
-- **roblox-architecture** ⬇ — map feature ownership, code layout, dependencies, startup, and client/server boundaries in a Roblox project.
-- **roblox-data** ⬇ — design and debug Roblox player persistence, schemas, migrations, session ownership, retries, and budgets.
-- **roblox-gui** ⬇ — build and verify Roblox screen, surface, and world UI across devices, input methods, and states.
-- **roblox-networking** ⬇ — validate server-authoritative Roblox remotes, rate limits, ownership, and failure behavior.
-- **roblox-security** ⬇ — audit Roblox authority, remotes, movement, economy, and data flows for exploit resistance.
-- **roblox-studio-mcp** ⬇ — use Studio MCP for inspection, edits, assets, playtests, and evidence.
+- **roblox-architecture** ⬇ — Use when adding, moving, refactoring, or reviewing Roblox feature ownership, code layout, dependencies, startup, or client-server boundaries.
+- **roblox-collaboration-mode** ⬇ — Load FIRST for any Roblox task: build, change, fix, debug, review, audit, or plan. Sets initiative and which decisions need the user.
+- **roblox-data** ⬇ — Use when writing, changing, debugging, or auditing Roblox player saves: DataStore, ProfileStore, session locks, schemas, migrations.
+- **roblox-luau-core** ⬇ — Use when writing, editing, or debugging any Luau: tables, control flow, string patterns, scope, closures, and errors ported from JS/Python.
+- **roblox-luau-patterns** ⬇ — Use when writing or refactoring Roblox Luau modules, object lifecycles, signals, task scheduling, pcall, and cleanup.
+- **roblox-luau-types** ⬇ — Use when adding or fixing Luau type annotations: generics, unions, narrowing, strict mode, sealed tables, module type exports, typed metatables.
+- **roblox-networking** ⬇ — Use when adding, changing, or auditing RemoteEvents/RemoteFunctions: argument validation, rate limits, server authority, exploit prevention.
+- **roblox-performance** ⬇ — Use when profiling or fixing Roblox performance: low FPS, lag, memory, network load, slow phones, hot paths.
+- **roblox-security** ⬇ — Use when auditing or hardening Roblox code against exploits: authority, remotes, economy, purchases, and DataStore flows.
+- **roblox-server-data** ⬇ — Use when building or fixing Roblox cross-server data: OrderedDataStore leaderboards, MessagingService, MemoryStore, world state, seasons.
+- **roblox-analytics** ⬇ — Use when adding, changing, or auditing Roblox analytics: AnalyticsService events, economy, funnels, onboarding traces, rate limits.
+- **roblox-game-design** ⬇ — Use when designing or reworking a Roblox game: core loop, tutorial/FTUE, levels, economy, retention phases, juice, grind, curation.
+- **roblox-growth-design** ⬇ — Use for Roblox growth: diagnosing stats, discovery, retention, onboarding, experiments, LiveOps, thumbnails, and packaging.
+- **roblox-monetization** ⬇ — Use when adding, changing, or auditing Roblox purchases: GamePasses, Developer Products, subscriptions, private servers, policy checks.
+- **roblox-player-psychology** ⬇ — Use when designing or reviewing player-behavior mechanics: first minute, rewards, streaks, daily rewards, pricing, RNG/pity, community.
+- **roblox-animation-vfx** ⬇ — Use when adding, changing, or fixing Roblox animations, particles, beams, trails, tweens, camera shake, or other visual effects.
+- **roblox-audio** ⬇ — Use when adding, changing, or fixing Roblox audio: playback, spatial sound, music, sound effects, SoundGroups, or dynamic effects.
+- **roblox-building** ⬇ — Use when building or editing geometry, maps, props, or generated assets with MCP or standalone Luau.
+- **roblox-camera** ⬇ — Use when scripting or fixing Roblox camera behavior: CFrame placement, screen raycasts, first/third-person, shoulder views, cutscenes.
+- **roblox-gui** ⬇ — Use when building or fixing Roblox menus, HUDs, shops, dialogs, or UI that must work on phones, tablets, desktop and console.
+- **roblox-input** ⬇ — Use when handling Roblox touch, gamepad, keyboard, mouse or motion input, on-screen action buttons, or cross-platform action binding.
+- **roblox-lighting** ⬇ — Use when setting up or changing Roblox lighting, atmosphere, day/night cycles, or post-processing effects.
+- **roblox-localization** ⬇ — Use when adding or fixing Roblox translation: localization tables, auto-translation, locale-specific content, or region detection.
+- **roblox-npc-ai** ⬇ — Use when creating or fixing Roblox NPCs, bots or enemies: pathfinding, state machines, line of sight, spawns, AI update loops.
+- **roblox-physics** ⬇ — Use when building or fixing Roblox physics: vehicles, ragdolls, projectiles, elevators, constraints, forces, network ownership.
+- **roblox-cloud** ⬇ — Use for Roblox Open Cloud: API keys, OAuth 2.0, webhooks, scopes, token lifecycle, DataStore or messaging access from outside the game.
+- **roblox-publish-checklist** ⬇ — Use before publishing or updating a Roblox experience to run evidence-backed release gates and a pre-release audit.
+- **roblox-studio-mcp** ⬇ — Use when working in Roblox Studio through MCP: editing scripts or scenes, generating assets, playtesting, screenshots, or input.
+- **roblox-tooling** ⬇ — Use when setting up or fixing Roblox tooling: Rojo, Wally, pesde, Selene, StyLua, Lune, Rokit, luau-lsp, tests, or CI/CD.
 - **/retro** ⬇ — look back over a coding session and suggest changes to the agent's environment: checks, coding standards, steering files.
 - **/review-animations** ⬇ — review animation and motion code against a high craft bar; default to flagging, approval is earned.
 - **scrutinize** — outsider-perspective end-to-end review of a plan, PR, or code change.
@@ -370,13 +393,11 @@ subagents; and always on, so no repo needs setting up.
 
 ### From TabooHarmony/roblox-brain
 
-Six complete skill folders are pinned to [v2.3.1 at `ceee4aa`](https://github.com/TabooHarmony/roblox-brain/tree/ceee4aaa5004502e2a51d78b3c33bba44d84742b): architecture, security, networking, player data, GUI, and Studio MCP. The vendor record marks these six as patched for the curated subset. Other offered skills are recorded as skipped for this phase, and optional references use the pinned upstream index.
+All 29 complete skill folders are vendored unchanged from [v2.3.1 at `ceee4aa`](https://github.com/TabooHarmony/roblox-brain/tree/ceee4aaa5004502e2a51d78b3c33bba44d84742b). The vendor record marks every Brain entry as verbatim, including collaboration-mode and player-psychology. The earlier six-skill adaptations and namespace rewriting are removed at the user's direction. Upstream examples and advice are carried as-is; review observations remain research, not local patches.
 
-The upstream is MIT licensed. Its tracked root license is preserved byte-for-byte at [`vendor/licenses/roblox-brain-LICENSE`](vendor/licenses/roblox-brain-LICENSE); the vendor record records the repository, release, commit, and license provenance.
+The upstream MIT license is preserved byte-for-byte at [`vendor/licenses/roblox-brain-LICENSE`](vendor/licenses/roblox-brain-LICENSE). All sibling skills and their `references/full.md` resources are included; no Brain skill sets `disable-model-invocation: true`.
 
-**Patched:** the six entry points describe the partial-library boundary. Architecture requires repository and target Studio source discovery before adding or replacing persistence or authored UI owners, with an explicit Unverified state when readback is unavailable. Studio MCP points to that check and distinguishes a missing live Studio connection from repository review. The Data persistence example accepts the existing owner’s shutdown predicate and skips backoff after its final retry.
-
-**Requirements:** Reading and loading these Markdown skills adds no packages. Live Studio work requires Roblox Studio and a configured, connected MCP bridge; this plugin does not install or configure the bridge. Project libraries such as ProfileStore or UI frameworks are conditional choices only when a project uses them. The upstream Python, PyYAML, and Luau compiler dependencies are for its CI, not user skill loading.
+**Dependencies:** Loading the skills requires no extra packages. Live operations depend on the host's actual tools: Studio/MCP for Studio work, shell/Git for repository workflows, and configured Open Cloud access for cloud operations. ProfileStore, UI frameworks, Rojo and other project libraries/tools remain conditional choices described by upstream, not mandatory plugin installs. Upstream Python/PyYAML/Luau tools are its CI dependencies, not runtime requirements for these Markdown skills. See [`docs/roblox-brain-full-adoption.md`](docs/roblox-brain-full-adoption.md) for exact payload verification and host limits.
 
 ### From emilkowalski/skills
 

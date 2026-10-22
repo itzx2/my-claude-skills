@@ -39,10 +39,6 @@ sources:
 
 HUDs, menus, shops, dialogs, world UI, and layout bugs on phone, tablet, desktop or TV.
 
-This plugin bundles six Roblox Brain skills. References to other Brain skills are optional upstream reading unless independently present in the live skill roster. Use the live roster to check whether another source supplies one; see the [pinned upstream skill index](../roblox-architecture/references/optional-upstream-skills.md).
-
-For existing-project UI behavior changes, follow /my-claude-skills:roblox-architecture; preserve authored hierarchy and geometry when wiring behavior, and treat redesign as separate scope.
-
 ## Quick Reference
 
 - Mobile first: design on the smallest landscape phone with touch controls, then grow (full.md §11).

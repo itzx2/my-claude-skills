@@ -120,14 +120,37 @@ Two model-invoked references running *beneath* the other skills, each the single
 
 ## Roblox development
 
-These six model-invoked routes cover the plugin-bundled Roblox subset. References to other Roblox Brain skills are optional upstream reading unless independently present in the live skill roster; use that roster to check whether another source supplies one.
+All 29 upstream Brain skills are bundled unchanged with their complete references. They are model-invocable; select by the live roster and follow the host's actual capabilities. A reference to an external library or tool is not an instruction to install it.
 
-- **`my-claude-skills:roblox-architecture`** — choose ownership, module boundaries, startup, and integration. Inspect the repository and target Studio source before proposing replacements.
-- **`my-claude-skills:roblox-data`** — implement or debug player saves, migrations, session ownership, and shutdown behavior.
-- **`my-claude-skills:roblox-gui`** — build or fix responsive Roblox UI across screen sizes, states, and input methods.
-- **`my-claude-skills:roblox-networking`** — design and validate remotes, server authority, rate limits, and untrusted input.
-- **`my-claude-skills:roblox-security`** — audit exploit surfaces across authority, movement, economy, remotes, and data.
-- **`my-claude-skills:roblox-studio-mcp`** — inspect or change a connected Studio, create assets, or run playtests. A missing Studio connection blocks live verification; use offline project evidence and state what remains Unverified.
+- **`my-claude-skills:roblox-architecture`** — Use when adding, moving, refactoring, or reviewing Roblox feature ownership, code layout, dependencies, startup, or client-server boundaries.
+- **`my-claude-skills:roblox-collaboration-mode`** — Load FIRST for any Roblox task: build, change, fix, debug, review, audit, or plan. Sets initiative and which decisions need the user.
+- **`my-claude-skills:roblox-data`** — Use when writing, changing, debugging, or auditing Roblox player saves: DataStore, ProfileStore, session locks, schemas, migrations.
+- **`my-claude-skills:roblox-luau-core`** — Use when writing, editing, or debugging any Luau: tables, control flow, string patterns, scope, closures, and errors ported from JS/Python.
+- **`my-claude-skills:roblox-luau-patterns`** — Use when writing or refactoring Roblox Luau modules, object lifecycles, signals, task scheduling, pcall, and cleanup.
+- **`my-claude-skills:roblox-luau-types`** — Use when adding or fixing Luau type annotations: generics, unions, narrowing, strict mode, sealed tables, module type exports, typed metatables.
+- **`my-claude-skills:roblox-networking`** — Use when adding, changing, or auditing RemoteEvents/RemoteFunctions: argument validation, rate limits, server authority, exploit prevention.
+- **`my-claude-skills:roblox-performance`** — Use when profiling or fixing Roblox performance: low FPS, lag, memory, network load, slow phones, hot paths.
+- **`my-claude-skills:roblox-security`** — Use when auditing or hardening Roblox code against exploits: authority, remotes, economy, purchases, and DataStore flows.
+- **`my-claude-skills:roblox-server-data`** — Use when building or fixing Roblox cross-server data: OrderedDataStore leaderboards, MessagingService, MemoryStore, world state, seasons.
+- **`my-claude-skills:roblox-analytics`** — Use when adding, changing, or auditing Roblox analytics: AnalyticsService events, economy, funnels, onboarding traces, rate limits.
+- **`my-claude-skills:roblox-game-design`** — Use when designing or reworking a Roblox game: core loop, tutorial/FTUE, levels, economy, retention phases, juice, grind, curation.
+- **`my-claude-skills:roblox-growth-design`** — Use for Roblox growth: diagnosing stats, discovery, retention, onboarding, experiments, LiveOps, thumbnails, and packaging.
+- **`my-claude-skills:roblox-monetization`** — Use when adding, changing, or auditing Roblox purchases: GamePasses, Developer Products, subscriptions, private servers, policy checks.
+- **`my-claude-skills:roblox-player-psychology`** — Use when designing or reviewing player-behavior mechanics: first minute, rewards, streaks, daily rewards, pricing, RNG/pity, community.
+- **`my-claude-skills:roblox-animation-vfx`** — Use when adding, changing, or fixing Roblox animations, particles, beams, trails, tweens, camera shake, or other visual effects.
+- **`my-claude-skills:roblox-audio`** — Use when adding, changing, or fixing Roblox audio: playback, spatial sound, music, sound effects, SoundGroups, or dynamic effects.
+- **`my-claude-skills:roblox-building`** — Use when building or editing geometry, maps, props, or generated assets with MCP or standalone Luau.
+- **`my-claude-skills:roblox-camera`** — Use when scripting or fixing Roblox camera behavior: CFrame placement, screen raycasts, first/third-person, shoulder views, cutscenes.
+- **`my-claude-skills:roblox-gui`** — Use when building or fixing Roblox menus, HUDs, shops, dialogs, or UI that must work on phones, tablets, desktop and console.
+- **`my-claude-skills:roblox-input`** — Use when handling Roblox touch, gamepad, keyboard, mouse or motion input, on-screen action buttons, or cross-platform action binding.
+- **`my-claude-skills:roblox-lighting`** — Use when setting up or changing Roblox lighting, atmosphere, day/night cycles, or post-processing effects.
+- **`my-claude-skills:roblox-localization`** — Use when adding or fixing Roblox translation: localization tables, auto-translation, locale-specific content, or region detection.
+- **`my-claude-skills:roblox-npc-ai`** — Use when creating or fixing Roblox NPCs, bots or enemies: pathfinding, state machines, line of sight, spawns, AI update loops.
+- **`my-claude-skills:roblox-physics`** — Use when building or fixing Roblox physics: vehicles, ragdolls, projectiles, elevators, constraints, forces, network ownership.
+- **`my-claude-skills:roblox-cloud`** — Use for Roblox Open Cloud: API keys, OAuth 2.0, webhooks, scopes, token lifecycle, DataStore or messaging access from outside the game.
+- **`my-claude-skills:roblox-publish-checklist`** — Use before publishing or updating a Roblox experience to run evidence-backed release gates and a pre-release audit.
+- **`my-claude-skills:roblox-studio-mcp`** — Use when working in Roblox Studio through MCP: editing scripts or scenes, generating assets, playtesting, screenshots, or input.
+- **`my-claude-skills:roblox-tooling`** — Use when setting up or fixing Roblox tooling: Rojo, Wally, pesde, Selene, StyLua, Lune, Rokit, luau-lsp, tests, or CI/CD.
 
 ## Phase boundaries
 

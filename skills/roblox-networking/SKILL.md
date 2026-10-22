@@ -20,8 +20,6 @@ sources:
 
 Load when adding a remote, handling untrusted input, adding cooldowns, or assigning authority.
 
-This plugin bundles six Roblox Brain skills. References to other Brain skills are optional upstream reading unless independently present in the live skill roster. Use the live roster to check whether another source supplies one; see the [pinned upstream skill index](../roblox-architecture/references/optional-upstream-skills.md).
-
 ## Quick Reference
 
 - Every client argument is attacker-controlled; validate type, size, ownership, state, distance, cooldown on the server.

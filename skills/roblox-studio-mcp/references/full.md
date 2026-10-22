@@ -34,7 +34,7 @@ Two Studio MCP bridges are in active use. The official Roblox Studio MCP server 
 
 | Tool | What it does |
 |------|-------------|
-| `subagent` | Optional bridge-provided capability. Check the live tool inventory and schema; use only when an advertised mode is compatible with the task. Supported modes vary. |
+| `subagent` | Launch a specialized exploration or playtest subagent. |
 | `search_game_tree` | Explore instance hierarchy as flat JSON. Filter by path, type, keywords. |
 | `inspect_instance` | Detailed info about a specific instance: properties, attributes, children summary. |
 
@@ -336,7 +336,7 @@ Before mutating in a multi-place session, confirm the target:
 The strongest playtest workflow uses a visible test artifact, not just "start play, read console." The pattern is bridge-agnostic: inject a test script that emits explicit START/FINISHED signals, run it, poll for the signal, stop, clean up, and report a summary.
 
 1. **Plan the assertion**: what must be true? (e.g. `SpawnLocation` exists above the ground, the NPC reaches its target, the button opens the shop.)
-2. **Inject the test (edit-time)**: while play is stopped, create a temporary script in `ServerScriptService` that sets a flag or prints a START/FINISHED guard-signal when the assertion passes or fails. This temporary script is the default path. A bridge-provided subagent is optional: use it only if the live tool inventory exposes it and its current schema advertises a mode explicitly suited to creating or running this test; mode names and support vary, so do not assume one. Otherwise use the temporary script directly. `eval_server_runtime`/`eval_client_runtime` cannot run before play exists; do not use them in this step.
+2. **Inject the test (edit-time)**: while play is stopped, create a temporary script in `ServerScriptService` (or use `subagent` with type `playtest`) that sets a flag or prints a START/FINISHED guard-signal when the assertion passes or fails. `eval_server_runtime`/`eval_client_runtime` cannot run before play exists; do not use them in this step.
 3. **Start play and wait for the VM**: `solo_playtest` (chrrxs) or `start_stop_play` (official). Confirm the intended VM is running (`get_studio_state` or `get_connected_instances`; the expected `Client`/`Server` peer, not just any context) before evaluating. Prefer Run mode (F8, server-only) for server-side logic; use Play mode (F5) when client behavior or rendering matters.
 3b. **Evaluate live (optional)**: with the intended VM confirmed, use `eval_server_runtime`/`eval_client_runtime` (chrrxs) to inspect runtime state against the assertion. If the playtest never started or the VM is not the intended one, stop; a stopped VM is never a live-evaluation target.
 4. **Poll**: read logs (`get_runtime_logs` per peer on chrrxs, `get_console_output` on official) looking for the FINISHED signal, with a timeout (e.g. 60s default, max 300s).

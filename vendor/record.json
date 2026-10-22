@@ -461,422 +461,148 @@
       "skills": {
         "roblox-architecture": {
           "path": "skills/core/roblox-architecture",
-          "status": "patched",
-          "note": "Curated adoption of the full skill folder; local patches document partial-library routing and project source-discovery limits.",
-          "patches": [
-            {
-              "checks": [
-                {
-                  "contains": "optional upstream reading unless independently present in the live skill roster."
-                }
-              ],
-              "purpose": "Clarify the curated boundary and point optional upstream references to an immutable source index; the live skill roster determines whether another source supplies a skill.",
-              "adds": [
-                "references/optional-upstream-skills.md"
-              ]
-            },
-            {
-              "purpose": "Before adding or replacing persistence or authored UI owners, require repository and target Studio source discovery; Git absence is not evidence that Studio lacks authored source, and unavailable readback yields Unverified.",
-              "checks": [
-                {
-                  "contains": "Before adding or replacing persistence or authored UI owners"
-                },
-                {
-                  "contains": "A missing Git checkout or absent repository files does not prove the place lacks authored source."
-                },
-                {
-                  "contains": "record ownership and source as Unverified"
-                }
-              ]
-            },
-            {
-              "purpose": "Rewrite optional upstream references to roblox-monetization, roblox-npc-ai in references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
-              "checks": [
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-monetization`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-npc-ai`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-npc-ai/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": " `roblox-monetization`"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": " `roblox-npc-ai`"
-                }
-              ]
-            }
-          ]
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-collaboration-mode": {
           "path": "skills/core/roblox-collaboration-mode",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-data": {
           "path": "skills/core/roblox-data",
-          "status": "patched",
-          "note": "Curated adoption of the full skill folder; local patches document partial-library routing and project source-discovery limits.",
-          "patches": [
-            {
-              "checks": [
-                {
-                  "contains": "optional upstream reading unless independently present in the live skill roster."
-                }
-              ],
-              "purpose": "Clarify the curated boundary and point optional upstream references to an immutable source index; the live skill roster determines whether another source supplies a skill."
-            },
-            {
-              "purpose": "For existing-project integration, route persistence owner changes through the architecture source-discovery check.",
-              "checks": [
-                {
-                  "contains": "follow /my-claude-skills:roblox-architecture before adding or replacing a persistence owner."
-                }
-              ]
-            },
-            {
-              "purpose": "Make the illustrative readPlayer retry example stop between attempts using the existing persistence owner lifecycle predicate, return an explicit shutdown result, and skip the final backoff without adding a BindToClose owner.",
-              "checks": [
-                {
-                  "file": "references/full.md",
-                  "contains": "shouldStop: () -> boolean"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "return false, \"shutdown\""
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "if attempt < 4 then"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "GetAsync` already in flight cannot be cancelled"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "end)\n        if shouldStop() then\n            return false, \"shutdown\"\n        end\n        if ok then"
-                }
-              ]
-            },
-            {
-              "purpose": "Rewrite optional upstream references to roblox-server-data, roblox-cloud, roblox-analytics, roblox-monetization in SKILL.md and references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
-              "checks": [
-                {
-                  "file": "SKILL.md",
-                  "contains": "[`roblox-server-data`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/references/full.md)"
-                },
-                {
-                  "file": "SKILL.md",
-                  "contains": "[`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md)"
-                },
-                {
-                  "file": "SKILL.md",
-                  "contains": "[`roblox-analytics`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/references/full.md)"
-                },
-                {
-                  "file": "SKILL.md",
-                  "absent": " `roblox-server-data`"
-                },
-                {
-                  "file": "SKILL.md",
-                  "absent": " `roblox-cloud`"
-                },
-                {
-                  "file": "SKILL.md",
-                  "absent": " `roblox-analytics`"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-server-data`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-cloud`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-monetization`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-analytics`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": " `roblox-server-data`"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": " `roblox-cloud`"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": " `roblox-monetization`"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": " `roblox-analytics`"
-                }
-              ]
-            }
-          ]
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-luau-core": {
           "path": "skills/core/roblox-luau-core",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-luau-patterns": {
           "path": "skills/core/roblox-luau-patterns",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-luau-types": {
           "path": "skills/core/roblox-luau-types",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-networking": {
           "path": "skills/core/roblox-networking",
-          "status": "patched",
-          "note": "Curated adoption of the full skill folder; local patches document partial-library routing and project source-discovery limits.",
-          "patches": [
-            {
-              "checks": [
-                {
-                  "contains": "optional upstream reading unless independently present in the live skill roster."
-                }
-              ],
-              "purpose": "Clarify the curated boundary and point optional upstream references to an immutable source index; the live skill roster determines whether another source supplies a skill."
-            },
-            {
-              "purpose": "Rewrite optional upstream references to roblox-tooling in references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
-              "checks": [
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-tooling`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-tooling/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": "(`roblox-tooling`"
-                }
-              ]
-            }
-          ]
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-performance": {
           "path": "skills/core/roblox-performance",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-security": {
           "path": "skills/core/roblox-security",
-          "status": "patched",
-          "note": "Curated adoption of the full skill folder; local patches document partial-library routing and project source-discovery limits.",
-          "patches": [
-            {
-              "checks": [
-                {
-                  "contains": "optional upstream reading unless independently present in the live skill roster."
-                }
-              ],
-              "purpose": "Clarify the curated boundary and point optional upstream references to an immutable source index; the live skill roster determines whether another source supplies a skill."
-            }
-          ]
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-server-data": {
           "path": "skills/core/roblox-server-data",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-analytics": {
           "path": "skills/design/roblox-analytics",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-game-design": {
           "path": "skills/design/roblox-game-design",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-growth-design": {
           "path": "skills/design/roblox-growth-design",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-monetization": {
           "path": "skills/design/roblox-monetization",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-player-psychology": {
           "path": "skills/design/roblox-player-psychology",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-animation-vfx": {
           "path": "skills/gameplay/roblox-animation-vfx",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-audio": {
           "path": "skills/gameplay/roblox-audio",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-building": {
           "path": "skills/gameplay/roblox-building",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-camera": {
           "path": "skills/gameplay/roblox-camera",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-gui": {
           "path": "skills/gameplay/roblox-gui",
-          "status": "patched",
-          "note": "Curated adoption of the full skill folder; local patches document partial-library routing and project source-discovery limits.",
-          "patches": [
-            {
-              "checks": [
-                {
-                  "contains": "optional upstream reading unless independently present in the live skill roster."
-                }
-              ],
-              "purpose": "Clarify the curated boundary and point optional upstream references to an immutable source index; the live skill roster determines whether another source supplies a skill."
-            },
-            {
-              "purpose": "For existing-project UI behavior wiring, preserve authored hierarchy and geometry; route owner discovery through architecture and keep redesign separate.",
-              "checks": [
-                {
-                  "contains": "follow /my-claude-skills:roblox-architecture; preserve authored hierarchy and geometry when wiring behavior, and treat redesign as separate scope."
-                }
-              ]
-            },
-            {
-              "purpose": "Rewrite optional upstream references to roblox-input in references/full.md from bare inline-code names to Markdown links to their references/full.md at pinned commit ceee4aaa5004502e2a51d78b3c33bba44d84742b. Reapply every occurrence on sync; retain bundled-skill references and the live-roster scope note.",
-              "checks": [
-                {
-                  "file": "references/full.md",
-                  "contains": "[`roblox-input`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/references/full.md)"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": "(`roblox-input`"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": " `roblox-input`"
-                }
-              ]
-            }
-          ]
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-input": {
           "path": "skills/gameplay/roblox-input",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-lighting": {
           "path": "skills/gameplay/roblox-lighting",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-localization": {
           "path": "skills/gameplay/roblox-localization",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-npc-ai": {
           "path": "skills/gameplay/roblox-npc-ai",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-physics": {
           "path": "skills/gameplay/roblox-physics",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-cloud": {
           "path": "skills/tools/roblox-cloud",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-publish-checklist": {
           "path": "skills/tools/roblox-publish-checklist",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-studio-mcp": {
           "path": "skills/tools/roblox-studio-mcp",
-          "status": "patched",
-          "note": "Curated adoption of the full skill folder; local patches document partial-library routing and project source-discovery limits.",
-          "patches": [
-            {
-              "checks": [
-                {
-                  "contains": "optional upstream reading unless independently present in the live skill roster."
-                }
-              ],
-              "purpose": "Clarify the curated boundary and point optional upstream references to an immutable source index; the live skill roster determines whether another source supplies a skill."
-            },
-            {
-              "purpose": "Route adding or replacing persistence and authored UI owners through the architecture discovery check; a disconnected Studio blocks live verification only.",
-              "checks": [
-                {
-                  "contains": "For adding or replacing persistence or authored UI owners"
-                },
-                {
-                  "contains": "No connected Studio blocks live verification only"
-                }
-              ]
-            },
-            {
-              "purpose": "Treat subagent as an optional bridge-provided capability gated by the live tool inventory and its advertised task-compatible modes; default structured playtest setup to a temporary edit-time script and do not assume a playtest mode.",
-              "checks": [
-                {
-                  "file": "SKILL.md",
-                  "contains": "Subagent is an optional bridge-provided capability; use it only when exposed with an advertised mode compatible with the task."
-                },
-                {
-                  "file": "SKILL.md",
-                  "contains": "Otherwise use the temporary edit-time script workflow in full.md."
-                },
-                {
-                  "file": "SKILL.md",
-                  "absent": "screen_capture`, `subagent`."
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "Supported modes vary."
-                },
-                {
-                  "file": "references/full.md",
-                  "contains": "This temporary script is the default path."
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": "`subagent` with type `playtest`"
-                },
-                {
-                  "file": "references/full.md",
-                  "absent": "Launch a specialized exploration or playtest subagent."
-                }
-              ]
-            }
-          ]
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         },
         "roblox-tooling": {
           "path": "skills/tools/roblox-tooling",
-          "status": "skipped",
-          "note": "Curated phase ships six focused Roblox skills; this offered skill remains available upstream and is not included in this adoption."
+          "status": "verbatim",
+          "note": "User-directed full upstream adoption on 2026-10-22: complete folder, unchanged at the recorded pin; no local content or namespace patches."
         }
       },
       "release": "v2.3.1",

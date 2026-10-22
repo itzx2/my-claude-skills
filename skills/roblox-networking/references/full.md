@@ -371,7 +371,7 @@ criteria, not fashion:
   with five remotes, a raw `RemoteEvent` layer plus the validation discipline of §2 is simpler and has
   one less build dependency. Follow the project's existing choice if it already has one.
 - **Pin the schema, verify the regen.** Pin the compiler's version the same way as any tool
-  ([`roblox-tooling`](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-tooling/references/full.md) version-pinning). Run codegen in CI on every change to the schema or its inputs,
+  (`roblox-tooling` version-pinning). Run codegen in CI on every change to the schema or its inputs,
   and gate on the *generated artifact*, not just the exit code: assert the output files exist,
   regenerate cleanly, and diff-check in review. A stale generated module that still compiles is the
   classic silent failure — hand-edited types drift from the schema and nobody notices until a payload

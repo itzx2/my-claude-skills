@@ -19,12 +19,6 @@ sources:
 
 Load for ownership, integration, boundaries, startup, or module splits.
 
-This plugin bundles six Roblox Brain skills. References to other Brain skills are optional upstream reading unless independently present in the live skill roster. Use the live roster to check whether another source supplies one; see the [pinned upstream skill index](../roblox-architecture/references/optional-upstream-skills.md).
-
-### Discover the existing source before designing a replacement
-
-Before adding or replacing persistence or authored UI owners, inspect repository source and the selected target Studio tree/scripts, then read back existing instances where relevant. A missing Git checkout or absent repository files does not prove the place lacks authored source. If target Studio or readback is unavailable, record ownership and source as Unverified and keep the proposed owner change conditional.
-
 ## Quick Reference
 
 Reuse proven project modules before rebuilding; inspect contracts and failure/cleanup paths. Integration workflow: full.md.
