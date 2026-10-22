@@ -333,6 +333,8 @@ Seventy-one of them are **vendored** — copied in from another repo rather than
 
 ## Vendored skills
 
+Ask Matt keeps its Roblox routes in [a separate reference](skills/ask-matt/references/roblox-brain.md), loaded for any Roblox-related request handled by the router.
+
 ### Skill sources
 
 This catalog lists every shipped vendored skill and plugin, with its local
