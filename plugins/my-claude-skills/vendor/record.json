@@ -9,7 +9,7 @@
   "upstreams": {
     "mattpocock": {
       "repo": "https://github.com/mattpocock/skills.git",
-      "pin": "49dd158d1076134a641b33efb035946536778336",
+      "pin": "b59cab42bf1206e1363eafc37f71b21c3bcaa12f",
       "rewrite": "namespace",
       "skills": {
         "code-review": {
@@ -246,8 +246,14 @@
         "batch-grill-me": {
           "status": "skipped",
           "note": "Removed upstream 2026-07-16 when grilling began asking a whole round at once; dropped here too."
+        },
+        "software-factory": {
+          "path": "skills/in-progress/software-factory",
+          "status": "verbatim",
+          "note": "User-approved experimental adoption from software-factory-skill, including all five supporting documents; remains user-invoked."
         }
-      }
+      },
+      "note": "Pinned software-factory-skill on 2026-10-22. Includes main at 5beb35b040e3de97e54fa9e386d7e42d15c295c2 (chief-of-staff wiki update), plus the experimental software-factory skill. Other recorded entries are unchanged from 49dd158."
     },
     "emilkowalski": {
       "repo": "https://github.com/emilkowalski/skills.git",

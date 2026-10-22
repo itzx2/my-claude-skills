@@ -8,9 +8,10 @@ removed. This supersedes the scope proposed by the review and the prior live
 handoff; the published handoff remains unchanged as a historical snapshot.
 
 The main plugin version is tracked in the [plugin manifest](../.claude-plugin/plugin.json).
-It contains 74 skills: 45 existing non-Brain skills and 29 Brain skills.
+At the initial full-adoption release (v2.3.2), it contained 74 skills: 45
+existing non-Brain skills and 29 Brain skills.
 All 29 Brain entry points omit `disable-model-invocation`, so
-none is user-only. The existing non-Brain roster has 22 user-only skills.
+none is user-only. That release's non-Brain roster had 22 user-only skills.
 
 ## Complete dependencies and resources
 
@@ -53,7 +54,7 @@ main-plugin ZIP with exactly one manifest and no nested sibling plugin:
 pwsh -NoProfile -File scripts/package-plugin.ps1 -OutputDirectory <fresh-directory>
 ```
 
-The output includes all 74 complete skill folders, hooks, helper scripts, vendor
+The output includes all complete skill folders, hooks, helper scripts, vendor
 provenance/license and project documentation. It excludes Git state, user config,
 the marketplace manifest, and savvy-progress. Upload the ZIP through Claude's
 Customize > Plugins UI. This does not redesign the existing marketplace or
