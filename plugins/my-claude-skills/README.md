@@ -10,6 +10,7 @@ This repo is a Claude Code plugin marketplace. Install it:
 claude plugin marketplace add https://github.com/itzx2/my-claude-skills.git
 claude plugin install my-claude-skills@my-claude-skills
 claude plugin install savvy-progress@my-claude-skills
+claude plugin install my-roblox-skills@my-claude-skills   # only if you build Roblox games
 ```
 
 That installs at **user scope**, so the skills load in every session in every
@@ -19,7 +20,7 @@ Code afterwards — skills are enumerated once, at session start.
 No clone, no symlink, no Administrator shell on Windows. Update later with
 `claude plugin update my-claude-skills`.
 
-The marketplace holds two plugins:
+The marketplace holds three plugins:
 
 Each marketplace entry points to its own folder under `plugins/`. The main
 plugin's release folder is generated from the development sources; it contains
@@ -46,6 +47,15 @@ ambiguity seen in Claude's marketplace importer. See
   them to the model** — tested on 2.1.299, both hot-reloaded and loaded at
   session start — so there those features are absent and the skills skip
   them silently. The panel and the band do not depend on them.
+- **`my-roblox-skills`** — the 29 Roblox domain skills from
+  [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain),
+  the **`/my-roblox-skills:ask-roblox`** router, and a **Roblox briefing**
+  injected at session start and into every subagent: the full route in a
+  folder that looks like a Roblox project (Rojo, Wally, pesde, Rokit, saved
+  places, `.luau` sources), a short pointer anywhere else. Install it only
+  where you build Roblox games; it does not need `my-claude-skills`, and works
+  beside it. See [its README](plugins/my-roblox-skills/README.md) and
+  [`docs/adr/0006`](docs/adr/0006-roblox-skills-ship-as-their-own-plugin.md).
 
 ### Invocation names are namespaced
 
@@ -250,11 +260,11 @@ which is why `ask-matt` reads both.
 
 ## Skills
 
-75 skills. `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
+46 skills in `my-claude-skills`. The Roblox skills are listed in [the `my-roblox-skills` README](plugins/my-roblox-skills/README.md). `/name` marks the ones Claude Code hides from the agent (`disable-model-invocation`), which only you can trigger — the rest the agent may invoke itself. This list is written by hand; the per-session briefing is generated from front matter and needs no edit here.
 
 The leading `/` below is a **marker for that distinction, not the invocation**. Installed as a plugin, every name here is prefixed: `/my-claude-skills:to-spec`, `my-claude-skills:grilling`, and so on. Only the legacy symlink install leaves them bare.
 
-Seventy-two of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: thirty-three engineering and productivity skills from [mattpocock/skills](https://github.com/mattpocock/skills), eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers), and all twenty-nine Roblox skills from [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain). [`vendor/record.json`](vendor/record.json) says which upstream, pin and status each one has; see [Vendored skills](#vendored-skills) for what changed on the way in.
+Forty-three of them are **vendored** — copied in from another repo rather than installed beside this one, so they ride the same install-and-brief path as everything else. Marked ⬇ below: thirty-three engineering and productivity skills from [mattpocock/skills](https://github.com/mattpocock/skills), eight design-engineering skills (animation and interface craft) from [emilkowalski/skills](https://github.com/emilkowalski/skills), and two branch-lifecycle skills from [obra/superpowers](https://github.com/obra/superpowers). The twenty-nine Roblox skills from [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain) ship in the separate `my-roblox-skills` plugin. [`vendor/record.json`](vendor/record.json) says which upstream, pin and status each one has; see [Vendored skills](#vendored-skills) for what changed on the way in.
 
 - **animate** ⬇ — build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits.
 - **animation-vocabulary** ⬇ — reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in).
@@ -284,35 +294,6 @@ Seventy-two of them are **vendored** — copied in from another repo rather than
 - **/project-brain** — scaffold a project's `AGENTS.md` router and domain model so any agent can orient cold.
 - **prototype** ⬇ — build a throwaway prototype to answer a design question.
 - **research** ⬇ — investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo.
-- **roblox-architecture** ⬇ — Use when adding, moving, refactoring, or reviewing Roblox feature ownership, code layout, dependencies, startup, or client-server boundaries.
-- **roblox-collaboration-mode** ⬇ — Load FIRST for any Roblox task: build, change, fix, debug, review, audit, or plan. Sets initiative and which decisions need the user.
-- **roblox-data** ⬇ — Use when writing, changing, debugging, or auditing Roblox player saves: DataStore, ProfileStore, session locks, schemas, migrations.
-- **roblox-luau-core** ⬇ — Use when writing, editing, or debugging any Luau: tables, control flow, string patterns, scope, closures, and errors ported from JS/Python.
-- **roblox-luau-patterns** ⬇ — Use when writing or refactoring Roblox Luau modules, object lifecycles, signals, task scheduling, pcall, and cleanup.
-- **roblox-luau-types** ⬇ — Use when adding or fixing Luau type annotations: generics, unions, narrowing, strict mode, sealed tables, module type exports, typed metatables.
-- **roblox-networking** ⬇ — Use when adding, changing, or auditing RemoteEvents/RemoteFunctions: argument validation, rate limits, server authority, exploit prevention.
-- **roblox-performance** ⬇ — Use when profiling or fixing Roblox performance: low FPS, lag, memory, network load, slow phones, hot paths.
-- **roblox-security** ⬇ — Use when auditing or hardening Roblox code against exploits: authority, remotes, economy, purchases, and DataStore flows.
-- **roblox-server-data** ⬇ — Use when building or fixing Roblox cross-server data: OrderedDataStore leaderboards, MessagingService, MemoryStore, world state, seasons.
-- **roblox-analytics** ⬇ — Use when adding, changing, or auditing Roblox analytics: AnalyticsService events, economy, funnels, onboarding traces, rate limits.
-- **roblox-game-design** ⬇ — Use when designing or reworking a Roblox game: core loop, tutorial/FTUE, levels, economy, retention phases, juice, grind, curation.
-- **roblox-growth-design** ⬇ — Use for Roblox growth: diagnosing stats, discovery, retention, onboarding, experiments, LiveOps, thumbnails, and packaging.
-- **roblox-monetization** ⬇ — Use when adding, changing, or auditing Roblox purchases: GamePasses, Developer Products, subscriptions, private servers, policy checks.
-- **roblox-player-psychology** ⬇ — Use when designing or reviewing player-behavior mechanics: first minute, rewards, streaks, daily rewards, pricing, RNG/pity, community.
-- **roblox-animation-vfx** ⬇ — Use when adding, changing, or fixing Roblox animations, particles, beams, trails, tweens, camera shake, or other visual effects.
-- **roblox-audio** ⬇ — Use when adding, changing, or fixing Roblox audio: playback, spatial sound, music, sound effects, SoundGroups, or dynamic effects.
-- **roblox-building** ⬇ — Use when building or editing geometry, maps, props, or generated assets with MCP or standalone Luau.
-- **roblox-camera** ⬇ — Use when scripting or fixing Roblox camera behavior: CFrame placement, screen raycasts, first/third-person, shoulder views, cutscenes.
-- **roblox-gui** ⬇ — Use when building or fixing Roblox menus, HUDs, shops, dialogs, or UI that must work on phones, tablets, desktop and console.
-- **roblox-input** ⬇ — Use when handling Roblox touch, gamepad, keyboard, mouse or motion input, on-screen action buttons, or cross-platform action binding.
-- **roblox-lighting** ⬇ — Use when setting up or changing Roblox lighting, atmosphere, day/night cycles, or post-processing effects.
-- **roblox-localization** ⬇ — Use when adding or fixing Roblox translation: localization tables, auto-translation, locale-specific content, or region detection.
-- **roblox-npc-ai** ⬇ — Use when creating or fixing Roblox NPCs, bots or enemies: pathfinding, state machines, line of sight, spawns, AI update loops.
-- **roblox-physics** ⬇ — Use when building or fixing Roblox physics: vehicles, ragdolls, projectiles, elevators, constraints, forces, network ownership.
-- **roblox-cloud** ⬇ — Use for Roblox Open Cloud: API keys, OAuth 2.0, webhooks, scopes, token lifecycle, DataStore or messaging access from outside the game.
-- **roblox-publish-checklist** ⬇ — Use before publishing or updating a Roblox experience to run evidence-backed release gates and a pre-release audit.
-- **roblox-studio-mcp** ⬇ — Use when working in Roblox Studio through MCP: editing scripts or scenes, generating assets, playtesting, screenshots, or input.
-- **roblox-tooling** ⬇ — Use when setting up or fixing Roblox tooling: Rojo, Wally, pesde, Selene, StyLua, Lune, Rokit, luau-lsp, tests, or CI/CD.
 - **/retro** ⬇ — look back over a coding session and suggest changes to the agent's environment: checks, coding standards, steering files.
 - **/review-animations** ⬇ — review animation and motion code against a high craft bar; default to flagging, approval is earned.
 - **/software-factory** ⬇ — experimental shared language for designing an agent factory: its tasks, triggers, services, review gates, and human intervention. Includes five supporting reference documents.
@@ -334,15 +315,15 @@ Seventy-two of them are **vendored** — copied in from another repo rather than
 
 ## Vendored skills
 
-Ask Matt keeps its Roblox routes in [a separate reference](skills/ask-matt/references/roblox-brain.md), loaded for any Roblox-related request handled by the router.
+Ask Matt sends Roblox requests to `/my-roblox-skills:ask-roblox`, the router in the `my-roblox-skills` plugin, when that plugin is installed.
 
 ### Skill sources
 
 This catalog lists every shipped vendored skill and plugin, with its local
 status and an immutable link to its upstream source. Local forks may differ
 substantially from that source. Skipped entries are not shipped; absorbed
-material is listed separately below. The three original skills are
-`karpathy-guidelines`, `project-brain`, and `scrutinize`.
+material is listed separately below. The three skills no upstream sync covers are
+`karpathy-guidelines` (started from Forrest Chang's, see [Credits](#credits-and-licenses)), `project-brain`, and `scrutinize`.
 
 The catalog is generated from `vendor/record.json` with
 `node scripts/vendor-catalog.js generate` and checked before publishing.
@@ -427,35 +408,35 @@ Pin: [`ceee4aa`](https://github.com/TabooHarmony/roblox-brain/commit/ceee4aaa500
 
 | Skill or plugin | Local status | Skill source |
 | --- | --- | --- |
-| [roblox-analytics](skills/roblox-analytics) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/SKILL.md) |
-| [roblox-animation-vfx](skills/roblox-animation-vfx) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-animation-vfx/SKILL.md) |
-| [roblox-architecture](skills/roblox-architecture) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-architecture/SKILL.md) |
-| [roblox-audio](skills/roblox-audio) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-audio/SKILL.md) |
-| [roblox-building](skills/roblox-building) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-building/SKILL.md) |
-| [roblox-camera](skills/roblox-camera) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-camera/SKILL.md) |
-| [roblox-cloud](skills/roblox-cloud) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/SKILL.md) |
-| [roblox-collaboration-mode](skills/roblox-collaboration-mode) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-collaboration-mode/SKILL.md) |
-| [roblox-data](skills/roblox-data) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-data/SKILL.md) |
-| [roblox-game-design](skills/roblox-game-design) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-game-design/SKILL.md) |
-| [roblox-growth-design](skills/roblox-growth-design) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-growth-design/SKILL.md) |
-| [roblox-gui](skills/roblox-gui) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-gui/SKILL.md) |
-| [roblox-input](skills/roblox-input) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/SKILL.md) |
-| [roblox-lighting](skills/roblox-lighting) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-lighting/SKILL.md) |
-| [roblox-localization](skills/roblox-localization) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-localization/SKILL.md) |
-| [roblox-luau-core](skills/roblox-luau-core) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-core/SKILL.md) |
-| [roblox-luau-patterns](skills/roblox-luau-patterns) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-patterns/SKILL.md) |
-| [roblox-luau-types](skills/roblox-luau-types) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-types/SKILL.md) |
-| [roblox-monetization](skills/roblox-monetization) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/SKILL.md) |
-| [roblox-networking](skills/roblox-networking) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-networking/SKILL.md) |
-| [roblox-npc-ai](skills/roblox-npc-ai) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-npc-ai/SKILL.md) |
-| [roblox-performance](skills/roblox-performance) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-performance/SKILL.md) |
-| [roblox-physics](skills/roblox-physics) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-physics/SKILL.md) |
-| [roblox-player-psychology](skills/roblox-player-psychology) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-player-psychology/SKILL.md) |
-| [roblox-publish-checklist](skills/roblox-publish-checklist) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-publish-checklist/SKILL.md) |
-| [roblox-security](skills/roblox-security) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-security/SKILL.md) |
-| [roblox-server-data](skills/roblox-server-data) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/SKILL.md) |
-| [roblox-studio-mcp](skills/roblox-studio-mcp) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-studio-mcp/SKILL.md) |
-| [roblox-tooling](skills/roblox-tooling) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-tooling/SKILL.md) |
+| [roblox-analytics](plugins/my-roblox-skills/skills/roblox-analytics) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-analytics/SKILL.md) |
+| [roblox-animation-vfx](plugins/my-roblox-skills/skills/roblox-animation-vfx) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-animation-vfx/SKILL.md) |
+| [roblox-architecture](plugins/my-roblox-skills/skills/roblox-architecture) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-architecture/SKILL.md) |
+| [roblox-audio](plugins/my-roblox-skills/skills/roblox-audio) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-audio/SKILL.md) |
+| [roblox-building](plugins/my-roblox-skills/skills/roblox-building) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-building/SKILL.md) |
+| [roblox-camera](plugins/my-roblox-skills/skills/roblox-camera) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-camera/SKILL.md) |
+| [roblox-cloud](plugins/my-roblox-skills/skills/roblox-cloud) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-cloud/SKILL.md) |
+| [roblox-collaboration-mode](plugins/my-roblox-skills/skills/roblox-collaboration-mode) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-collaboration-mode/SKILL.md) |
+| [roblox-data](plugins/my-roblox-skills/skills/roblox-data) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-data/SKILL.md) |
+| [roblox-game-design](plugins/my-roblox-skills/skills/roblox-game-design) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-game-design/SKILL.md) |
+| [roblox-growth-design](plugins/my-roblox-skills/skills/roblox-growth-design) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-growth-design/SKILL.md) |
+| [roblox-gui](plugins/my-roblox-skills/skills/roblox-gui) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-gui/SKILL.md) |
+| [roblox-input](plugins/my-roblox-skills/skills/roblox-input) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-input/SKILL.md) |
+| [roblox-lighting](plugins/my-roblox-skills/skills/roblox-lighting) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-lighting/SKILL.md) |
+| [roblox-localization](plugins/my-roblox-skills/skills/roblox-localization) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-localization/SKILL.md) |
+| [roblox-luau-core](plugins/my-roblox-skills/skills/roblox-luau-core) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-core/SKILL.md) |
+| [roblox-luau-patterns](plugins/my-roblox-skills/skills/roblox-luau-patterns) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-patterns/SKILL.md) |
+| [roblox-luau-types](plugins/my-roblox-skills/skills/roblox-luau-types) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-luau-types/SKILL.md) |
+| [roblox-monetization](plugins/my-roblox-skills/skills/roblox-monetization) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-monetization/SKILL.md) |
+| [roblox-networking](plugins/my-roblox-skills/skills/roblox-networking) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-networking/SKILL.md) |
+| [roblox-npc-ai](plugins/my-roblox-skills/skills/roblox-npc-ai) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-npc-ai/SKILL.md) |
+| [roblox-performance](plugins/my-roblox-skills/skills/roblox-performance) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-performance/SKILL.md) |
+| [roblox-physics](plugins/my-roblox-skills/skills/roblox-physics) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/gameplay/roblox-physics/SKILL.md) |
+| [roblox-player-psychology](plugins/my-roblox-skills/skills/roblox-player-psychology) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/design/roblox-player-psychology/SKILL.md) |
+| [roblox-publish-checklist](plugins/my-roblox-skills/skills/roblox-publish-checklist) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-publish-checklist/SKILL.md) |
+| [roblox-security](plugins/my-roblox-skills/skills/roblox-security) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-security/SKILL.md) |
+| [roblox-server-data](plugins/my-roblox-skills/skills/roblox-server-data) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/core/roblox-server-data/SKILL.md) |
+| [roblox-studio-mcp](plugins/my-roblox-skills/skills/roblox-studio-mcp) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-studio-mcp/SKILL.md) |
+| [roblox-tooling](plugins/my-roblox-skills/skills/roblox-tooling) | verbatim | [SKILL.md](https://github.com/TabooHarmony/roblox-brain/blob/ceee4aaa5004502e2a51d78b3c33bba44d84742b/skills/tools/roblox-tooling/SKILL.md) |
 
 #### Absorbed upstream material
 
@@ -538,9 +519,9 @@ subagents; and always on, so no repo needs setting up.
 
 ### From TabooHarmony/roblox-brain
 
-All 29 complete skill folders are vendored unchanged from [v2.3.1 at `ceee4aa`](https://github.com/TabooHarmony/roblox-brain/tree/ceee4aaa5004502e2a51d78b3c33bba44d84742b). The vendor record marks every Brain entry as verbatim, including collaboration-mode and player-psychology. The earlier six-skill adaptations and namespace rewriting are removed at the user's direction. Upstream examples and advice are carried as-is; review observations remain research, not local patches.
+All 29 complete skill folders ship in the `my-roblox-skills` plugin, under [`plugins/my-roblox-skills/skills/`](plugins/my-roblox-skills/skills), vendored unchanged from [v2.3.1 at `ceee4aa`](https://github.com/TabooHarmony/roblox-brain/tree/ceee4aaa5004502e2a51d78b3c33bba44d84742b). The vendor record marks every Brain entry as verbatim, including collaboration-mode and player-psychology. The earlier six-skill adaptations and namespace rewriting are removed at the user's direction. Upstream examples and advice are carried as-is; review observations remain research, not local patches.
 
-The upstream MIT license is preserved byte-for-byte at [`vendor/licenses/roblox-brain-LICENSE`](vendor/licenses/roblox-brain-LICENSE). All sibling skills and their `references/full.md` resources are included; no Brain skill sets `disable-model-invocation: true`.
+The upstream MIT license is preserved byte-for-byte at [`plugins/my-roblox-skills/licenses/roblox-brain-LICENSE`](plugins/my-roblox-skills/licenses/roblox-brain-LICENSE), inside the plugin so every install carries it. All sibling skills and their `references/full.md` resources are included; no Brain skill sets `disable-model-invocation: true`.
 
 **Dependencies:** Loading the skills requires no extra packages. Live operations depend on the host's actual tools: Studio/MCP for Studio work, shell/Git for repository workflows, and configured Open Cloud access for cloud operations. ProfileStore, UI frameworks, Rojo and other project libraries/tools remain conditional choices described by upstream, not mandatory plugin installs. Upstream Python/PyYAML/Luau tools are its CI dependencies, not runtime requirements for these Markdown skills. See [`docs/roblox-brain-full-adoption.md`](docs/roblox-brain-full-adoption.md) for exact payload verification and host limits.
 
@@ -636,3 +617,28 @@ rules — verify a suggestion against this codebase before implementing it, and
 clarify every unclear item before starting any of them — are worth a short
 skill written here, not a vendoring. The other nine superpowers skills all
 duplicate something this repo already does better.
+
+## Credits and licenses
+
+Most of what ships here was written by other people. Every upstream below is
+MIT-licensed, and MIT asks for one thing in return: keep the copyright and
+permission notice with every copy. Each license is kept byte-for-byte as it
+stood at the pinned commit, inside the plugin folder that ships the copied
+work, because a plugin install copies only that folder.
+
+| Upstream | Author | What we use | License copy |
+| --- | --- | --- | --- |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | Matt Pocock | 33 engineering and productivity skills, including `ask-matt`, `grill-with-docs`, `tdd`, `chief-of-staff` and `software-factory` | [`vendor/licenses/mattpocock-LICENSE`](vendor/licenses/mattpocock-LICENSE) |
+| [emilkowalski/skills](https://github.com/emilkowalski/skills) | Emil Kowalski | 8 animation and interface-craft skills | [`vendor/licenses/emilkowalski-LICENSE`](vendor/licenses/emilkowalski-LICENSE) |
+| [obra/superpowers](https://github.com/obra/superpowers) | Jesse Vincent | `using-git-worktrees` and `finishing-a-development-branch` (rewritten), and material absorbed into `karpathy-guidelines` and `ask-matt` | [`vendor/licenses/superpowers-LICENSE`](vendor/licenses/superpowers-LICENSE) |
+| [JohnnyVizz/claude-kit](https://github.com/JohnnyVizz/claude-kit) | johnnyvizz | the `savvy-progress` mod, patched | [`plugins/savvy-progress/LICENSE`](plugins/savvy-progress/LICENSE), also [`vendor/licenses/claude-kit-LICENSE`](vendor/licenses/claude-kit-LICENSE) |
+| [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain) | TabooHarmony | all 29 Roblox domain skills, unchanged, and the domain structure `ask-roblox` routes by | [`plugins/my-roblox-skills/licenses/roblox-brain-LICENSE`](plugins/my-roblox-skills/licenses/roblox-brain-LICENSE) |
+| [forrestchang/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) (now under multica-ai) | Forrest Chang | `karpathy-guidelines`, extended here with a *Claim on evidence* subsection; it distils [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding | declared `license: MIT` in the skill's own front matter, which travels with it; the repo has no separate LICENSE file |
+
+`project-brain` and `scrutinize` are original to this repo.
+[`vendor/record.json`](vendor/record.json) records each synced upstream's pin,
+license and the status of every copied skill, and the
+[Skill sources](#skill-sources) catalog links each one to its pinned original.
+
+None of these authors endorses this repo. If you are one of them and want
+something changed or removed, open an issue.

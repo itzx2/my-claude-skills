@@ -34,7 +34,7 @@ The map writes each skill the way you will reach it:
 
 ## 2. Match the situation against the whole roster
 
-For **any Roblox-related task**, first read the [Roblox Brain routing map](references/roblox-brain.md). It contains all 29 domain routes, their overlaps, and combinations; use it alongside the main flow below.
+For **any Roblox-related task**, the Roblox skills live in their own plugin, **`my-roblox-skills`**. When the roster holds it, recommend **`/my-roblox-skills:ask-roblox`** for the domain routing (which of its 29 skills, in what order) and keep the engineering flow below for the process; start with `my-roblox-skills:roblox-collaboration-mode` either way. When the roster lacks it, say the plugin is not installed: `claude plugin install my-roblox-skills@my-claude-skills`.
 
 Weigh **every** entry in the roster against what the user described. The map below carries relationships no description states — which skill precedes which, and which of two overlapping skills wins — so use it for the skills it covers, and match the rest on their descriptions alone.
 

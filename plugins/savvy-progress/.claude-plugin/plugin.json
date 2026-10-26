@@ -1,6 +1,6 @@
 {
   "name": "savvy-progress",
-  "version": "1.2.1-mcs.2",
+  "version": "1.2.1-mcs.3",
   "description": "Agents panel (/agents-info) showing every subagent with model, context, cost and time, plus a band above the prompt that reopens it. Vendored into my-claude-skills from JohnnyVizz/claude-kit; its progress and step tools do not reach the model in the desktop app.",
   "author": {
     "name": "johnnyvizz",

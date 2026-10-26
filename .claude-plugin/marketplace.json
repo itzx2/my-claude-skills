@@ -8,9 +8,19 @@
   "plugins": [
     {
       "name": "my-claude-skills",
-      "description": "Personal Claude Code skills library: Roblox development, design and animation, code review, TDD and debugging, planning, research, handoffs, and workflow automation",
-      "version": "2.3.3",
+      "description": "Personal Claude Code skills library: design and animation, code review, TDD and debugging, planning, research, handoffs, and workflow automation",
+      "version": "3.0.0",
       "source": "./plugins/my-claude-skills",
+      "author": {
+        "name": "itzx2",
+        "url": "https://github.com/itzx2"
+      }
+    },
+    {
+      "name": "my-roblox-skills",
+      "description": "Roblox game development skills: 29 domain skills from TabooHarmony/roblox-brain, an ask-roblox router, and a briefing that points every agent at them in Roblox projects",
+      "version": "1.0.0",
+      "source": "./plugins/my-roblox-skills",
       "author": {
         "name": "itzx2",
         "url": "https://github.com/itzx2"
@@ -19,7 +29,7 @@
     {
       "name": "savvy-progress",
       "description": "Mod: a live agents panel showing every subagent's model, effort, context, cost and time, and a Subagents band above the prompt that reopens it. Vendored from JohnnyVizz/claude-kit; the panel opens whenever any subagent starts.",
-      "version": "1.2.1-mcs.2",
+      "version": "1.2.1-mcs.3",
       "source": "./plugins/savvy-progress",
       "author": {
         "name": "johnnyvizz",
