@@ -49,17 +49,28 @@ try {
   test('a Rojo project gets the full briefing with its reason', () => {
     const out = brief({ hook_event_name: 'SessionStart', cwd: rojo });
     assert.equal(out.hookEventName, 'SessionStart');
-    assert.match(out.additionalContext, /looks like a Roblox project \(default\.project\.json\)/);
-    assert.match(out.additionalContext, /my-roblox-skills:roblox-collaboration-mode` first/);
+    assert.match(out.additionalContext, /is a Roblox project \(default\.project\.json\)/);
+    assert.match(out.additionalContext, /starts with `my-roblox-skills:roblox-collaboration-mode`/);
   });
 
-  test('every installed domain skill is named exactly once in the domain list', () => {
+  const routes = fs.readFileSync(path.join(PLUGIN, 'skills', 'ask-roblox', 'ROUTES.md'), 'utf8').replace(/\r\n/g, '\n');
+
+  test('ROUTES.md groups every installed domain skill exactly once', () => {
+    const domains = routes.slice(routes.indexOf('## Domains'), routes.indexOf('## Owners'));
+    for (const n of skills) assert.equal(domains.split(`\`${n}\``).length - 1, 1, `${n} not grouped once`);
+    assert.equal((domains.match(/`roblox-[a-z-]+`/g) || []).length, skills.length, 'ROUTES.md groups a skill that is not installed');
+  });
+
+  test('the full briefing inlines the Owners section of ROUTES.md verbatim', () => {
+    const owners = routes.match(/^## Owners\n([\s\S]*?)(?=^## )/m)[1].trim();
+    assert.ok(owners.length > 100);
+    assert.ok(brief({ hook_event_name: 'SessionStart', cwd: rojo }).additionalContext.includes(owners));
+  });
+
+  test('the full briefing points at ROUTES.md by an absolute path that exists', () => {
     const text = brief({ hook_event_name: 'SessionStart', cwd: rojo }).additionalContext;
-    const domains = text.slice(text.indexOf('## Domains'), text.indexOf('## Who owns what'));
-    for (const n of skills) {
-      assert.equal(domains.split(`\`my-roblox-skills:${n}\``).length - 1, 1, `${n} not listed once`);
-    }
-    assert.doesNotMatch(domains, /\*\*Other:\*\*/, 'a domain skill is missing from GROUPS');
+    const pointed = text.match(/read `([^`]+ROUTES\.md)`/)[1];
+    assert.ok(path.isAbsolute(pointed) && fs.existsSync(pointed), pointed);
   });
 
   test('a subdirectory of a Roblox project still counts', () => {
@@ -78,26 +89,26 @@ try {
   test('a subagent gets the full briefing addressed to it', () => {
     const out = brief({ hook_event_name: 'SubagentStart', cwd: rojo, agent_type: 'general-purpose' });
     assert.equal(out.hookEventName, 'SubagentStart');
-    assert.match(out.additionalContext, /You are a subagent/);
+    assert.match(out.additionalContext, /Your brief may name no domain skills/);
   });
 
-  test('the main session is not told it is a subagent', () => {
-    assert.doesNotMatch(brief({ hook_event_name: 'SessionStart', cwd: rojo }).additionalContext, /You are a subagent/);
+  test('the main session gets no subagent line', () => {
+    assert.doesNotMatch(brief({ hook_event_name: 'SessionStart', cwd: rojo }).additionalContext, /Your brief/);
   });
 
   test('a non-Roblox folder gets only the pointer, for subagents too', () => {
     for (const event of ['SessionStart', 'SubagentStart']) {
       const out = brief({ hook_event_name: event, cwd: web });
       assert.equal(out.hookEventName, event);
-      assert.match(out.additionalContext, /does not look like a Roblox project/);
-      assert.doesNotMatch(out.additionalContext, /## Domains/);
+      assert.match(out.additionalContext, /is not a Roblox project/);
+      assert.doesNotMatch(out.additionalContext, /## Owners/);
       assert.ok(out.additionalContext.length < 800, 'pointer should stay short');
     }
   });
 
   test('the router is named as user-invoked in both forms', () => {
     for (const cwd of [rojo, web]) {
-      assert.match(brief({ hook_event_name: 'SessionStart', cwd }).additionalContext, /\/my-roblox-skills:ask-roblox`.*never start it/s);
+      assert.match(brief({ hook_event_name: 'SessionStart', cwd }).additionalContext, /\/my-roblox-skills:ask-roblox`.*(user-invoked|only the user can start it)/s);
     }
   });
 

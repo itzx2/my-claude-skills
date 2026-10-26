@@ -33,10 +33,12 @@ Every skill is invoked through the plugin's namespace:
 - **The Roblox briefing**: a hook that runs at session start and again each
   time a subagent starts, because a subagent never sees the main session's
   start-up context. What it says depends on the folder:
-  - **In a Roblox project**, the agent gets the full route: load
-    `roblox-collaboration-mode` first, the 29 domains in four groups, who owns
-    what, common combinations, and that `ask-roblox` exists. A subagent is also
-    told to load the domains its task touches even if its brief names none.
+  - **In a Roblox project**, the agent gets what every Roblox task needs: start
+    with `roblox-collaboration-mode`, the ownership rules that settle which
+    domain owns a question, a pointer to the router's `ROUTES.md` for groups and
+    combinations when a task spans several domains, and that `ask-roblox`
+    exists. A subagent is also told to choose domains from its task when its
+    brief names none.
   - **Anywhere else**, it gets a short pointer, because Roblox work also happens
     through a Studio MCP bridge with no repository open.
 
@@ -44,8 +46,9 @@ Every skill is invoked through the plugin's namespace:
   root holds `default.project.json` or another `*.project.json` (Rojo),
   `wally.toml`, `pesde.toml`, `rokit.toml`, `aftman.toml`, `foreman.toml`, or a
   saved place or model (`.rbxl`, `.rbxlx`, `.rbxm`, `.rbxmx`), or when `.luau`
-  files sit within two levels of it. The skill names come from the folders on
-  disk, so a sync that adds or drops a skill cannot leave the briefing wrong.
+  files sit within two levels of it. The skill count comes from the folders on
+  disk and the ownership rules are read from `ROUTES.md`, the one file both
+  the router and the briefing use, so neither can drift from the other.
   Tested by `scripts/test-roblox-briefing.js` at the repository root.
 
 ## Skills

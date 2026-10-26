@@ -12,10 +12,13 @@
  * How much is said depends on the folder. In something that looks like a
  * Roblox project the agent gets the full route; anywhere else it gets a short
  * pointer, because Roblox work also happens through a Studio MCP bridge with no
- * repository open, and a full briefing in every unrelated session is waste.
+ * repository open.
  *
- * Names come from the skills on disk, not a list in this file, so a skill added
- * or dropped by a sync cannot leave the briefing lying.
+ * The full route inlines only what every Roblox task needs: start with
+ * collaboration-mode, and the ownership rules. Groups and combinations serve
+ * only multi-domain tasks, so they stay in the router's ROUTES.md behind a
+ * pointer. The count comes from the skills on disk and the ownership rules from
+ * ROUTES.md itself, so the briefing restates nothing it could drift from.
  *
  * Failure must never block a session or a subagent: on any error this exits 0
  * with no output.
@@ -43,18 +46,6 @@ const MARKER_FILES = [
 ];
 const MARKER_EXTENSIONS = ['.rbxl', '.rbxlx', '.rbxm', '.rbxmx'];
 const LUAU_EXTENSIONS = ['.luau'];
-
-/** Domain groups, in the order the router presents them. */
-const GROUPS = [
-  ['Core', ['roblox-collaboration-mode', 'roblox-luau-core', 'roblox-luau-types', 'roblox-luau-patterns',
-    'roblox-architecture', 'roblox-networking', 'roblox-security', 'roblox-data', 'roblox-server-data',
-    'roblox-performance']],
-  ['Gameplay', ['roblox-building', 'roblox-physics', 'roblox-npc-ai', 'roblox-camera', 'roblox-input',
-    'roblox-gui', 'roblox-animation-vfx', 'roblox-lighting', 'roblox-audio', 'roblox-localization']],
-  ['Design', ['roblox-game-design', 'roblox-player-psychology', 'roblox-growth-design', 'roblox-analytics',
-    'roblox-monetization']],
-  ['Tools', ['roblox-studio-mcp', 'roblox-tooling', 'roblox-cloud', 'roblox-publish-checklist']],
-];
 
 /** Read all of stdin, or '' when there is none (a hand run from a terminal). */
 function readStdin() {
@@ -128,64 +119,48 @@ function hasLuau(dir, depth, budget) {
 }
 
 const q = (name) => `\`${PLUGIN}:${name}\``;
+const ROUTER = `\`/${PLUGIN}:ask-roblox\``;
+const ROUTES = path.join(PLUGIN_ROOT, 'skills', 'ask-roblox', 'ROUTES.md');
+
+/**
+ * The Owners section of the router's ROUTES.md, the single source for which
+ * domain owns a question two domains touch. Inlined rather than restated, so
+ * the briefing and the router cannot drift apart. '' when it cannot be read.
+ */
+function owners() {
+  let text;
+  try {
+    text = fs.readFileSync(ROUTES, 'utf8').replace(/\r\n/g, '\n');
+  } catch {
+    return '';
+  }
+  const match = text.match(/^## Owners\n([\s\S]*?)(?=^## )/m);
+  return match ? match[1].trim() : '';
+}
 
 function full(skills, reasons, subagent) {
-  const known = new Set(skills);
-  const grouped = new Set();
   const lines = [
     '# Roblox skills',
     '',
-    `This folder looks like a Roblox project (${reasons.join(', ')}). The \`${PLUGIN}\` plugin ` +
-      `is installed with ${skills.length} Roblox domain skills, all in your Skill listing.`,
+    `This folder is a Roblox project (${reasons.join(', ')}), and \`${PLUGIN}\` holds ` +
+      `${skills.length} Roblox domain skills, all in your Skill listing.`,
     '',
+    `**Every Roblox task starts with ${q('roblox-collaboration-mode')}**, then the domain ` +
+      'skills that own its questions, loaded before writing or judging Roblox code.',
   ];
 
-  if (subagent) {
-    lines.push(
-      'You are a subagent. Do the task you were given, and load the domains it touches before ' +
-        'writing or judging Roblox code: your brief may not name them.',
-      ''
-    );
-  }
+  if (subagent) lines.push('', 'Your brief may name no domain skills; choose them from your task.');
 
-  lines.push(
-    '**For any Roblox task, invoke ' + q('roblox-collaboration-mode') + ' first**, then the ' +
-      'domain skills the task touches. The first calibrates initiative and evidence; the ' +
-      'domains supply the engine knowledge. Pick the relevant ones; do not load all of them.',
-    '',
-    '## Domains',
-    ''
-  );
-
-  for (const [title, names] of GROUPS) {
-    const present = names.filter((n) => known.has(n));
-    present.forEach((n) => grouped.add(n));
-    if (present.length) lines.push(`- **${title}:** ${present.map(q).join(', ')}`);
-  }
-  const other = skills.filter((n) => !grouped.has(n));
-  if (other.length) lines.push(`- **Other:** ${other.map(q).join(', ')}`);
+  const owned = owners();
+  if (owned) lines.push('', '## Owners', '', 'When two domains touch one question, the owner decides:', '', owned);
 
   lines.push(
     '',
-    '## Who owns what',
+    `**When a task spans several domains**, read \`${ROUTES.replace(/\\/g, '/')}\` for the ` +
+      'domain groups and the combinations common problems need.',
     '',
-    '- Architecture decides where code lives; luau-patterns shapes the module once it is owned.',
-    '- Networking designs a remote; security attacks it. Anything the client sends needs both.',
-    '- Data owns durable player saves; server-data owns shared and cross-server state.',
-    '- GUI owns presentation and state; input owns actions and device paths.',
-    '- Performance starts from a measured scenario, not from the symptom.',
-    '- Studio MCP is live editor and runtime work; tooling is the repository and build; cloud is outside the game.',
-    '- Web animation skills do not supply Roblox APIs; use the Roblox presentation skills.',
-    '',
-    '## Common combinations',
-    '',
-    '- Saves fail or duplicate: architecture → data → security (+ server-data when shared).',
-    '- Purchases break: gui + input, monetization + data, networking + security.',
-    '- NPCs stuck or laggy: npc-ai + physics, performance to measure.',
-    '- Before a release: publish-checklist plus every domain changed.',
-    '',
-    `The user can run \`/${PLUGIN}:ask-roblox\` for a full routing answer. It is user-invoked, ` +
-      'so it is not in your Skill listing: suggest it, never start it.'
+    `${ROUTER} is the user's router over these skills. It is user-invoked, so it is absent ` +
+      'from your Skill listing: suggest it to the user when the route is unclear.'
   );
   return lines.join('\n');
 }
@@ -194,11 +169,10 @@ function pointer(skills) {
   return [
     '# Roblox skills',
     '',
-    `The \`${PLUGIN}\` plugin is installed (${skills.length} Roblox domain skills, ` +
-      `\`${PLUGIN}:roblox-*\`), but this folder does not look like a Roblox project. ` +
-      'If the task is Roblox work anyway, such as Studio through MCP with no repository open, ' +
-      `invoke ${q('roblox-collaboration-mode')} first, then the domains it touches. ` +
-      `The user can run \`/${PLUGIN}:ask-roblox\` for routing; it is user-invoked, so suggest it, never start it.`,
+    `\`${PLUGIN}\` holds ${skills.length} Roblox domain skills (\`${PLUGIN}:roblox-*\`). This ` +
+      'folder is not a Roblox project; when the task is Roblox work anyway, such as Studio ' +
+      `through MCP, start with ${q('roblox-collaboration-mode')}, then the domains the task ` +
+      `touches. The user can run ${ROUTER} for routing: suggest it, since only the user can start it.`,
   ].join('\n');
 }
 
