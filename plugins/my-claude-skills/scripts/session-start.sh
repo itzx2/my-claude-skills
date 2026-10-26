@@ -64,8 +64,8 @@ fi
 #
 # briefing.js, not the old skills-briefing.py: it is the same walk the plugin
 # runs, so a session briefed through this fallback and one briefed by the plugin
-# describe the roster the same way. It reads $CLAUDE_CONFIG_DIR (or ~/.claude)
-# directly rather than a passed-in skills directory.
+# describe the roster the same way. It briefs the folder it sits in: the repo
+# (a plugin) for the checkout copy, ~/.claude/skills for the installed copy.
 BRIEFING=""
 for candidate in "$SCRIPT_DIR/../hooks/briefing.js" "$HOME/.claude/briefing.js"; do
   if [ -n "$candidate" ] && [ -f "$candidate" ]; then

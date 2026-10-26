@@ -88,7 +88,7 @@ registered for the next session and never for this one.
 That costs more than it sounds, because of what only the briefing carries.
 Skills setting `disable-model-invocation: true` are hidden from the agent's
 Skill listing completely, and the briefing is the only thing that tells the
-agent they exist. Eighteen skills here set it — every `/`-only one, including
+agent they exist. Twenty-three skills here set it — every `/`-only one, including
 `handoff`, `implement`, `to-tickets`, `triage`, `wayfinder`, `ask-matt` and
 `grill-with-docs`.
 
@@ -101,22 +101,29 @@ whole time and would have run if invoked. Only discovery was missing, and the
 half of the work that made it worth choosing (the ADRs and glossary that
 `grill-with-docs` adds over `grilling`) silently did not happen.
 
-**Any hook that installs this plugin must emit the briefing itself.** After the
-install loop:
+**Any hook that installs these plugins must emit their briefings itself.** Each
+plugin briefs only its own skills, so emit one briefing per installed plugin
+that ships one — `my-claude-skills` (`hooks/briefing.js`) and, where it is
+installed, `my-roblox-skills` (`hooks/roblox-briefing.js`). After the install
+loop:
 
 ```bash
-for candidate in "$HOME"/.claude/plugins/cache/my-claude-skills/my-claude-skills/*/hooks/briefing.js; do
-  [ -f "$candidate" ] || continue
-  node "$candidate" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{process.stdout.write(JSON.parse(s).hookSpecificOutput.additionalContext)})'
-  break
+for brief in my-claude-skills/hooks/briefing.js my-roblox-skills/hooks/roblox-briefing.js; do
+  for candidate in "$HOME"/.claude/plugins/cache/my-claude-skills/${brief%%/*}/*/hooks/${brief##*/}; do
+    [ -f "$candidate" ] || continue
+    node "$candidate" </dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{if(s)process.stdout.write(JSON.parse(s).hookSpecificOutput.additionalContext+"\n")})'
+    break
+  done
 done
 ```
 
 Three things that are easy to get wrong here:
 
-- **`briefing.js` takes no arguments and needs no `CLAUDE_PLUGIN_ROOT`.** It
-  reads `$CLAUDE_CONFIG_DIR` (or `~/.claude`) itself. The variable in the
-  plugin's own `hooks.json` only locates the script.
+- **A briefing takes no arguments and needs no `CLAUDE_PLUGIN_ROOT`.** It
+  reads the plugin it ships in, found from its own location, so running the
+  copy in the cache briefs that cached plugin. The variable in the plugin's own
+  `hooks.json` only locates the script. The Roblox briefing reads the working
+  folder from `$CLAUDE_PROJECT_DIR` when no hook input arrives on stdin.
 - **Unwrap the JSON whenever the hook also writes a plain status line.** Claude
   Code parses stdout as a `hookSpecificOutput` payload only when that is all
   stdout holds; a payload mixed with prose is parsed as neither. Plain text for

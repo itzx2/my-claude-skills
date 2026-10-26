@@ -15,7 +15,7 @@ This routes over **every skill installed in this session** — the engineering s
 Answer from what is actually installed right now, never from memory of what this repo used to hold. Read both sources — each holds skills the other omits:
 
 - **Your Skill tool listing** — every model-invocable skill, with full descriptions. Covers plugin skills, environment skills, and anything the harness supplies. It is the *only* source for skills that arrive from outside this machine's plugin directory, such as claude.ai-managed plugins.
-- **The SessionStart briefings** — one block per plugin that ships a briefing, each covering only its own plugin: the block headed *Skills in the my-claude-skills plugin* from this one, *Roblox skills* from `my-roblox-skills`. Their **user-invoked sections are the only place skills with `disable-model-invocation: true` appear at all**. Without this plugin's briefing, more than a third of the map below is invisible to you.
+- **The SessionStart briefings** — one block per plugin that ships a briefing, each covering only its own plugin: the block headed *Skills in the my-claude-skills plugin* from this one, *Roblox skills* from `my-roblox-skills`. They are **the only place skills with `disable-model-invocation: true` appear at all**: this plugin's briefing lists its hidden skills in a user-invoked section, and the Roblox briefing names its one, `/my-roblox-skills:ask-roblox`. Without this plugin's briefing, more than a third of the map below is invisible to you.
 
 If this plugin's briefing is missing from context, say so rather than guessing — the roster is incomplete without it, and `claude plugin details <name>` will list a plugin's components on demand as a fallback.
 

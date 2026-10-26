@@ -16,15 +16,16 @@ Two files, one line each, kept identical:
 .claude-plugin/marketplace.json  "version": "1.3.0"
 ```
 
-The marketplace lists two more plugins with the same rule. `plugins/my-roblox-skills/`
-(the Roblox skills, their router and briefing; see `docs/adr/0006`) is
-hand-maintained in place, not generated: any change under it bumps the version
-in its own `.claude-plugin/plugin.json` and in its `marketplace.json` entry. Its
-`roblox-*` skills are vendored verbatim, so change them only through the vendor
-record. `plugins/savvy-progress/` follows the
-same rule: any change under that folder bumps the version in its own
-`.claude-plugin/plugin.json` and in its `marketplace.json` entry. It is a
-vendored copy, so its version is upstream's plus `-mcs.N` (`1.2.1-mcs.1`);
+The marketplace lists two more plugins, each hand-maintained in its own folder
+rather than generated, and the same rule holds for both: any change under
+`plugins/my-roblox-skills/` or `plugins/savvy-progress/` bumps the version in
+that folder's `.claude-plugin/plugin.json` and in its `marketplace.json` entry.
+
+- `plugins/my-roblox-skills/` holds the Roblox skills, their router and their
+  briefing (see `docs/adr/0006`). Its `roblox-*` skills are vendored verbatim,
+  so change them only through the vendor record.
+- `plugins/savvy-progress/` is a vendored copy, so its version is upstream's
+  plus `-mcs.N` (`1.2.1-mcs.1`);
 raise N for a change of ours, and reset it to `-mcs.1` on a new upstream
 version. `node scripts/vendor.js check` fails when the two disagree.
 

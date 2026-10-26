@@ -172,7 +172,10 @@ At session start it walks **this plugin only**: the `skills/` *and*
 `commands/` directories of the folder it ships in, found from the script's own
 location. Each plugin briefs its own skills — `my-roblox-skills` ships its own
 Roblox briefing — so no briefing restates another's, and a plugin's briefing
-says nothing about plugins that are not installed with it.
+says nothing about plugins that are not installed with it. In the legacy
+loose install, where `install-skills.sh` copies the script to
+`~/.claude/briefing.js`, there is no plugin manifest above it, so it briefs
+`~/.claude/skills` instead, with bare names.
 
 The skills walk **recurses**, because a plugin may group skills in container
 directories. A directory holding `SKILL.md` is a skill and is never descended

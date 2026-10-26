@@ -90,6 +90,17 @@ hasnt 'other-hidden'              && ok "another plugin's hidden skill left out"
 hasnt 'loose-one'                 && ok "loose ~/.claude/skills left out"    || bad "a loose skill was briefed"
 hasnt 'project-skill'             && ok "project .claude/skills left out"    || bad "a project skill was briefed"
 
+echo "== legacy loose install =="
+# install-skills.sh copies the script to ~/.claude/briefing.js beside
+# ~/.claude/skills. With no plugin manifest above it, it briefs that folder bare.
+mkdir -p "$TMP/loose/skills"
+cp "$BRIEFING" "$TMP/loose/briefing.js"
+skill "$TMP/loose/skills" bare-skill
+skill "$TMP/loose/skills" bare-hidden disable
+loose="$(node "$TMP/loose/briefing.js" | context)"
+printf '%s' "$loose" | grep -qF '`/bare-hidden`' && ok "loose hidden skill, bare" || bad "loose hidden skill missing"
+printf '%s' "$loose" | grep -qF '`bare-skill`'   && ok "loose skill, bare"        || bad "loose skill missing"
+
 echo "== blind spots =="
 has 'cannot see'                  && ok "roster declares its own limits"     || bad "roster still claims completeness"
 

@@ -26,9 +26,15 @@ for (const entry of marketplace.plugins) {
   assert.equal(manifest.version, entry.version);
   assert.equal(Object.hasOwn(manifest, 'types'), false, `${entry.name}: unsupported top-level types field`);
   const skillCount = () => fs.readdirSync(path.join(source, 'skills')).filter(name => fs.existsSync(path.join(source, 'skills', name, 'SKILL.md'))).length;
-  if (entry.name === 'my-claude-skills') assert.equal(skillCount(), 46);
+  // Derived, not hard-coded: the payload holds every root skill, and the Roblox
+  // plugin its router plus every roblox-brain skill the vendor record ships.
+  if (entry.name === 'my-claude-skills') {
+    assert.equal(skillCount(), fs.readdirSync(path.join(ROOT, 'skills')).filter(name => fs.existsSync(path.join(ROOT, 'skills', name, 'SKILL.md'))).length);
+  }
   if (entry.name === 'my-roblox-skills') {
-    assert.equal(skillCount(), 30);
+    const record = JSON.parse(fs.readFileSync(path.join(ROOT, 'vendor/record.json'), 'utf8'));
+    const shipped = Object.values(record.upstreams['roblox-brain'].skills).filter(e => ['verbatim', 'patched', 'forked'].includes(e.status)).length;
+    assert.equal(skillCount(), shipped + 1);
     assert.equal(fs.existsSync(path.join(source, 'licenses/roblox-brain-LICENSE')), true, 'my-roblox-skills must carry the upstream license');
   }
 }

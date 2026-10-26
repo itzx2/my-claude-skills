@@ -35,6 +35,11 @@ const path = require('path');
 // hand from the plugin cache.
 const PLUGIN_ROOT = path.resolve(__dirname, '..');
 
+// The legacy loose install (scripts/install-skills.sh) copies this script to
+// ~/.claude/briefing.js beside ~/.claude/skills, where this repo's skills sit
+// unprefixed. With no plugin manifest above it, that folder is what it briefs.
+const LOOSE_ROOT = __dirname;
+
 const DISABLE_KEY = 'disable-model-invocation';
 
 /** Read and parse a JSON file, or return null. Never throws. */
@@ -221,13 +226,19 @@ function collectCommands(commandsDir, prefix, source, out, trail = []) {
   }
 }
 
-/** Build the roster from this plugin's own skills and commands. */
+/**
+ * Build the roster from this plugin's own skills and commands, or, in the
+ * legacy loose install, from the `skills/` and `commands/` beside the script.
+ * `scope` names what was walked, for the rendered heading and blind spot.
+ */
 function buildRoster() {
   const out = { modelInvocable: [], userInvoked: [] };
-  const manifest = readJson(path.join(PLUGIN_ROOT, '.claude-plugin', 'plugin.json')) || {};
-  out.plugin = manifest.name || path.basename(PLUGIN_ROOT);
-  collect(path.join(PLUGIN_ROOT, 'skills'), out.plugin, out.plugin, out);
-  collectCommands(path.join(PLUGIN_ROOT, 'commands'), out.plugin, out.plugin, out);
+  const manifest = readJson(path.join(PLUGIN_ROOT, '.claude-plugin', 'plugin.json'));
+  const root = manifest ? PLUGIN_ROOT : LOOSE_ROOT;
+  const prefix = manifest ? manifest.name || path.basename(PLUGIN_ROOT) : null;
+  out.scope = prefix ? `the \`${prefix}\` plugin` : 'the loose `~/.claude/skills` install';
+  collect(path.join(root, 'skills'), prefix, prefix || 'personal', out);
+  collectCommands(path.join(root, 'commands'), prefix, prefix || 'personal', out);
   return out;
 }
 
@@ -264,11 +275,11 @@ function render(roster) {
   return out;
 }
 
-function renderAt({ plugin, modelInvocable, userInvoked }, limit, compact) {
+function renderAt({ scope, modelInvocable, userInvoked }, limit, compact) {
   const lines = [
-    `# Skills in the \`${plugin}\` plugin`,
+    `# Skills in ${scope}`,
     '',
-    `Built at session start from the \`${plugin}\` plugin's own folder. They encode ` +
+    `Built at session start from ${scope}'s own folder. They encode ` +
       'how this user wants recurring work done, so prefer a matching skill over ' +
       'improvising.',
     '',
@@ -310,9 +321,9 @@ function renderAt({ plugin, modelInvocable, userInvoked }, limit, compact) {
   }
 
   lines.push(
-    `**What this roster cannot see:** everything outside \`${plugin}\`. Other plugins ` +
-      'brief their own skills, and loose and harness skills are in your Skill listing. ' +
-      'An absent name here means "not in this plugin", never "does not exist".',
+    `**What this roster cannot see:** everything outside ${scope}. Other plugins ` +
+      'brief their own skills, and the rest that you may invoke are in your Skill ' +
+      `listing. An absent name here means "not in ${scope}", never "does not exist".`,
     '',
     'Names above are exact, including any `plugin:` prefix. Use them as written.'
   );

@@ -11,7 +11,8 @@ for where the shipped skills come from.
 ### Briefing
 
 **Roster**:
-The set of skills a briefing reports for one session, built at session start.
+The set of skills a plugin's briefing reports: that plugin's own skills,
+built when the briefing runs.
 _Avoid_: list, inventory, manifest
 
 **Location**:
@@ -41,7 +42,7 @@ _Avoid_: gap, miss, hole
 
 **Invocation**:
 The exact string the user types to start a skill. Plugin-provided skills are
-namespaced `plugin:skill`; loose and nested ones stay bare. The one thing an
+namespaced `plugin:skill`, nested ones included; loose ones stay bare. The one thing an
 agent cannot reconstruct on its own, so the roster always carries it verbatim.
 _Avoid_: name, slug, command
 

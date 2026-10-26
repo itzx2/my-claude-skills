@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 Route a Roblox situation to the domain skills that own it.
 
-## 1. Read the routes and the roster
+## 1. Read the routes and the listing
 
-Read [ROUTES.md](ROUTES.md): the domain groups, which domain **owns** a question when two touch it, and the common combinations. Then take the roster from your Skill listing: every `my-roblox-skills:roblox-*` skill with its description. The listing wins where the two disagree: a skill listed there is available even when ROUTES.md omits it.
+Read [ROUTES.md](ROUTES.md): the domain groups, which domain **owns** a question when two touch it, and the common combinations. Then read your Skill listing for every `my-roblox-skills:roblox-*` skill with its description. The listing wins where the two disagree: a skill listed there is available even when ROUTES.md omits it.
 
 *Done when* you hold both.
 
@@ -18,11 +18,11 @@ Read [ROUTES.md](ROUTES.md): the domain groups, which domain **owns** a question
 
 Break the situation into the questions it raises, and give each question its **owner** domain, using the Owners section to settle any question two domains touch. Check the Combinations section for a match. When the work also needs process (a spec, TDD, debugging, review), add the engineering skill for it: with `my-claude-skills` installed, `/my-claude-skills:ask-matt` routes those.
 
-*Done when* every question in the situation has exactly one owner, and every owner is a skill in the roster.
+*Done when* every question in the situation has exactly one owner, and every owner is a skill in your Skill listing.
 
 ## 3. Recommend
 
-Give the route, starting with `my-roblox-skills:roblox-collaboration-mode`:
+Give the route, starting with the skill ROUTES.md names under **First**:
 
 - each owner's exact invocation, in order, with one sentence on what it contributes;
 - the engineering skills, at the point in the order where they apply;
