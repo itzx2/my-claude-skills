@@ -1,0 +1,19 @@
+{
+  "name": "my-roblox-skills",
+  "description": "Roblox game development skills: 29 domain skills from TabooHarmony/roblox-brain, an ask-roblox router, and a briefing that points every agent at them in Roblox projects",
+  "version": "1.0.0",
+  "author": {
+    "name": "itzx2",
+    "url": "https://github.com/itzx2"
+  },
+  "homepage": "https://github.com/itzx2/my-claude-skills/tree/main/plugins/my-roblox-skills",
+  "repository": "https://github.com/itzx2/my-claude-skills",
+  "keywords": [
+    "roblox",
+    "luau",
+    "rojo",
+    "roblox-studio",
+    "game-development",
+    "skills"
+  ]
+}

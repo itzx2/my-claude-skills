@@ -7,12 +7,13 @@ importers that scan a plugin source recursively. We cannot reproduce Claude's
 private importer locally; this correction addresses that observed layout and
 does not claim its internal parser behavior is known.
 
-Both marketplace entries now use explicit self-contained directories:
+Every marketplace entry uses explicit self-contained directories:
 
 ```text
 .claude-plugin/marketplace.json
 plugins/
   my-claude-skills/   # generated main release payload, one manifest
+  my-roblox-skills/  # Roblox skills, router, briefing; hand-maintained, one manifest (ADR 0006)
   savvy-progress/    # separate vendored mod, one manifest
 ```
 

@@ -16,10 +16,16 @@ Two files, one line each, kept identical:
 .claude-plugin/marketplace.json  "version": "1.3.0"
 ```
 
-The marketplace lists a second plugin, `plugins/savvy-progress/`, with the
-same rule: any change under that folder bumps the version in its own
-`.claude-plugin/plugin.json` and in its `marketplace.json` entry. It is a
-vendored copy, so its version is upstream's plus `-mcs.N` (`1.2.1-mcs.1`);
+The marketplace lists two more plugins, each hand-maintained in its own folder
+rather than generated, and the same rule holds for both: any change under
+`plugins/my-roblox-skills/` or `plugins/savvy-progress/` bumps the version in
+that folder's `.claude-plugin/plugin.json` and in its `marketplace.json` entry.
+
+- `plugins/my-roblox-skills/` holds the Roblox skills, their router and their
+  briefing (see `docs/adr/0006`). Its `roblox-*` skills are vendored verbatim,
+  so change them only through the vendor record.
+- `plugins/savvy-progress/` is a vendored copy, so its version is upstream's
+  plus `-mcs.N` (`1.2.1-mcs.1`);
 raise N for a change of ours, and reset it to `-mcs.1` on a new upstream
 version. `node scripts/vendor.js check` fails when the two disagree.
 
@@ -135,6 +141,7 @@ and the complete payload, including each marketplace source's sole root manifest
 
 ```sh
 bash scripts/test-briefing.sh      # fixture tests for the briefing walk
+node scripts/test-roblox-briefing.js # the Roblox briefing: project detection, subagents
 bash scripts/test-install-race.sh  # two concurrent installs stay correct
 bash scripts/verify-install.sh     # every skill in skills/ reachable right now
 node scripts/vendor.js check       # vendored skills match the vendor record
@@ -166,5 +173,6 @@ patch.
 - **`docs/adr/`** — decisions worth their reasoning. `0001` records that handoff
   integrity is instructed rather than enforced, and what that costs; `0003`
   why vendored skills sync from a record; `0004` why the glossary is
-  `GLOSSARY.md`; `0005` why the progress mod is a plugin of its own.
+  `GLOSSARY.md`; `0005` why the progress mod is a plugin of its own; `0006` why the Roblox
+  skills are one too.
 - **`skills/writing-for-agents/`** — the reference for editing any skill here.
