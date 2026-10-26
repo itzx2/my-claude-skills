@@ -73,8 +73,8 @@ A version there that is not the manifest's is what you are actually running.
 
 ### Tag the merge commit, right after merging
 
-**Every version bump gets a matching `vX.Y.Z` tag on the commit that merged it,
-and a GitHub Release built from that tag.** Nothing installs from it: `claude
+**Every version bump gets a matching tag on the commit that merged it, and a
+GitHub Release built from that tag.** Nothing installs from it: `claude
 plugin install` resolves the marketplace at the default branch and keys its
 cache on `plugin.json`, so no tool ever reads a tag here. The tag is for people.
 GitHub's Releases panel is what a human checks to see whether a repo is alive,
@@ -88,9 +88,24 @@ and any force-push, so deleting a merged branch is a human's job too. An agent
 finishes at the merge and hands both over:
 
 ```sh
-git tag -a v<version> <merge-sha> -m "v<version> — <one line>"
-git push origin refs/tags/v<version>
+git tag -a <tag> <merge-sha> -m "<plugin> <version> — <one line>"
+git push origin refs/tags/<tag>
 ```
+
+Each plugin has its own tag scheme, so a tag never reads as another plugin's
+version:
+
+| Plugin | Tag | Release |
+| --- | --- | --- |
+| `my-claude-skills` | `vX.Y.Z` | Latest |
+| `savvy-progress` | `vX.Y.Z-mcs.N`, its version as-is | pre-release, `--latest=false` |
+| `my-roblox-skills` | `my-roblox-skills-vX.Y.Z` | pre-release, `--latest=false` |
+
+The Roblox tags carry the plugin name because a bare `v1.0.0` would read as a
+`my-claude-skills` version, which went through `1.x` itself. A merge that bumps
+several plugins gets one tag each, all on the same merge commit, and only the
+`my-claude-skills` Release is marked Latest. Each pre-release note ends with
+"Shipped with my-claude-skills v<version> in PR #<n>." when one shipped beside it.
 
 Do it immediately after the merge, while the version is still in front of you. A
 tag added "later" is exactly how the previous drift started: hand-tagging left
@@ -98,7 +113,7 @@ tag added "later" is exactly how the previous drift started: hand-tagging left
 commit*, which is why tagging was briefly abandoned altogether. See
 `docs/adr/0002` for why it came back rather than staying dropped.
 
-Every tag on the remote now follows the `vX.Y.Z` scheme. The two that predated
+Every tag on the remote now follows the scheme above. The two that predated
 it — `Release`, which sat on the initial commit and carried a stale GitHub
 Release entry, and `my-claude-skills--v1.2.0` — were deleted on 2026-09-02,
 along with that Release entry. Versions `1.3.0` through `1.5.0` are permanently
