@@ -1,22 +1,18 @@
 #!/usr/bin/env node
 /**
- * SessionStart hook: brief the agent on every skill installed *right now*.
+ * SessionStart hook: brief the agent on this plugin's own skills.
  *
  * The problem this solves: Claude Code hides any skill with
  * `disable-model-invocation: true` from the agent's Skill listing completely.
  * The agent cannot discover them, so it cannot recommend them, so they may as
- * well not exist until the user happens to remember one. This hook walks what
- * is actually installed and writes those skills into the session's context.
+ * well not exist until the user happens to remember one. This hook walks the
+ * plugin it ships in and writes those skills into the session's context.
  *
- * Roster sources, in order:
- *
- *   1. Every *enabled* plugin's `skills/` and `commands/` directories. Paths
- *      come from `plugins/installed_plugins.json` (authoritative for where a
- *      plugin landed, version included); enabled state comes from
- *      `settings.json`. Both directories matter — a plugin can ship behaviour
- *      as either, and Claude Code lists both.
- *   2. `~/.claude/skills/*` and `~/.claude/commands/*` — loose personal ones
- *      that belong to no plugin.
+ * The roster is this plugin only: its `skills/` and `commands/` directories,
+ * read from the folder this script sits in. Both directories matter — a plugin
+ * can ship behaviour as either, and Claude Code lists both. Every plugin briefs
+ * its own skills (my-roblox-skills ships its own briefing), so no briefing
+ * restates another's.
  *
  * Deliberately Node rather than bash+python: on Windows `bash` frequently
  * resolves to WSL (a different filesystem with a different $HOME) and
@@ -32,11 +28,12 @@
 'use strict';
 
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 
-const CLAUDE_DIR =
-  process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
+// The plugin this script ships in. __dirname rather than $CLAUDE_PLUGIN_ROOT,
+// so the script still works when an installing hook or the README runs it by
+// hand from the plugin cache.
+const PLUGIN_ROOT = path.resolve(__dirname, '..');
 
 const DISABLE_KEY = 'disable-model-invocation';
 
@@ -148,25 +145,23 @@ function firstSentence(text, limit = 160) {
 /**
  * Collect skills from one `skills/` directory.
  *
- * `prefix` is the plugin's name, or null for loose personal skills. Claude Code
- * namespaces plugin-provided skills as `plugin:skill` and leaves personal ones
- * bare, so the prefix decides the invocation string the agent must use — the
- * single most important thing this briefing gets right.
+ * `prefix` is the plugin's name. Claude Code namespaces plugin-provided skills
+ * as `plugin:skill`, so the prefix decides the invocation string the agent must
+ * use — the single most important thing this briefing gets right.
  *
  * Recurses, because a skills directory can hold *container* directories rather
- * than skills: `~/.claude/skills/synced/` groups the account-synced ones, and a
- * plugin may group its own. A directory holding SKILL.md is a skill and is never
- * descended into; anything else is a container and is walked.
+ * than skills, when a plugin groups its own. A directory holding SKILL.md is a
+ * skill and is never descended into; anything else is a container and is walked.
  *
  * Note the deliberate asymmetry with collectCommands(): nesting there *does*
  * build the name (`commands/foo/bar.md` is `foo:bar`), and here it never does.
- * That is not an oversight. Claude Code flattens the skills tree, so
- * `synced/xlsx` is invoked as `xlsx`, not `synced:xlsx`; only a plugin's
- * identity ever contributes a prefix.
+ * That is not an oversight. Claude Code flattens the skills tree, so a grouped
+ * `group/xlsx` is invoked as `plugin:xlsx`; only the plugin's identity ever
+ * contributes a prefix.
  */
 function collect(skillsDir, prefix, source, out, depth = 0) {
   // A guard against a pathological tree, not a real layout limit: two levels
-  // already covers `synced/` and any plugin that groups its skills.
+  // already covers any plugin that groups its skills.
   if (depth > 2) return;
 
   for (const entry of listDirs(skillsDir)) {
@@ -226,88 +221,21 @@ function collectCommands(commandsDir, prefix, source, out, trail = []) {
   }
 }
 
-/** Build the roster from every enabled plugin plus loose personal skills. */
+/** Build the roster from this plugin's own skills and commands. */
 function buildRoster() {
   const out = { modelInvocable: [], userInvoked: [] };
-
-  const installed = readJson(path.join(CLAUDE_DIR, 'plugins', 'installed_plugins.json'));
-  const settings = readJson(path.join(CLAUDE_DIR, 'settings.json')) || {};
-  const enabled = settings.enabledPlugins || {};
-
-  if (installed && installed.plugins) {
-    for (const [id, entries] of Object.entries(installed.plugins)) {
-      // A plugin explicitly switched off contributes nothing to the session.
-      if (enabled[id] === false) continue;
-      if (!Array.isArray(entries) || !entries.length) continue;
-
-      // Multiple entries mean multiple scopes; the last one installed wins,
-      // which matches how Claude Code resolves them.
-      const installPath = entries[entries.length - 1].installPath;
-      if (!installPath) continue;
-
-      const pluginName = id.split('@')[0];
-      collect(path.join(installPath, 'skills'), pluginName, pluginName, out);
-      collectCommands(path.join(installPath, 'commands'), pluginName, pluginName, out);
-    }
-  }
-
-  // Loose skills and commands live directly under ~/.claude and carry no prefix.
-  collect(path.join(CLAUDE_DIR, 'skills'), null, 'personal', out);
-  collectCommands(path.join(CLAUDE_DIR, 'commands'), null, 'personal', out);
-
-  // The open repo's own .claude/ — invoked bare like personal ones, but they
-  // exist only while this project is open, so they are tracked separately and
-  // rendered apart. $CLAUDE_PROJECT_DIR rather than the hook's stdin `cwd`,
-  // so the script still works when run by hand from the README.
-  const projectDir = process.env.CLAUDE_PROJECT_DIR;
-  if (projectDir) {
-    collect(path.join(projectDir, '.claude', 'skills'), null, 'project', out);
-    collectCommands(path.join(projectDir, '.claude', 'commands'), null, 'project', out);
-  }
-
+  const manifest = readJson(path.join(PLUGIN_ROOT, '.claude-plugin', 'plugin.json')) || {};
+  out.plugin = manifest.name || path.basename(PLUGIN_ROOT);
+  collect(path.join(PLUGIN_ROOT, 'skills'), out.plugin, out.plugin, out);
+  collectCommands(path.join(PLUGIN_ROOT, 'commands'), out.plugin, out.plugin, out);
   return out;
 }
 
-/**
- * Bare names installed from more than one place.
- *
- * Both invocations genuinely work, so this is not an error and nothing is
- * deduped — hiding one would make the roster lie. But a duplicate almost always
- * means a half-finished migration (the classic: a leftover symlink into
- * ~/.claude/skills alongside the same skills installed as a plugin), and this
- * briefing is the only thing positioned to see both.
- */
-function findCollisions({ modelInvocable, userInvoked }) {
-  const seen = new Map();
-  for (const e of [...modelInvocable, ...userInvoked]) {
-    if (!seen.has(e.name)) seen.set(e.name, new Set());
-    seen.get(e.name).add(e.qualified);
-  }
-  return [...seen.entries()]
-    .filter(([, quals]) => quals.size > 1)
-    .map(([name, quals]) => ({ name, invocations: [...quals].sort() }));
-}
-
-/**
- * Render one bucket, splitting the project's own skills into their own group.
- *
- * They are invoked bare exactly like personal ones, so the invocation string is
- * unchanged — but they vanish the moment another repo is opened, and an agent
- * that remembers one as generally available would be wrong.
- */
+/** Render one bucket as a list. */
 function renderGroup(entries, fmt, describe) {
-  const line = ({ qualified, description }) =>
-    description && describe ? `- ${fmt(qualified)} — ${describe(description)}` : `- ${fmt(qualified)}`;
-
-  const project = entries.filter((e) => e.source === 'project');
-  const rest = entries.filter((e) => e.source !== 'project');
-
-  const lines = rest.map(line);
-  if (project.length) {
-    lines.push('', '**Available in this project only** — not installed elsewhere:', '');
-    lines.push(...project.map(line));
-  }
-  return lines;
+  return entries.map(({ qualified, description }) =>
+    description && describe ? `- ${fmt(qualified)} — ${describe(description)}` : `- ${fmt(qualified)}`
+  );
 }
 
 /**
@@ -336,13 +264,12 @@ function render(roster) {
   return out;
 }
 
-function renderAt({ modelInvocable, userInvoked }, limit, compact) {
+function renderAt({ plugin, modelInvocable, userInvoked }, limit, compact) {
   const lines = [
-    '# Skills installed in this session',
+    `# Skills in the \`${plugin}\` plugin`,
     '',
-    'Built at session start from what is on disk: every enabled plugin, ' +
-      '`~/.claude/skills`, and this project\'s `.claude/skills`. They encode how ' +
-      'this user wants recurring work done, so prefer a matching skill over ' +
+    `Built at session start from the \`${plugin}\` plugin's own folder. They encode ` +
+      'how this user wants recurring work done, so prefer a matching skill over ' +
       'improvising.',
     '',
     '**When the user types `/<name>`, invoke it via `Skill` with that exact name, ' +
@@ -382,26 +309,10 @@ function renderAt({ modelInvocable, userInvoked }, limit, compact) {
     }
   }
 
-  const collisions = findCollisions({ modelInvocable, userInvoked });
-  if (collisions.length) {
-    lines.push(
-      '## ⚠ Installed more than once',
-      '',
-      'These resolve from two places. Both work, but it usually means a ' +
-        'half-finished migration (e.g. a leftover `~/.claude/skills` symlink beside ' +
-        'the same plugin). Worth telling the user once.',
-      '',
-      ...collisions.map(
-        ({ name, invocations }) => `- \`${name}\` — ${invocations.map((i) => `\`${i}\``).join(' and ')}`
-      ),
-      ''
-    );
-  }
-
   lines.push(
-    '**What this roster cannot see:** skills supplied by the harness rather than ' +
-      'installed on disk. They are all model-invocable, so your Skill listing covers ' +
-      'them. An absent name here means "not installed on disk", never "does not exist".',
+    `**What this roster cannot see:** everything outside \`${plugin}\`. Other plugins ` +
+      'brief their own skills, and loose and harness skills are in your Skill listing. ' +
+      'An absent name here means "not in this plugin", never "does not exist".',
     '',
     'Names above are exact, including any `plugin:` prefix. Use them as written.'
   );

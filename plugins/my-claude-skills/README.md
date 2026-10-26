@@ -168,22 +168,17 @@ registers itself via `hooks/hooks.json`, so installing the plugin is the only
 setup step — there is no `~/.claude/settings.json` to edit and no repo-relative
 path to get wrong.
 
-At session start it walks what is actually installed:
+At session start it walks **this plugin only**: the `skills/` *and*
+`commands/` directories of the folder it ships in, found from the script's own
+location. Each plugin briefs its own skills — `my-roblox-skills` ships its own
+Roblox briefing — so no briefing restates another's, and a plugin's briefing
+says nothing about plugins that are not installed with it.
 
-- every **enabled** plugin's `skills/` *and* `commands/` directories, with paths
-  read from `~/.claude/plugins/installed_plugins.json` and enabled state from
-  `~/.claude/settings.json`
-- `~/.claude/skills` and `~/.claude/commands` for loose personal ones
-- `$CLAUDE_PROJECT_DIR/.claude/skills` and `commands` for the open repo's own,
-  listed under their own heading since they vanish when another repo is opened
-
-The skills walk **recurses**, because a skills directory can hold container
-directories rather than skills — `~/.claude/skills/synced/` groups the
-account-synced ones. A directory holding `SKILL.md` is a skill and is never
-descended into; anything else is a container and is walked. Nesting never
-contributes to the name: `synced/xlsx` is invoked as `xlsx`, since only a
-plugin's identity creates a prefix. (Commands are the deliberate exception —
-`commands/foo/bar.md` really is `foo:bar`.)
+The skills walk **recurses**, because a plugin may group skills in container
+directories. A directory holding `SKILL.md` is a skill and is never descended
+into; anything else is a container and is walked. Nesting never contributes to
+the name: only the plugin's identity creates a prefix. (Commands are the
+deliberate exception — `commands/foo/bar.md` really is `foo:bar`.)
 
 then emits a `SessionStart` `additionalContext` payload splitting them into:
 
@@ -194,22 +189,13 @@ then emits a `SessionStart` `additionalContext` payload splitting them into:
 
 Both directories matter: a plugin can ship behaviour as a skill (a directory
 with `SKILL.md`) or a command (a single `.md` file), and Claude Code lists both.
-Reading only `skills/` silently drops whole plugins.
 
 Each entry carries its exact invocation, `plugin:` prefix included, since that
 is the one thing the agent cannot reconstruct on its own.
 
-A name that resolves from two places at once — the classic being a leftover
-`~/.claude/skills` symlink alongside the same skills installed as a plugin — is
-listed under **⚠ Installed more than once** rather than deduped. Both
-invocations really do work, so dropping one would make the roster lie; but it
-almost always means a half-finished migration, and this briefing is the only
-thing positioned to notice.
-
-The roster also states what it *cannot* see. Skills supplied by the harness
-rather than installed on disk can't be enumerated by any hook, so the briefing
-says so and points at the Skill tool listing for them, instead of implying that
-an absent name means an absent skill.
+The roster also states what it *cannot* see: everything outside this plugin.
+Other plugins brief their own, and loose and harness-supplied skills are in the
+agent's Skill listing, so an absent name never means an absent skill.
 
 Three scripts check it, and all exit non-zero on failure:
 
@@ -219,11 +205,12 @@ bash scripts/test-install-race.sh  # two installs at once stay correct
 bash scripts/verify-install.sh     # is every skill in skills/ reachable right now?
 ```
 
-`test-briefing.sh` builds throwaway directories — a nested container, a plugin
-with skills and commands, a disabled plugin, a project dir, a deliberate
-duplicate — and asserts the rendered roster. Every bug it guards against is a
-silent one: a wrong walk still emits a plausible roster, just short. That is how
-the `synced/` gap survived unnoticed.
+`test-briefing.sh` builds throwaway plugin folders — with skills, commands, a
+nested container, and other plugins, loose skills and project skills beside
+them — and asserts the rendered roster holds the plugin's own skills and
+nothing else. Every bug it guards against is a silent one: a wrong walk still
+emits a plausible roster, just short. That is how the old `synced/` gap
+survived unnoticed.
 
 `test-install-race.sh` runs the real installer two-up against a fixture source.
 A session on this repo registers the SessionStart hook twice — user-level and
@@ -253,10 +240,11 @@ further down this README is maintained by hand.
 
 ### Scope note
 
-The briefing sees local plugins only. Skills that arrive with the harness or
-from claude.ai-managed plugins never touch `~/.claude/plugins`, so they appear
-in the agent's Skill listing but not here. The two sources are complementary,
-which is why `ask-matt` reads both.
+The briefing covers its own plugin only. A hidden skill in another plugin, or
+loose in `~/.claude/skills`, is briefed by nothing here: that plugin's own
+briefing has to carry it, as `my-roblox-skills` does for `ask-roblox`. Model-
+invocable skills from anywhere, including the harness and claude.ai-managed
+plugins, are in the agent's Skill listing, which is why `ask-matt` reads both.
 
 ## Skills
 

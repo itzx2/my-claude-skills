@@ -15,9 +15,9 @@ This routes over **every skill installed in this session** — the engineering s
 Answer from what is actually installed right now, never from memory of what this repo used to hold. Read both sources — each holds skills the other omits:
 
 - **Your Skill tool listing** — every model-invocable skill, with full descriptions. Covers plugin skills, environment skills, and anything the harness supplies. It is the *only* source for skills that arrive from outside this machine's plugin directory, such as claude.ai-managed plugins.
-- **The SessionStart briefing** — the `Skills installed in this session` block emitted by this plugin's hook. It enumerates every enabled local plugin plus loose skills in `~/.claude/skills`, and its **user-invoked section is the only place skills with `disable-model-invocation: true` appear at all**. Without it, more than a third of the map below is invisible to you.
+- **The SessionStart briefings** — one block per plugin that ships a briefing, each covering only its own plugin: the block headed *Skills in the my-claude-skills plugin* from this one, *Roblox skills* from `my-roblox-skills`. Their **user-invoked sections are the only place skills with `disable-model-invocation: true` appear at all**. Without this plugin's briefing, more than a third of the map below is invisible to you.
 
-If the briefing is missing from context, say so rather than guessing — the roster is incomplete without it, and `claude plugin details <name>` will list a plugin's components on demand as a fallback.
+If this plugin's briefing is missing from context, say so rather than guessing — the roster is incomplete without it, and `claude plugin details <name>` will list a plugin's components on demand as a fallback.
 
 That is the roster. It supersedes every name below: a skill in the roster is available even when this map omits it, and a name here that the roster lacks is gone.
 
@@ -162,7 +162,7 @@ Off the main flow. Each line carries what its description omits — reach for th
 
 The map above covers one family of skills. The roster from step 1 is wider, and everything in it is equally recommendable. Expect at least these to sit outside the map:
 
-- **Other local plugins** — whatever else is installed alongside this one. They appear in both roster sources, prefixed with their own plugin name.
+- **Other local plugins** — whatever else is installed alongside this one, prefixed with their own plugin name. Their model-invocable skills are in your Skill listing; their hidden ones appear only if that plugin ships a briefing of its own.
 - **Environment and claude.ai-managed skills** — document formats, data visualisation, harness configuration, API references. These arrive with the session rather than from this machine's plugin directory, so the SessionStart briefing never sees them and **only your Skill tool listing does**. They are frequently the right answer.
 - **Loose personal skills** — anything sitting directly in `~/.claude/skills`, invoked bare with no plugin prefix.
 
