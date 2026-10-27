@@ -108,7 +108,7 @@ function frontMatter(file) {
   let key = null;
   for (const line of lines.slice(1)) {
     if (line.trim() === '---') break;
-    if (key && /^[ \t]/.test(line) && !line.includes(':')) {
+    if (key && /^[ \t]/.test(line) && !line.split('#')[0].includes(':')) {
       fields[key] = `${fields[key]} ${line.trim()}`.trim();
       continue;
     }
@@ -135,7 +135,7 @@ function userInvokedSkills() {
   for (const e of listEntries(path.join(PLUGIN_ROOT, 'skills'))) {
     if (!e.isDirectory()) continue;
     const fields = frontMatter(path.join(PLUGIN_ROOT, 'skills', e.name, 'SKILL.md'));
-    if (String(fields['disable-model-invocation']).trim().toLowerCase() !== 'true') continue;
+    if (!['true', 'yes', '1'].includes(String(fields['disable-model-invocation']).trim().toLowerCase())) continue;
     const description = String(fields.description || '').split(/\s+/).join(' ').trim();
     const summary = (description.match(/^.*?[.!?](?=\s|$)/) || [description])[0];
     out.push({ name: e.name, summary });

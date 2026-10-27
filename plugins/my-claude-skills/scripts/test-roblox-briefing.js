@@ -175,11 +175,10 @@ try {
   });
 
   test('the router is named as user-invoked in both forms', () => {
-    for (const cwd of [rojo, web]) {
-      const text = brief({ hook_event_name: 'SessionStart', cwd }).additionalContext;
-      assert.match(text, /\/my-roblox-skills:ask-roblox`/);
-      assert.match(text, /user-invoked/);
-    }
+    const full = brief({ hook_event_name: 'SessionStart', cwd: rojo }).additionalContext;
+    assert.match(full, /user-invoked skills\..*only the user can start them.*:\n\n(- .*\n)*- `\/my-roblox-skills:ask-roblox`/);
+    const pointer = brief({ hook_event_name: 'SessionStart', cwd: web }).additionalContext;
+    assert.match(pointer, /user-invoked skills are [^\n]*`\/my-roblox-skills:ask-roblox`[^\n]*only the user can start them/);
   });
 
   // A fixture plugin with one extra user-invoked skill, the setup skill, and a

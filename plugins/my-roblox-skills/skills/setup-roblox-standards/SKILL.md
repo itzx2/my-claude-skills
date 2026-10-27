@@ -107,7 +107,7 @@ In `AGENTS.md`, put this line between the router-pointer markers, in its rules s
 
 > **Before writing, moving or reviewing Luau**, read the Roblox standards in `<standards document, repo-relative>`.
 
-When the repo has no `AGENTS.md` and the user approved one, create it holding a one-line description of the project and the pointer, and suggest `/my-claude-skills:project-brain` for a full router. When a `CLAUDE.md` in the repo lacks an `@AGENTS.md` import and the user approved it, add the import on its own line: Claude Code reads `AGENTS.md` only when no `CLAUDE.md` exists, so a sentence telling Claude to read it loads nothing.
+When the repo has no `AGENTS.md` and the user approved one, create it holding a one-line description of the project and the pointer, and suggest `/my-claude-skills:project-brain` for a full router. When a `CLAUDE.md` in the repo root or above it lacks an `@AGENTS.md` import and the user approved it, add the import on its own line; one above the repo root is outside the repo, so it is its own grill question: Claude Code reads `AGENTS.md` only when no `CLAUDE.md` exists, so a sentence telling Claude to read it loads nothing.
 
 *Done when* `AGENTS.md` holds the pointer exactly once, and every approved import is in place.
 

@@ -181,15 +181,18 @@ patch.
   hand-maintained skill list. Update that list when you add or remove a skill.
 - **`.claude/PLUGIN-SETUP.md`** — wiring this plugin into another repo, and the
   four `claude plugin` behaviours that each cost a debugging cycle.
-- **`GLOSSARY.md`** — the vocabulary, in three clusters: *briefing* (roster,
+- **`GLOSSARY.md`** — the vocabulary, in four clusters: *briefing* (roster,
   location, tier, hidden, blind spot, invocation, hand-rolled invocation),
-  *handoff* (live brief, published, archive) and *vendoring* (upstream, pin,
-  verbatim, patched, forked, absorbed, sync, vendor record, clash).
+  *handoff* (live brief, published, archive), *vendoring* (upstream, pin,
+  verbatim, patched, forked, absorbed, sync, vendor record, clash) and
+  *standards* (standards section, house practice, guidance, hard, judgement
+  and mechanical rule).
 - **`docs/adr/`** — decisions worth their reasoning. `0001` records that handoff
   integrity is instructed rather than enforced, and what that costs; `0003`
   why vendored skills sync from a record; `0004` why the glossary is
   `GLOSSARY.md`; `0005` why the progress mod is a plugin of its own; `0006` why the Roblox
-  skills are one too.
+  skills are one too; `0007` why coding agents get a pointer to a repo's Roblox
+  standards.
 - **`skills/writing-for-agents/`** — the reference for editing any skill here.
 
 ## Agent skills

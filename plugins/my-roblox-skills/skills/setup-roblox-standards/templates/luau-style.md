@@ -1,7 +1,7 @@
 <!-- my-roblox-skills:luau-style:start -->
 ## Luau style
 
-<One paragraph naming this repo's Luau conventions: the type-checking mode its files use, its module and naming style, and the formatter and linter its toolchain runs.>
+<One paragraph naming this repo's Luau house practice: the type-checking mode its files use, its module and naming style, and the formatter and linter its toolchain runs.>
 
 ### <Rule group, such as Modules and naming, Types, Errors, Idioms>
 

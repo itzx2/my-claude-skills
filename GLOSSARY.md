@@ -4,7 +4,8 @@ The language for the two things a fresh session lacks and cannot recover on its
 own: which skills it actually has, and what the session before it knew. Both are
 invisible by default — Claude Code hides some skills from the agent entirely,
 and a conversation leaves no trace once it ends. Alongside them, the language
-for where the shipped skills come from.
+for where the shipped skills come from, and for the per-repo standards the
+Roblox setup skill writes.
 
 ## Language
 
@@ -137,6 +138,11 @@ What a repo's own code already does, each claim backed by a path in it. Wins
 over the domain guidance on shape; never on trust, authority, data loss or
 cleanup.
 _Avoid_: convention, existing style, legacy
+
+**Guidance**:
+What the Roblox domain skills teach, independent of any one repo. Wins over
+house practice on trust, authority, data loss and cleanup.
+_Avoid_: best practice, the skills' rules, upstream advice
 
 **Hard rule**:
 A standards rule whose break blocks a change in review.
