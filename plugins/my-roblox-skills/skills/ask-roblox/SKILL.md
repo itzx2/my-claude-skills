@@ -22,6 +22,8 @@ Break the situation into the questions it raises, and give each question its **o
 
 ## 3. Recommend
 
+When the project has no Roblox standards (no `CODING_STANDARDS.md` at its root), recommend `/my-roblox-skills:setup-roblox-standards` first.
+
 Give the route, starting with the skill ROUTES.md names under **First**:
 
 - each owner's exact invocation, in order, with one sentence on what it contributes;

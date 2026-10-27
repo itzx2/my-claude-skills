@@ -4,7 +4,8 @@ The language for the two things a fresh session lacks and cannot recover on its
 own: which skills it actually has, and what the session before it knew. Both are
 invisible by default — Claude Code hides some skills from the agent entirely,
 and a conversation leaves no trace once it ends. Alongside them, the language
-for where the shipped skills come from.
+for where the shipped skills come from, and for the per-repo standards the
+Roblox setup skill writes.
 
 ## Language
 
@@ -122,3 +123,38 @@ A short skill name the Skill tool would resolve to something other than this
 plugin's skill, such as a harness built-in of the same name. Vendored
 references to a clashing name are rewritten to its full invocation.
 _Avoid_: collision, conflict, shadowing
+
+### Standards
+
+**Standards section**:
+One marked part of a repo's standards document, written by
+`setup-roblox-standards` from a fixed set of domain skills: architecture,
+trust boundary, player data or Luau style. A rerun replaces only the text
+between its markers.
+_Avoid_: block, chapter, standards file
+
+**House practice**:
+What a repo's own code already does, each claim backed by a path in it. Wins
+over the domain guidance on shape; never on trust, authority, data loss or
+cleanup.
+_Avoid_: convention, existing style, legacy
+
+**Guidance**:
+What the Roblox domain skills teach, independent of any one repo. Wins over
+house practice on trust, authority, data loss and cleanup.
+_Avoid_: best practice, the skills' rules, upstream advice
+
+**Hard rule**:
+A standards rule whose break blocks a change in review.
+_Avoid_: must, blocker, strict rule
+
+**Judgement rule**:
+A standards rule whose break is an argument for the reviewer to make, not a
+block.
+_Avoid_: soft rule, guideline, preference
+
+**Mechanical rule**:
+A standards rule a tool could check without judgement, such as a banned API
+or a required import. Enforced by lint where the repo has one; otherwise kept
+as prose for the reviewer.
+_Avoid_: lint rule, automatic rule, static rule

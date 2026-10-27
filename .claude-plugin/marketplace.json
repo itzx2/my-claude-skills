@@ -18,8 +18,8 @@
     },
     {
       "name": "my-roblox-skills",
-      "description": "Roblox game development skills: 29 domain skills from TabooHarmony/roblox-brain, an ask-roblox router, and a briefing that points every agent at them in Roblox projects",
-      "version": "1.0.0",
+      "description": "Roblox game development skills: 29 domain skills from TabooHarmony/roblox-brain, an ask-roblox router, a setup skill that writes a repo's Roblox standards, and a briefing that points every agent at them in Roblox projects",
+      "version": "1.1.0",
       "source": "./plugins/my-roblox-skills",
       "author": {
         "name": "itzx2",

@@ -49,13 +49,17 @@ ambiguity seen in Claude's marketplace importer. See
   them silently. The panel and the band do not depend on them.
 - **`my-roblox-skills`** — the 29 Roblox domain skills from
   [TabooHarmony/roblox-brain](https://github.com/TabooHarmony/roblox-brain),
-  the **`/my-roblox-skills:ask-roblox`** router, and a **Roblox briefing**
+  the **`/my-roblox-skills:ask-roblox`** router,
+  **`/my-roblox-skills:setup-roblox-standards`**, which writes a repo's own
+  Roblox coding standards and routes every agent and code review to them, and
+  a **Roblox briefing**
   injected at session start and into every subagent: the full route in a
   folder that looks like a Roblox project (Rojo, Wally, pesde, Rokit, saved
   places, `.luau` sources), a short pointer anywhere else. Install it only
   where you build Roblox games; it does not need `my-claude-skills`, and works
   beside it. See [its README](plugins/my-roblox-skills/README.md) and
-  [`docs/adr/0006`](docs/adr/0006-roblox-skills-ship-as-their-own-plugin.md).
+  [`docs/adr/0006`](docs/adr/0006-roblox-skills-ship-as-their-own-plugin.md) and
+  [`0007`](docs/adr/0007-coding-agents-load-the-roblox-standards-through-a-router-pointer.md).
 
 ### Invocation names are namespaced
 
@@ -245,7 +249,7 @@ further down this README is maintained by hand.
 
 The briefing covers its own plugin only. A hidden skill in another plugin, or
 loose in `~/.claude/skills`, is briefed by nothing here: that plugin's own
-briefing has to carry it, as `my-roblox-skills` does for `ask-roblox`. Model-
+briefing has to carry it, as `my-roblox-skills` does for its own. Model-
 invocable skills from anywhere, including the harness and claude.ai-managed
 plugins, are in the agent's Skill listing, which is why `ask-matt` reads both.
 

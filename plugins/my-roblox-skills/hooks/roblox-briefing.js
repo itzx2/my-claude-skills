@@ -4,9 +4,9 @@
  *
  * The 29 domain skills are model-invocable, so their descriptions already sit
  * in each agent's Skill listing. What a listing cannot carry is the route:
- * which skill comes first, which domain owns a question, and that
- * `/my-roblox-skills:ask-roblox` exists at all (it is user-invoked, so it is
- * hidden from the listing). A subagent never sees the main session's
+ * which skill comes first, which domain owns a question, and that the plugin's
+ * user-invoked skills, such as `/my-roblox-skills:ask-roblox`, exist at all
+ * (they are hidden from the listing). A subagent never sees the main session's
  * SessionStart context, so the same briefing is injected at SubagentStart too.
  *
  * How much is said depends on the folder. In something that looks like a
@@ -19,6 +19,12 @@
  * tasks, so they stay in the router's ROUTES.md behind a pointer. The count
  * comes from the skills on disk, and the first skill and the ownership rules
  * from ROUTES.md itself, so the briefing restates nothing it could drift from.
+ * The user-invoked skills are likewise read from their front matter on disk.
+ *
+ * The full route also points at the project's Roblox standards: the
+ * `CODING_STANDARDS.md` at the project root when there is one, or else a
+ * suggestion to run the setup skill that writes it. Some subagents start
+ * without project instructions, so this line is their route to the standards.
  *
  * Failure must never block a session or a subagent: on any error this exits 0
  * with no output.
@@ -35,6 +41,8 @@ const path = require('path');
 // plugin cache briefs the same plugin a hook run does.
 const PLUGIN_ROOT = path.resolve(__dirname, '..');
 const ROUTES = path.join(PLUGIN_ROOT, 'skills', 'ask-roblox', 'ROUTES.md');
+const STANDARDS = 'CODING_STANDARDS.md';
+const SETUP_SKILL = 'setup-roblox-standards';
 
 /**
  * Files whose presence marks a Roblox project: the Roblox package and
@@ -81,10 +89,67 @@ function domainSkills() {
 }
 
 /**
- * Why `start` looks like a Roblox project, or [] when it does not.
+ * The flat `key: value` front matter of a SKILL.md, or {}.
  *
- * Walks up from `start` to the repository root (the first directory holding
- * `.git`), so a session opened in `src/server` still counts. The walk never
+ * Not a YAML parser, matching hooks/briefing.js in my-claude-skills: skill
+ * front matter is flat pairs. Strips one level of quotes and folds block
+ * scalars and wrapped values onto one line.
+ */
+function frontMatter(file) {
+  let lines;
+  try {
+    lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
+  } catch {
+    return {};
+  }
+  if (!lines.length || lines[0].trim() !== '---') return {};
+
+  const fields = {};
+  let key = null;
+  for (const line of lines.slice(1)) {
+    if (line.trim() === '---') break;
+    if (key && /^[ \t]/.test(line) && !line.split('#')[0].includes(':')) {
+      fields[key] = `${fields[key]} ${line.trim()}`.trim();
+      continue;
+    }
+    const idx = line.indexOf(':');
+    if (idx === -1) continue;
+    key = line.slice(0, idx).trim();
+    let value = line.slice(idx + 1).trim();
+    if (['>', '>-', '|', '|-'].includes(value)) value = '';
+    else if (value.length >= 2 && value[0] === value[value.length - 1] && `"'`.includes(value[0])) {
+      value = value.slice(1, -1);
+    }
+    fields[key] = value;
+  }
+  return fields;
+}
+
+/**
+ * The plugin's user-invoked skills (front matter sets
+ * `disable-model-invocation: true`), as `{ name, summary }` sorted by name. The
+ * summary is the description's first sentence.
+ */
+function userInvokedSkills() {
+  const out = [];
+  for (const e of listEntries(path.join(PLUGIN_ROOT, 'skills'))) {
+    if (!e.isDirectory()) continue;
+    const fields = frontMatter(path.join(PLUGIN_ROOT, 'skills', e.name, 'SKILL.md'));
+    if (!['true', 'yes', '1'].includes(String(fields['disable-model-invocation']).trim().toLowerCase())) continue;
+    const description = String(fields.description || '').split(/\s+/).join(' ').trim();
+    const summary = (description.match(/^.*?[.!?](?=\s|$)/) || [description])[0];
+    out.push({ name: e.name, summary });
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Why `start` looks like a Roblox project, and the project root.
+ *
+ * `reasons` is [] when it does not look like one. Walks up from `start` to the
+ * repository root (the first directory holding `.git`), so a session opened in
+ * `src/server` still counts; that directory is the `root`, or `start` itself
+ * when the walk finds no `.git`. The walk never
  * reaches the home directory or anything above it: a stray place file saved in
  * the home folder would otherwise put every folder under it in full mode. Each
  * level is checked for marker files, `*.project.json`, and saved places. Luau
@@ -95,6 +160,7 @@ function detect(start) {
   const reasons = new Set();
   const home = path.resolve(os.homedir());
   let dir = path.resolve(start);
+  let root = dir;
 
   for (let level = 0; level < 8; level++) {
     if (level > 0 && isAtOrAbove(dir, home)) break;
@@ -104,14 +170,17 @@ function detect(start) {
       if (MARKER_FILES.includes(name) || name.endsWith('.project.json')) reasons.add(entry.name);
       else if (MARKER_EXTENSIONS.includes(path.extname(name))) reasons.add(`*${path.extname(name)}`);
     }
-    if (fs.existsSync(path.join(dir, '.git'))) break;
+    if (fs.existsSync(path.join(dir, '.git'))) {
+      root = dir;
+      break;
+    }
     const parent = path.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
 
   if (!reasons.size && hasLuau(path.resolve(start), 0, { seen: 0 })) reasons.add('*.luau sources');
-  return [...reasons].sort();
+  return { reasons: [...reasons].sort(), root };
 }
 
 /** Whether `dir` is `home` or one of its ancestors. */
@@ -158,7 +227,24 @@ function routesSection(heading) {
   return body.join('\n').trim();
 }
 
-function fullBriefing(plugin, skills, reasons, subagent) {
+/**
+ * The standards line: a pointer to `CODING_STANDARDS.md` at the project root,
+ * or a suggestion to run the setup skill when it is missing. Naming the file is
+ * enough even when it only points at another document: one read leads there.
+ * '' when there is neither, so the briefing never suggests a skill not on disk.
+ */
+function standardsLine(plugin, invoked, root) {
+  const file = path.join(root, STANDARDS);
+  if (fs.existsSync(file)) {
+    return `**This project's Roblox standards** are in \`${file.replace(/\\/g, '/')}\`: follow them ` +
+      'when writing Luau, and review against them.';
+  }
+  if (!invoked.some((s) => s.name === SETUP_SKILL)) return '';
+  return `**This project has no Roblox standards** (no \`${STANDARDS}\` at its root): suggest the user ` +
+    `run \`/${plugin}:${SETUP_SKILL}\` to write them.`;
+}
+
+function fullBriefing(plugin, skills, invoked, { reasons, root }, subagent) {
   const invocation = (name) => `\`${plugin}:${name}\``;
   const first = (routesSection('First').match(/`(roblox-[a-z-]+)`/) || [])[1];
   const lines = [
@@ -174,6 +260,9 @@ function fullBriefing(plugin, skills, reasons, subagent) {
         'writing or judging Roblox code.',
   ];
 
+  const standards = standardsLine(plugin, invoked, root);
+  if (standards) lines.push('', standards);
+
   if (subagent) lines.push('', 'Your brief may name no domain skills; choose them from your task.');
 
   const owners = routesSection('Owners');
@@ -182,22 +271,35 @@ function fullBriefing(plugin, skills, reasons, subagent) {
   lines.push(
     '',
     `**When a task spans several domains**, read \`${ROUTES.replace(/\\/g, '/')}\` for the ` +
-      'domain groups and the combinations common problems need.',
-    '',
-    `\`/${plugin}:ask-roblox\` is the user's router over these skills. It is user-invoked, so ` +
-      'it is absent from your Skill listing: suggest it to the user when the route is unclear.'
+      'domain groups and the combinations common problems need.'
   );
+
+  if (invoked.length) {
+    lines.push(
+      '',
+      `\`${plugin}\` also has these user-invoked skills. They are absent from your Skill listing ` +
+        'and only the user can start them, so suggest one when it fits:',
+      '',
+      ...invoked.map((s) => `- \`/${plugin}:${s.name}\`${s.summary ? ` — ${s.summary}` : ''}`)
+    );
+  }
   return lines.join('\n');
 }
 
-function pointerBriefing(plugin, skills) {
+function pointerBriefing(plugin, skills, invoked) {
   const first = (routesSection('First').match(/`(roblox-[a-z-]+)`/) || [])[1];
   const start = first ? `start with \`${plugin}:${first}\`` : 'load the domain skills the task touches';
-  return [
+  const lines = [
     `\`${plugin}\` holds ${skills.length} Roblox domain skills (\`${plugin}:roblox-*\`); this folder ` +
       `is not a Roblox project, so for Roblox work here, such as Studio through MCP, ${start}.`,
-    `The user can run \`/${plugin}:ask-roblox\` for routing: suggest it, since only the user can start it.`,
-  ].join('\n');
+  ];
+  if (invoked.length) {
+    lines.push(
+      `Its user-invoked skills are ${invoked.map((s) => `\`/${plugin}:${s.name}\``).join(', ')}: ` +
+        'suggest one when it fits, since only the user can start them.'
+    );
+  }
+  return lines.join('\n');
 }
 
 function main() {
@@ -217,10 +319,11 @@ function main() {
   const manifest = readJson(path.join(PLUGIN_ROOT, '.claude-plugin', 'plugin.json')) || {};
   const plugin = manifest.name || path.basename(PLUGIN_ROOT);
 
-  const reasons = detect(cwd);
-  const context = reasons.length
-    ? fullBriefing(plugin, skills, reasons, event === 'SubagentStart')
-    : pointerBriefing(plugin, skills);
+  const invoked = userInvokedSkills();
+  const detection = detect(cwd);
+  const context = detection.reasons.length
+    ? fullBriefing(plugin, skills, invoked, detection, event === 'SubagentStart')
+    : pointerBriefing(plugin, skills, invoked);
 
   process.stdout.write(
     `${JSON.stringify({ hookSpecificOutput: { hookEventName: event, additionalContext: context } })}\n`

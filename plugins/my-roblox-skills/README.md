@@ -30,24 +30,50 @@ Every skill is invoked through the plugin's namespace:
   carries what the skill descriptions leave out: which domain owns a question
   when two overlap, and which combinations common problems need. It is
   user-invoked, so the agent can suggest it but never starts it.
+- **`/my-roblox-skills:setup-roblox-standards`**: writes this repo's own Roblox
+  coding standards and routes every agent to them. It surveys the repo with one
+  subagent per section, interviews you over what it found, and writes four
+  sections: **architecture**, **trust boundary**, **player data** and **Luau
+  style**. Each rule names a real path in your repo, says why and how a
+  reviewer spots a break, and is marked *hard*, *judgement* or *mechanical*.
+  The repo's practice wins on shape; the domain skills win on trust, authority,
+  data-loss and cleanup defects, and every such clash is put to you.
+  - **Where it writes**: into your existing standards doc, with
+    `CODING_STANDARDS.md` created as a one-line pointer to it, or into a new
+    `CODING_STANDARDS.md`. Root files are created only with your approval.
+  - **Markers**: each section sits between
+    `<!-- my-roblox-skills:<section>:start -->` and `…:end -->`. A rerun
+    replaces only the text between them; everything outside stays unchanged.
+  - **Wiring**: one pointer line in `AGENTS.md` (between
+    `my-roblox-skills:standards` markers), an `@AGENTS.md` import in
+    `CLAUDE.md` when you approve it, and the briefing below for subagents.
+    `my-claude-skills:code-review` then reads the standards as the repo's
+    coding standards, unchanged.
+
+  It works alone; with `my-claude-skills` installed it interviews through
+  `grilling` and writes with `writing-for-agents`. User-invoked.
 - **The Roblox briefing**: a hook that runs at session start and again each
   time a subagent starts, because a subagent never sees the main session's
   start-up context. What it says depends on the folder:
   - **In a Roblox project**, the agent gets what every Roblox task needs: start
     with `roblox-collaboration-mode`, the ownership rules that settle which
     domain owns a question, a pointer to the router's `ROUTES.md` for groups and
-    combinations when a task spans several domains, and that `ask-roblox`
-    exists. A subagent is also told to choose domains from its task when its
-    brief names none.
-  - **Anywhere else**, it gets a short pointer, because Roblox work also happens
-    through a Studio MCP bridge with no repository open.
+    combinations when a task spans several domains, and the plugin's
+    user-invoked skills. It points at the project's `CODING_STANDARDS.md`
+    when the repo root has one, and otherwise suggests
+    `setup-roblox-standards`. A subagent is also told to choose domains from
+    its task when its brief names none.
+  - **Anywhere else**, it gets a short pointer naming the user-invoked skills,
+    because Roblox work also happens through a Studio MCP bridge with no
+    repository open.
 
   A folder counts as a Roblox project when it or a parent up to the repository
   root holds `default.project.json` or another `*.project.json` (Rojo),
   `wally.toml`, `pesde.toml`, `rokit.toml`, `aftman.toml`, `foreman.toml`, or a
   saved place or model (`.rbxl`, `.rbxlx`, `.rbxm`, `.rbxmx`), or when `.luau`
-  files sit within two levels of it. The skill count comes from the folders on
-  disk and the ownership rules are read from `ROUTES.md`, the one file both
+  files sit within two levels of it. The skill count and the user-invoked
+  skills come from the folders on disk, and the ownership rules are read from
+  `ROUTES.md`, the one file both
   the router and the briefing use, so neither can drift from the other.
   Tested by `scripts/test-roblox-briefing.js` at the repository root.
 
@@ -114,9 +140,12 @@ license text ships with this plugin at
 [`licenses/roblox-brain-LICENSE`](licenses/roblox-brain-LICENSE), as MIT
 requires.
 
-**Router and briefing:** `ask-roblox` and `hooks/roblox-briefing.js` are written
-in this repository by itzx2. The router's four domain groups, its overlap
-notes and its combinations are adapted from roblox-brain's own structure.
+**Router, setup skill and briefing:** `ask-roblox`, `setup-roblox-standards`
+and `hooks/roblox-briefing.js` are written in this repository by itzx2. The
+router's four domain groups, its overlap notes and its combinations are
+adapted from roblox-brain's own structure. The standards sections that
+`setup-roblox-standards` writes are derived from roblox-brain's domain skills,
+and each carries an attribution line saying so.
 
 The repository's [`vendor/record.json`](../../vendor/record.json) pins the
 upstream commit and marks every copied skill `verbatim`, and
