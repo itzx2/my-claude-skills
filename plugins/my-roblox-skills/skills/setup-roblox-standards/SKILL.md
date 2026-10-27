@@ -43,6 +43,8 @@ Each rule is one bullet in its template's format:
 
 About fifteen rules per section at most. Past that, keep the rules whose breaks cost the most.
 
+Each rule lives in **one** section. Surveys overlap (a remote's declaration is both architecture and trust boundary, a NaN guard both Luau style and trust boundary), so when two drafts carry the same rule, keep it in the section whose domain skills own the concern and drop the copy.
+
 ### Markers
 
 Sections sit between `<!-- my-roblox-skills:<section>:start -->` and `<!-- my-roblox-skills:<section>:end -->`. The router pointer sits between `<!-- my-roblox-skills:standards:start -->` and `<!-- my-roblox-skills:standards:end -->`. Other tools rely on these exact strings.
@@ -97,7 +99,7 @@ Offer an ADR only for a decision that is hard to reverse, surprising without con
 
 For each section, read its template, fill it from the agreed rules, and write it into the standards document between its markers: replace the pair's contents when present, append the section when absent. Keep the template's attribution line. Create `CODING_STANDARDS.md`, its pointer, or the move as approved, and apply approved Selene changes.
 
-*Done when* the standards document holds four marked sections, each rule follows the rule shape, no template placeholder remains, and the text outside the markers is unchanged.
+*Done when* the standards document holds four marked sections, each rule follows the rule shape and appears in one section only, no template placeholder remains, and the text outside the markers is unchanged byte for byte, line endings included.
 
 ### 5. Route
 
@@ -115,7 +117,7 @@ Check by running, not by reading:
 
 - every path named in the standards resolves from the repo root;
 - every marker pair appears once and in order, in the standards document and in `AGENTS.md`;
-- the Roblox briefing points at the standards: run `node <plugin root>/hooks/roblox-briefing.js` with `{"hook_event_name":"SubagentStart","cwd":"<repo root>"}` on stdin, where the plugin root is two levels above this skill's base directory, and find the line naming `CODING_STANDARDS.md`.
+- the Roblox briefing points at the standards: run `node <plugin root>/hooks/roblox-briefing.js` with `{"hook_event_name":"SubagentStart","cwd":"<repo root>"}` on stdin, the repo root given as a native absolute path (`C:\\…` on Windows), where the plugin root is two levels above this skill's base directory, and find the line naming `CODING_STANDARDS.md`.
 
 Then report in one message: the files written, created or moved; each section's rule count by kind; each clash and how it was settled; the survey gaps left open; and what `code-review` will now enforce.
 

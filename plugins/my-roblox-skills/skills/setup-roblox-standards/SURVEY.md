@@ -33,7 +33,7 @@ Return, in this order:
 
 1. **House practice**: what the repo does for your section, each fact with its path(s).
 2. **Clashes**: where house practice differs from the guidance. Say for each whether it is shape (house practice wins) or a trust, authority, data-loss or cleanup defect (guidance wins, and the user must decide).
-3. **Mechanical candidates**: rules a linter could enforce, and for a repo with Selene, the config that would.
+3. **Mechanical candidates**: rules a linter could enforce, and for a repo with Selene, the config that would, confirmed by running the repo's pinned Selene against a scratch copy of the config: a lint level it ignores looks exactly like one it accepts.
 4. **Survey gaps**: what you could not check, and why.
 5. **Draft section**: rules in the template's format, each naming a real path, about fifteen at most.
 
