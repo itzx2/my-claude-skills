@@ -73,6 +73,9 @@ A version there that is not the manifest's is what you are actually running.
 
 ### Tag the merge commit, right after merging
 
+Open a PR per change. Merge it, push a tag or publish a Release only when the
+user asks for that action; the steps below are how, once they have.
+
 **Every version bump gets a matching tag on the commit that merged it, and a
 GitHub Release built from that tag.** Nothing installs from it: `claude
 plugin install` resolves the marketplace at the default branch and keys its
