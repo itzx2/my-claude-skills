@@ -3,7 +3,8 @@
 
 // Fixture tests for plugins/my-roblox-skills/hooks/roblox-briefing.js: which
 // folders get the full route, which get the pointer, that subagents get theirs,
-// and that the first skill and ownership rules come from ROUTES.md.
+// that the first skill and ownership rules come from ROUTES.md, that the
+// user-invoked skills come from disk, and the standards pointer or setup line.
 //
 // The hook reads the plugin it ships in, found from its own location, so a
 // fixture plugin is a copy of the real one with its ROUTES.md or skills changed.
@@ -47,6 +48,14 @@ function pluginCopy(name, edit) {
   const routes = path.join(dir, 'skills', 'ask-roblox', 'ROUTES.md');
   if (edit) fs.writeFileSync(routes, edit(fs.readFileSync(routes, 'utf8').replace(/\r\n/g, '\n')));
   return path.join(dir, 'hooks', 'roblox-briefing.js');
+}
+
+/** Add a skill folder to a plugin copy made by `pluginCopy(copy)`. */
+function addSkill(copy, name, description, { userInvoked = true } = {}) {
+  const dir = path.join(fixture, copy, 'skills', name);
+  fs.mkdirSync(dir, { recursive: true });
+  const disable = userInvoked ? 'disable-model-invocation: true\n' : '';
+  fs.writeFileSync(path.join(dir, 'SKILL.md'), `---\nname: ${name}\ndescription: ${description}\n${disable}---\n\n# ${name}\n`);
 }
 
 /** The bullet lines of one ROUTES.md section, found without the hook's parser. */
@@ -167,15 +176,81 @@ try {
 
   test('the router is named as user-invoked in both forms', () => {
     for (const cwd of [rojo, web]) {
-      assert.match(brief({ hook_event_name: 'SessionStart', cwd }).additionalContext, /\/my-roblox-skills:ask-roblox`.*(user-invoked|only the user can start it)/s);
+      const text = brief({ hook_event_name: 'SessionStart', cwd }).additionalContext;
+      assert.match(text, /\/my-roblox-skills:ask-roblox`/);
+      assert.match(text, /user-invoked/);
     }
+  });
+
+  // A fixture plugin with one extra user-invoked skill, the setup skill, and a
+  // model-invocable skill that must stay out of the user-invoked list.
+  const extraHook = pluginCopy('extra-skills');
+  addSkill('extra-skills', 'zz-extra-tool', 'Do an extra thing. Longer detail that the summary drops.');
+  addSkill('extra-skills', 'setup-roblox-standards', "Write this repo's Roblox coding standards.");
+  addSkill('extra-skills', 'helper', 'A helper agents load themselves.', { userInvoked: false });
+
+  test('the full briefing lists every user-invoked skill from disk, with a summary', () => {
+    const text = brief({ hook_event_name: 'SessionStart', cwd: rojo }, { hook: extraHook }).additionalContext;
+    assert.match(text, /`\/my-roblox-skills:ask-roblox` — Ask which Roblox skills fit your situation, in what order\./);
+    assert.match(text, /`\/my-roblox-skills:zz-extra-tool` — Do an extra thing\.$/m);
+    assert.doesNotMatch(text, /Longer detail/);
+    assert.doesNotMatch(text, /:helper`/);
+  });
+
+  test('the two-line pointer names every user-invoked skill and stays two lines', () => {
+    for (const event of ['SessionStart', 'SubagentStart']) {
+      const text = brief({ hook_event_name: event, cwd: web }, { hook: extraHook }).additionalContext;
+      assert.equal(text.split('\n').length, 2);
+      for (const name of ['ask-roblox', 'setup-roblox-standards', 'zz-extra-tool']) {
+        assert.ok(text.includes(`\`/my-roblox-skills:${name}\``), `pointer misses ${name}`);
+      }
+      assert.doesNotMatch(text, /:helper`/);
+    }
+  });
+
+  const withStandards = project('standards', ['default.project.json', 'CODING_STANDARDS.md', 'src/server/x.luau']);
+
+  test('a Roblox project with CODING_STANDARDS.md is pointed at it, for subagents too', () => {
+    const expected = path.join(withStandards, 'CODING_STANDARDS.md').replace(/\\/g, '/');
+    for (const event of ['SessionStart', 'SubagentStart']) {
+      for (const cwd of [withStandards, path.join(withStandards, 'src', 'server')]) {
+        const text = brief({ hook_event_name: event, cwd }, { hook: extraHook }).additionalContext;
+        const pointed = (text.match(/\*\*This project's Roblox standards\*\* are in `([^`]+)`/) || [])[1];
+        assert.equal(pointed, expected, `${event} from ${cwd}`);
+        assert.ok(path.isAbsolute(pointed) && fs.existsSync(pointed));
+        assert.doesNotMatch(text, /setup-roblox-standards` to write/);
+      }
+    }
+  });
+
+  test('a Roblox project without standards gets the setup suggestion and no standards line', () => {
+    for (const event of ['SessionStart', 'SubagentStart']) {
+      const text = brief({ hook_event_name: event, cwd: rojo }, { hook: extraHook }).additionalContext;
+      assert.match(text, /no Roblox standards.*`\/my-roblox-skills:setup-roblox-standards`/s);
+      assert.doesNotMatch(text, /This project's Roblox standards/);
+    }
+  });
+
+  test('the setup suggestion appears only when the setup skill is on disk', () => {
+    const hook = pluginCopy('no-setup-skill');
+    fs.rmSync(path.join(fixture, 'no-setup-skill', 'skills', 'setup-roblox-standards'), { recursive: true, force: true });
+    assert.doesNotMatch(brief({ hook_event_name: 'SessionStart', cwd: rojo }, { hook }).additionalContext, /setup-roblox-standards/);
+  });
+
+  test('a non-Roblox folder never gets the standards line', () => {
+    const notes = project('web-standards', ['package.json', 'CODING_STANDARDS.md']);
+    const text = brief({ hook_event_name: 'SessionStart', cwd: notes }, { hook: extraHook }).additionalContext;
+    assert.doesNotMatch(text, /Roblox standards/);
+    assert.equal(text.split('\n').length, 2);
   });
 
   // Hook context over 10,000 characters is cut to a 2,000-character preview; the
   // briefing also rides into every subagent, so it is held far below that.
   test('the full briefing stays small', () => {
-    const text = brief({ hook_event_name: 'SubagentStart', cwd: rojo }).additionalContext;
-    assert.ok(text.length < 4000, `briefing is ${text.length} characters`);
+    for (const [cwd, hook] of [[rojo, HOOK], [rojo, extraHook], [withStandards, extraHook]]) {
+      const text = brief({ hook_event_name: 'SubagentStart', cwd }, { hook }).additionalContext;
+      assert.ok(text.length < 4000, `briefing is ${text.length} characters`);
+    }
   });
 
   test('no stdin falls back to CLAUDE_PROJECT_DIR', () => {
